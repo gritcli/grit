@@ -1,6 +1,7 @@
 package source
 
 import (
+	"github.com/jmalloc/grit/cmd/grit2/internal/commands/source/add"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +12,10 @@ func NewRoot() *cobra.Command {
 		Short: "manage repository sources",
 	}
 
-	cmd.AddCommand(newListCommand())
+	cmd.AddCommand(
+		add.NewRoot(),
+		newListCommand(),
+	)
 
 	return cmd
 }
