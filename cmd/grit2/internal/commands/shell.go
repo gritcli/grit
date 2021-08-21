@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/jmalloc/grit/cmd/grit2/internal/di"
-	"github.com/jmalloc/grit/internal/shell"
+	"github.com/gritcli/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/internal/shell"
 	"github.com/spf13/cobra"
 )
 

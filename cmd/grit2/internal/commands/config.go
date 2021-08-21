@@ -3,8 +3,8 @@ package commands
 import (
 	"os"
 
-	"github.com/jmalloc/grit/cmd/grit2/internal/di"
-	"github.com/jmalloc/grit/internal/config"
+	"github.com/gritcli/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/internal/config"
 	"github.com/spf13/cobra"
 )
 
