@@ -1,8 +1,8 @@
 package di
 
 import (
-	"github.com/jmalloc/grit/internal/config"
-	"github.com/jmalloc/grit/internal/source"
+	"github.com/gritcli/grit/internal/config"
+	"github.com/gritcli/grit/internal/source"
 )
 
 func init() {

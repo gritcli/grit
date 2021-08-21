@@ -1,6 +1,7 @@
 package source
 
 import (
+	"github.com/gritcli/grit/cmd/grit2/internal/commands/source/setup"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +12,10 @@ func NewRoot() *cobra.Command {
 		Short: "manage repository sources",
 	}
 
-	cmd.AddCommand(newListCommand())
+	cmd.AddCommand(
+		setup.NewRoot(),
+		newListCommand(),
+	)
 
 	return cmd
 }

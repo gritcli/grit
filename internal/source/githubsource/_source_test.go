@@ -1,4 +1,4 @@
-package shell_test
+package githubsource_test
 
 import (
 	"strings"
@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func NewExecutor()", func() {
+var _ = Describe("type Source", func() {
 	It("returns an Executor that writes escaped commands to the writer", func() {
 		w := &strings.Builder{}
 		exec := NewExecutor(w)

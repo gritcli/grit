@@ -8,8 +8,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jmalloc/grit/cmd/grit2/internal/commands"
-	"github.com/jmalloc/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/cmd/grit2/internal/commands"
+	"github.com/gritcli/grit/cmd/grit2/internal/di"
 	"go.uber.org/multierr"
 )
 
