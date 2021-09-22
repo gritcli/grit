@@ -10,7 +10,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/go-github/v38 v38.1.0
 	github.com/onsi/ginkgo v1.16.4
-	github.com/onsi/gomega v1.15.0
+	github.com/onsi/gomega v1.16.0
 	github.com/spf13/cobra v1.2.1
 	go.uber.org/dig v1.13.0
 	go.uber.org/multierr v1.7.0
