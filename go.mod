@@ -11,7 +11,7 @@ require (
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.15.0
 	github.com/spf13/cobra v1.2.1
-	go.uber.org/dig v1.12.0
+	go.uber.org/dig v1.13.0
 	go.uber.org/multierr v1.7.0
 	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602
 )
