@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/alecthomas/participle/v2 v2.0.0-alpha7
-	github.com/cli/oauth v0.8.0
+	github.com/cli/oauth v0.9.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/go-github/v38 v38.1.0
 	github.com/onsi/ginkgo v1.16.5
