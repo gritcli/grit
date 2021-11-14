@@ -3,7 +3,7 @@ package config
 import (
 	"net/url"
 
-	"github.com/jmalloc/grit/internal/config/internal/ast"
+	"github.com/gritcli/grit/internal/config/internal/ast"
 )
 
 // GitHubSource holds the configuration for a repository source that clones

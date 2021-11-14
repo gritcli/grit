@@ -14,13 +14,11 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v1
       with:
-        go-version: 1.15
+        go-version: ^1
       id: go
     - name: Checkout
       uses: actions/checkout@v1
     - name: Make
       run: make ci
     - name: Upload Coverage Reports
-      if: success()
-      run: |
-        [[ -z "${{ secrets.CODECOV_TOKEN }}" ]] || bash <(curl -s https://codecov.io/bash) -t "${{ secrets.CODECOV_TOKEN }}" -B "${{ github.ref }}"
+      uses: codecov/codecov-action@v2

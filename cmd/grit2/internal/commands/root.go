@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jmalloc/grit/cmd/grit2/internal/commands/source"
+	"github.com/gritcli/grit/cmd/grit2/internal/commands/source"
 	"github.com/spf13/cobra"
 )
 
@@ -13,8 +13,7 @@ import (
 // v is the version to display. It is passed from the main package where it is
 // made available as part of the build process.
 func NewRoot(v string) *cobra.Command {
-	var root *cobra.Command
-	root = &cobra.Command{
+	root := &cobra.Command{
 		Version: v,
 		Use:     executableName(),
 		Short:   "keep track of your local git clones",

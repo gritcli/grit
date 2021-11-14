@@ -2,8 +2,8 @@ package source
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/jmalloc/grit/cmd/grit2/internal/di"
-	"github.com/jmalloc/grit/internal/source"
+	"github.com/gritcli/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/internal/source"
 	"github.com/spf13/cobra"
 )
 
@@ -26,15 +26,15 @@ func newListCommand() *cobra.Command {
 			ctx := cmd.Context()
 
 			for _, src := range sources {
-				desc, err := src.Description(ctx)
+				status, err := src.Status(ctx)
 				if err != nil {
-					desc = "error: " + err.Error()
+					status = "error: " + err.Error()
 				}
 
 				cmd.Printf(
 					"%s: %s\n",
-					src.Name(),
-					desc,
+					src.Description(),
+					status,
 				)
 			}
 

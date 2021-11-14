@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/jmalloc/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/cmd/grit2/internal/di"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ func newCloneCommand() *cobra.Command {
 		tree.
 
 		The <repo> argument is a repository name or a part thereof. For example,
-		the Grit repository itself may be referred to as "jmalloc/grit" or just
+		the Grit repository itself may be referred to as "gritcli/grit" or just
 		"grit".
 
 		Each of the repository sources defined in the Grit configuration file is
