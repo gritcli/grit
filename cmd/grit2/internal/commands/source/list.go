@@ -2,7 +2,7 @@ package source
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/gritcli/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/internal/di/cobradi"
 	"github.com/gritcli/grit/internal/source"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ func newListCommand() *cobra.Command {
 		The "source list" command lists the configured repository sources and
 		their current status.
 		`),
-		RunE: di.RunE(func(
+		RunE: cobradi.RunE(func(
 			cmd *cobra.Command,
 			args []string,
 			sources []source.Source,

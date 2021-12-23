@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/gritcli/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/internal/di"
 	"github.com/gritcli/grit/internal/shell"
 	"github.com/spf13/cobra"
 )
@@ -36,8 +36,8 @@ func setupShellExecutor(root *cobra.Command) {
 }
 
 // provideShellExecutor adds a shell.Executor to the DI configuration.
-func provideShellExecutor(cmd *cobra.Command) {
-	di.Provide(func(d *di.Deferrer) (shell.Executor, error) {
+func provideShellExecutor(c *di.Container, cmd *cobra.Command) {
+	c.Provide(func() (shell.Executor, error) {
 		filename, err := cmd.Flags().GetString("shell-executor-output")
 		if err != nil {
 			return nil, err
@@ -54,7 +54,7 @@ func provideShellExecutor(cmd *cobra.Command) {
 			return nil, err
 		}
 
-		d.Defer(func() error {
+		c.Defer(func() error {
 			defer fp.Close()
 
 			if err := fp.Sync(); err != nil {

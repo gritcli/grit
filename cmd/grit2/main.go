@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"github.com/gritcli/grit/cmd/grit2/internal/commands"
-	"github.com/gritcli/grit/cmd/grit2/internal/di"
-	"go.uber.org/multierr"
+	"github.com/gritcli/grit/internal/config"
+	"github.com/gritcli/grit/internal/di"
+	"github.com/gritcli/grit/internal/di/cobradi"
+	"github.com/gritcli/grit/internal/source"
 )
 
 func main() {
@@ -32,14 +34,21 @@ func run() (err error) {
 	)
 	defer cancel()
 
-	defer func() {
-		err = multierr.Append(
-			err,
-			di.Close(),
-		)
-	}()
+	container := di.New()
 
-	return commands.
-		NewRoot(version).
-		ExecuteContext(ctx)
+	container.Provide(func(cfg config.Config) []source.Source {
+		var sources []source.Source
+
+		for _, src := range cfg.Sources {
+			sources = append(sources, source.FromConfig(src))
+		}
+
+		return sources
+	})
+
+	return cobradi.Execute(
+		ctx,
+		container,
+		commands.NewRoot(version),
+	)
 }

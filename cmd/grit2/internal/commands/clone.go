@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/gritcli/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/internal/di/cobradi"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ func newCloneCommand() *cobra.Command {
 		multiple matches and the shell is interactive the user is prompted to
 		select the desired repository.
 		`),
-		RunE: di.RunE(func(
+		RunE: cobradi.RunE(func(
 			cmd *cobra.Command,
 			args []string,
 		) error {

@@ -3,8 +3,8 @@ package commands
 import (
 	"os"
 
-	"github.com/gritcli/grit/cmd/grit2/internal/di"
 	"github.com/gritcli/grit/internal/config"
+	"github.com/gritcli/grit/internal/di"
 	"github.com/spf13/cobra"
 )
 
@@ -20,8 +20,8 @@ func setupConfig(root *cobra.Command) {
 
 // provideConfig adds parses the Grit configuration and adds the config.Config
 // to the DI configuration.
-func provideConfig(cmd *cobra.Command) {
-	di.Provide(func() (config.Config, error) {
+func provideConfig(c *di.Container, cmd *cobra.Command) {
+	c.Provide(func() (config.Config, error) {
 		filename, err := cmd.Flags().GetString("config")
 		if err != nil {
 			return config.Config{}, err

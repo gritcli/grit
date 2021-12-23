@@ -5,7 +5,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cli/oauth"
-	"github.com/gritcli/grit/cmd/grit2/internal/di"
+	"github.com/gritcli/grit/internal/di/cobradi"
 	"github.com/gritcli/grit/internal/source/githubsource"
 	"github.com/spf13/cobra"
 )
@@ -18,12 +18,12 @@ func newGitHubCommand() *cobra.Command {
 		Long: heredoc.Doc(`
 		The "github" command configures Grit to clone repositories from a GitHub
 		installation.
-		
+
 		By default it configures github.com as a repository source. The --enterprise
 		flag can be used to specify the address (<hostname>:<port>) of a GitHub
 		Enterprise Cloud or GitHub Enterprise Server API server instead.
 		`),
-		RunE: di.RunE(func(
+		RunE: cobradi.RunE(func(
 			cmd *cobra.Command,
 		) error {
 			if addr, _ := cmd.Flags().GetString("enterprise"); addr != "" {
