@@ -3,7 +3,7 @@ package githubsource_test
 import (
 	"strings"
 
-	. "github.com/gritcli/grit/internal/shell"
+	. "github.com/gritcli/grit/cmd/grit2/internal/shell"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
