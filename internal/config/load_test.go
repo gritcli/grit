@@ -30,6 +30,11 @@ var _ = Describe("func Load()", func() {
 			"testdata/valid/empty-dir",
 			DefaultConfig,
 		),
+		Entry(
+			"ignores non-HCL files, directories and files beginning with underscores",
+			"testdata/valid/ignore",
+			DefaultConfig,
+		),
 		// Entry(
 		// 	"implicit github source disabled",
 		// 	"testdata/valid/github-disabled.conf",
@@ -112,37 +117,22 @@ var _ = Describe("func Load()", func() {
 		"it returns an error if there is a problem with the configuration",
 		func(dir string, expect string) {
 			_, err := Load(dir)
-			Expect(err).To(MatchError(expect))
+			Expect(err).To(MatchError(expect), err.Error())
 		},
-		// Entry(
-		// 	`syntax error`,
-		// 	`testdata/invalid/syntax-error.conf`,
-		// 	`testdata/invalid/syntax-error.conf:3:4 unexpected token ";" (expected "=" Value ";")`,
-		// ),
-		// Entry(
-		// 	`unrecognized global parameter`,
-		// 	`testdata/invalid/unrecognized-parameter.conf`,
-		// 	`testdata/invalid/unrecognized-parameter.conf:3:1 unrecognized "key" parameter`,
-		// ),
-		// Entry(
-		// 	`git source missing "endpoint" key`,
-		// 	`testdata/invalid/git-missing-endpoint.conf`,
-		// 	`testdata/invalid/git-missing-endpoint.conf:4:1 missing required "endpoint" parameter in "git" source`,
-		// ),
-		// Entry(
-		// 	`git source with unrecognized parameter`,
-		// 	`testdata/invalid/git-unrecognized-parameter.conf`,
-		// 	`testdata/invalid/git-unrecognized-parameter.conf:6:5 unrecognized "key" parameter in "my-company" source`,
-		// ),
-		// Entry(
-		// 	`github source missing "api" key`,
-		// 	`testdata/invalid/github-missing-api.conf`,
-		// 	`testdata/invalid/github-missing-api.conf:4:1 missing required "api" parameter in "my-company" source`,
-		// ),
-		// Entry(
-		// 	`github source with unrecognized parameter`,
-		// 	`testdata/invalid/github-unrecognized-parameter.conf`,
-		// 	`testdata/invalid/github-unrecognized-parameter.conf:6:5 unrecognized "key" parameter in "my-company" source`,
-		// ),
+		Entry(
+			`not existent directory`,
+			`testdata/invalid/does-not-exist`,
+			`open testdata/invalid/does-not-exist: no such file or directory`,
+		),
+		Entry(
+			`syntax error`,
+			`testdata/invalid/syntax-error`,
+			`testdata/invalid/syntax-error/grit.hcl:1,1-2: Argument or block definition required; An argument or block definition is required here.`,
+		),
+		Entry(
+			`unrecognized file`,
+			`testdata/invalid/unrecognized-file`,
+			`testdata/invalid/unrecognized-file/unrecognized.hcl: unrecognized configuration file`,
+		),
 	)
 })

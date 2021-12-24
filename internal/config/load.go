@@ -40,7 +40,7 @@ func Load(dir string) (Config, error) {
 		} else if strings.HasSuffix(name, ".source.hcl") {
 			err = loadSourceConfig(filename, &cfg)
 		} else {
-			err = fmt.Errorf("unrecognized configuration file: %s", name)
+			err = fmt.Errorf("%s: unrecognized configuration file", filename)
 		}
 
 		if err != nil {
