@@ -48,7 +48,9 @@ func run() (err error) {
 	})
 
 	container.Provide(func() *apiserver.Server {
-		return &apiserver.Server{}
+		return &apiserver.Server{
+			Version: version,
+		}
 	})
 
 	return container.Invoke(func(

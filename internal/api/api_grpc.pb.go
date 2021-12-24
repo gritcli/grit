@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type APIClient interface {
+	// Ping is a no-op used to test that the server is reachable.
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 }
 
@@ -46,6 +47,7 @@ func (c *aPIClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.Call
 // All implementations should embed UnimplementedAPIServer
 // for forward compatibility
 type APIServer interface {
+	// Ping is a no-op used to test that the server is reachable.
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
 }
 

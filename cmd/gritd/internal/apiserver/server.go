@@ -7,9 +7,13 @@ import (
 )
 
 // Server is a Grit gRPC API server.
-type Server struct{}
+type Server struct {
+	Version string
+}
 
 // Ping is a no-op used to test that the server is reachable.
 func (s *Server) Ping(ctx context.Context, _ *api.PingRequest) (*api.PingResponse, error) {
-	return &api.PingResponse{}, nil
+	return &api.PingResponse{
+		Version: s.Version,
+	}, nil
 }

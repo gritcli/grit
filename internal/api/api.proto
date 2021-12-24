@@ -10,8 +10,10 @@ service API {
 
 // PingRequest is the request value for the Ping operation.
 message PingRequest {
+    string version = 1;
 }
 
 // PingRequest is the response value for the Ping operation.
 message PingResponse {
+    string version = 1;
 }
