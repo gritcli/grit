@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dogmatiq/dapper"
 	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
 	"github.com/gritcli/grit/internal/api"
 	"github.com/gritcli/grit/internal/config"
@@ -57,6 +58,8 @@ func run() (err error) {
 		cfg config.Config,
 		s *apiserver.Server,
 	) error {
+		dapper.Print(cfg)
+
 		g := grpc.NewServer()
 		api.RegisterAPIServer(g, s)
 
