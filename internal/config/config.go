@@ -1,40 +1,33 @@
 package config
 
-import (
-	"net/url"
-)
-
-// DefaultFile is the default path to the Grit configuration file.
-const DefaultFile = "~/.config/grit.conf"
-
-// DefaultConfig is the configuration used if no configuration file is present.
-var DefaultConfig = Config{
-	Dir: "~/grit",
-	Sources: map[string]Source{
-		"github": GitHubSource{
-			SourceName: "github",
-			API: &url.URL{
-				Scheme: "https",
-				Host:   "api.github.com",
-			},
-		},
-	},
-}
+// DefaultDirectory is the default directory to search for Grit configuration
+// files.
+const DefaultDirectory = "~/.config/grit"
 
 // Config is the root of a Grit configuration.
 type Config struct {
-	Dir     string
-	Sources map[string]Source
+	Daemon Daemon
 }
 
-// Source is an interface for the configuration of various repository sources.
-type Source interface {
-	Name() string
-	Visit(SourceVisitor) error
+// mainConfig is the structure of the "grit.hcl" file.
+type mainConfig struct {
+	Daemon *Daemon `hcl:"daemon,block"`
 }
 
-// SourceVisitor is an interface for visiting Source configurations.
-type SourceVisitor interface {
-	VisitGitSource(GitSource) error
-	VisitGitHubSource(GitHubSource) error
+// sourceConfig is the structure of a "*.source.hcl" file.
+type sourceConfig struct {
+}
+
+// Daemon contains configuration for the Grit daemon.
+type Daemon struct {
+	// Socket is the path of the Unix socket used for communication between
+	// the Grit CLI and the Grit daemon.
+	Socket string `hcl:"socket"`
+}
+
+// DefaultConfig is the default Grit configuration.
+var DefaultConfig = Config{
+	Daemon: Daemon{
+		Socket: "~/grit/grit.sock",
+	},
 }

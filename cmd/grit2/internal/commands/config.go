@@ -13,8 +13,8 @@ import (
 func setupConfig(root *cobra.Command) {
 	root.PersistentFlags().StringP(
 		"config", "c",
-		config.DefaultFile,
-		"set the path to the Grit configuration file",
+		config.DefaultDirectory,
+		"set the path to the Grit configuration directory",
 	)
 }
 
@@ -22,12 +22,12 @@ func setupConfig(root *cobra.Command) {
 // to the DI configuration.
 func provideConfig(c *di.Container, cmd *cobra.Command) {
 	c.Provide(func() (config.Config, error) {
-		filename, err := cmd.Flags().GetString("config")
+		dir, err := cmd.Flags().GetString("config")
 		if err != nil {
 			return config.Config{}, err
 		}
 
-		cfg, err := config.ParseFile(filename)
+		cfg, err := config.Load(dir)
 		if err != nil {
 			if os.IsNotExist(err) {
 				if !cmd.Flags().Changed("config") {

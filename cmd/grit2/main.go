@@ -9,10 +9,8 @@ import (
 	"time"
 
 	"github.com/gritcli/grit/cmd/grit2/internal/commands"
-	"github.com/gritcli/grit/internal/config"
 	"github.com/gritcli/grit/internal/di"
 	"github.com/gritcli/grit/internal/di/cobradi"
-	"github.com/gritcli/grit/internal/source"
 )
 
 func main() {
@@ -36,15 +34,15 @@ func run() (err error) {
 
 	container := di.New()
 
-	container.Provide(func(cfg config.Config) []source.Source {
-		var sources []source.Source
+	// container.Provide(func(cfg config.Config) []source.Source {
+	// 	var sources []source.Source
 
-		for _, src := range cfg.Sources {
-			sources = append(sources, source.FromConfig(src))
-		}
+	// 	// for _, src := range cfg.Sources {
+	// 	// 	sources = append(sources, source.FromConfig(src))
+	// 	// }
 
-		return sources
-	})
+	// 	return sources
+	// })
 
 	return cobradi.Execute(
 		ctx,
