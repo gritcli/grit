@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/gritcli/grit/cmd/grit2/internal/shell"
+	"github.com/gritcli/grit/cmd/grit/internal/shell"
 	"github.com/gritcli/grit/internal/di"
 	"github.com/spf13/cobra"
 )

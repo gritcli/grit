@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gritcli/grit/cmd/grit2/internal/commands/source"
+	"github.com/gritcli/grit/cmd/grit/internal/commands/source"
 	"github.com/gritcli/grit/internal/di"
 	"github.com/gritcli/grit/internal/di/cobradi"
 	"github.com/spf13/cobra"

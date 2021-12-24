@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gritcli/grit/cmd/grit2/internal/commands"
+	"github.com/gritcli/grit/cmd/grit/internal/commands"
 	"github.com/gritcli/grit/internal/di"
 	"github.com/gritcli/grit/internal/di/cobradi"
 )
