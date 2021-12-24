@@ -4,4 +4,14 @@ package grit.v2.api;
 option go_package = "github.com/gritcli/grit/internal/api";
 
 service API {
+    // Ping is a no-op used to test that the server is reachable.
+    rpc Ping(PingRequest) returns (PingResponse);
+}
+
+// PingRequest is the request value for the Ping operation.
+message PingRequest {
+}
+
+// PingRequest is the response value for the Ping operation.
+message PingResponse {
 }
