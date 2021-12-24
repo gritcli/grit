@@ -29,12 +29,12 @@ func newPingCommand() *cobra.Command {
 				Version: info.Version,
 			})
 			if err != nil {
-				cmd.PrintErrf("Unable to connect to daemon: %s\n", err)
-				return nil
+				return err
 			}
 
 			cmd.Printf("Daemon version: %s\n", res.Version)
 			cmd.Printf("CLI version: %s", info.Version)
+
 			return nil
 		}),
 	}

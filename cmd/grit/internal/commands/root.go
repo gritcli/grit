@@ -20,14 +20,14 @@ import (
 // made available as part of the build process.
 func NewRoot(v string) *cobra.Command {
 	root := &cobra.Command{
-		Version: v,
-		Use:     "grit",
-		Short:   "Manage your local source repository clones",
-
-		// Use the PersistentPreRun hook to add the currently-executing Cobra
-		// CLI command the the DI container. This hook is called after the
-		// CLI arguments are resolved to a specific command.
+		Version:      v,
+		Use:          "grit",
+		Short:        "Manage your local source repository clones",
+		SilenceUsage: true, // otherwise ANY error shows usage
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			// Add the currently-executing Cobra CLI command the the DI
+			// container. This hook is called after the CLI arguments are
+			// resolved to a specific command.
 			deps.Container.Provide(func() (
 				context.Context,
 				*cobra.Command,
