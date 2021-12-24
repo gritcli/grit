@@ -34,16 +34,6 @@ func run() (err error) {
 
 	container := di.New()
 
-	// container.Provide(func(cfg config.Config) []source.Source {
-	// 	var sources []source.Source
-
-	// 	// for _, src := range cfg.Sources {
-	// 	// 	sources = append(sources, source.FromConfig(src))
-	// 	// }
-
-	// 	return sources
-	// })
-
 	return cobradi.Execute(
 		ctx,
 		container,

@@ -48,24 +48,31 @@ func run() (err error) {
 		return config.Load(dir)
 	})
 
-	container.Provide(func() *apiserver.Server {
-		return &apiserver.Server{
+	container.Provide(func() api.PingServer {
+		return &apiserver.PingServer{
 			Version: version,
 		}
 	})
 
+	container.Provide(func(
+		ping api.PingServer,
+	) *grpc.Server {
+		s := grpc.NewServer()
+
+		api.RegisterPingServer(s, ping)
+
+		return s
+	})
+
 	return container.Invoke(func(
 		cfg config.Config,
-		s *apiserver.Server,
+		s *grpc.Server,
 	) error {
 		dapper.Print(cfg)
 
-		g := grpc.NewServer()
-		api.RegisterAPIServer(g, s)
-
 		go func() {
 			<-ctx.Done()
-			g.GracefulStop()
+			s.GracefulStop()
 		}()
 
 		l, err := apiserver.Listen(cfg.Daemon.Socket)
@@ -74,6 +81,6 @@ func run() (err error) {
 		}
 		defer l.Close()
 
-		return g.Serve(l)
+		return s.Serve(l)
 	})
 }

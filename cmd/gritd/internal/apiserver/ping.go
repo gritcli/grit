@@ -6,13 +6,13 @@ import (
 	"github.com/gritcli/grit/internal/api"
 )
 
-// Server is a Grit gRPC API server.
-type Server struct {
+// PingServer is an implementation of api.PingServer
+type PingServer struct {
 	Version string
 }
 
 // Ping is a no-op used to test that the server is reachable.
-func (s *Server) Ping(ctx context.Context, _ *api.PingRequest) (*api.PingResponse, error) {
+func (s *PingServer) Ping(ctx context.Context, _ *api.PingRequest) (*api.PingResponse, error) {
 	return &api.PingResponse{
 		Version: s.Version,
 	}, nil
