@@ -14,7 +14,7 @@ import (
 func newShellIntegrationCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "shell-integration",
-		Short: "setup shell integration",
+		Short: "Setup shell integration",
 		RunE: func(
 			cmd *cobra.Command,
 			args []string,

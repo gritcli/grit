@@ -18,7 +18,7 @@ func NewRoot(v string) *cobra.Command {
 	root := &cobra.Command{
 		Version: v,
 		Use:     executableName(),
-		Short:   "keep track of your local git clones",
+		Short:   "Manage your local source repository clones",
 		PersistentPreRunE: cobradi.Setup(
 			func(
 				c *di.Container,

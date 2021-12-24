@@ -13,7 +13,7 @@ func newListCommand() *cobra.Command {
 		Use:     "list",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"ls"},
-		Short:   "list the configured repository sources",
+		Short:   "List the configured repository sources",
 		Long: heredoc.Doc(`
 		The "source list" command lists the configured repository sources and
 		their current status.

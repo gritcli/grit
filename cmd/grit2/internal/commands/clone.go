@@ -13,9 +13,9 @@ func newCloneCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "clone <repo>",
 		Args:  cobra.ExactArgs(1),
-		Short: "clone a remote repository",
+		Short: "Clone a remote repository",
 		Long: heredoc.Doc(`
-		The "clone" command makes a local clone of a remote Git repository then
+		The "clone" command makes a local clone of a remote repository then
 		changes the shell's current working directory to the clone's working
 		tree.
 
