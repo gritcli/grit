@@ -3,14 +3,16 @@ package deps
 import (
 	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
 	"github.com/gritcli/grit/internal/api"
-	"github.com/gritcli/grit/internal/di"
+	"github.com/gritcli/grit/internal/commondeps"
 	"google.golang.org/grpc"
 )
 
 func init() {
-	Container.Provide(func(x di.ExecutableInfo) api.PingServer {
+	Container.Provide(func(
+		info commondeps.ExecutableInfo,
+	) api.PingServer {
 		return &apiserver.PingServer{
-			Version: x.Version,
+			Version: info.Version,
 		}
 	})
 

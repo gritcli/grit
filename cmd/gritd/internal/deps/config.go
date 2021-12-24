@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	Catalog.Provide(func() (config.Config, error) {
+	Container.Provide(func() (config.Config, error) {
 		dir := os.Getenv("GRIT_CONFIG_DIR")
 		if dir == "" {
 			dir = config.DefaultDirectory

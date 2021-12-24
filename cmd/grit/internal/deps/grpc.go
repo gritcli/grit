@@ -8,7 +8,10 @@ import (
 
 func init() {
 	Container.Provide(func(cfg config.Config) (grpc.ClientConnInterface, error) {
-		conn, err := grpc.Dial("unix:" + cfg.Daemon.Socket)
+		conn, err := grpc.Dial(
+			"unix:"+cfg.Daemon.Socket,
+			grpc.WithInsecure(),
+		)
 		if err != nil {
 			return nil, err
 		}
