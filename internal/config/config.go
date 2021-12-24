@@ -4,6 +4,13 @@ package config
 // files.
 const DefaultDirectory = "~/.config/grit"
 
+// DefaultConfig is the default Grit configuration.
+var DefaultConfig = Config{
+	Daemon: Daemon{
+		Socket: "~/grit/daemon.sock",
+	},
+}
+
 // Config is the root of a Grit configuration.
 type Config struct {
 	Daemon Daemon
@@ -25,9 +32,8 @@ type Daemon struct {
 	Socket string `hcl:"socket"`
 }
 
-// DefaultConfig is the default Grit configuration.
-var DefaultConfig = Config{
-	Daemon: Daemon{
-		Socket: "~/grit/grit.sock",
-	},
+func init() {
+	if err := normalize(&DefaultConfig, ""); err != nil {
+		panic(err)
+	}
 }

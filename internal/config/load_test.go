@@ -31,6 +31,11 @@ var _ = Describe("func Load()", func() {
 			DefaultConfig,
 		),
 		Entry(
+			`not existent directory (should be the same as the default)`,
+			`testdata/valid/non-existent`,
+			DefaultConfig,
+		),
+		Entry(
 			"ignores non-HCL files, directories and files beginning with underscores",
 			"testdata/valid/ignore",
 			DefaultConfig,
@@ -117,13 +122,9 @@ var _ = Describe("func Load()", func() {
 		"it returns an error if there is a problem with the configuration",
 		func(dir string, expect string) {
 			_, err := Load(dir)
+			Expect(err).Should(HaveOccurred())
 			Expect(err).To(MatchError(expect), err.Error())
 		},
-		Entry(
-			`not existent directory`,
-			`testdata/invalid/does-not-exist`,
-			`open testdata/invalid/does-not-exist: no such file or directory`,
-		),
 		Entry(
 			`syntax error`,
 			`testdata/invalid/syntax-error`,

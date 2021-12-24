@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"os"
-
 	"github.com/gritcli/grit/internal/config"
 	"github.com/gritcli/grit/internal/di"
 	"github.com/spf13/cobra"
@@ -29,14 +27,6 @@ func provideConfig(c *di.Container, cmd *cobra.Command) {
 
 		cfg, err := config.Load(dir)
 		if err != nil {
-			if os.IsNotExist(err) {
-				if !cmd.Flags().Changed("config") {
-					// If the --config flag was not specified and the config
-					// file doesn't exist we fall back to the default config.
-					return config.DefaultConfig, nil
-				}
-			}
-
 			return config.Config{}, err
 		}
 

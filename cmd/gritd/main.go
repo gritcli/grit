@@ -11,6 +11,7 @@ import (
 
 	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
 	"github.com/gritcli/grit/internal/api"
+	"github.com/gritcli/grit/internal/config"
 	"github.com/gritcli/grit/internal/di"
 	"google.golang.org/grpc"
 )
@@ -37,11 +38,23 @@ func run() (err error) {
 
 	container := di.New()
 
+	container.Provide(func() (config.Config, error) {
+		dir := os.Getenv("GRIT_CONFIG_DIR")
+		if dir == "" {
+			dir = config.DefaultDirectory
+		}
+
+		return config.Load(dir)
+	})
+
 	container.Provide(func() *apiserver.Server {
 		return &apiserver.Server{}
 	})
 
-	return container.Invoke(func(s *apiserver.Server) error {
+	return container.Invoke(func(
+		cfg config.Config,
+		s *apiserver.Server,
+	) error {
 		g := grpc.NewServer()
 		api.RegisterAPIServer(g, s)
 

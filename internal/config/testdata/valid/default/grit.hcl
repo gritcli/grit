@@ -1,3 +1,3 @@
 daemon {
-    socket = "~/grit/grit.sock"
+    socket = "~/grit/daemon.sock"
 }
