@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -51,7 +50,7 @@ func run() (err error) {
 			g.GracefulStop()
 		}()
 
-		l, err := net.Listen("tcp", "/var/run/gritd.socket")
+		l, err := apiserver.Listen(cfg.Daemon.Socket)
 		if err != nil {
 			return err
 		}
