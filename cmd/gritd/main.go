@@ -11,9 +11,9 @@ import (
 
 	"github.com/dogmatiq/dapper"
 	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
-	"github.com/gritcli/grit/internal/api"
+	"github.com/gritcli/grit/cmd/gritd/internal/deps"
+	"github.com/gritcli/grit/internal/commondeps"
 	"github.com/gritcli/grit/internal/config"
-	"github.com/gritcli/grit/internal/di"
 	"google.golang.org/grpc"
 )
 
@@ -37,34 +37,9 @@ func run() (err error) {
 	)
 	defer cancel()
 
-	container := di.New()
+	commondeps.Provide(&deps.Container, version)
 
-	container.Provide(func() (config.Config, error) {
-		dir := os.Getenv("GRIT_CONFIG_DIR")
-		if dir == "" {
-			dir = config.DefaultDirectory
-		}
-
-		return config.Load(dir)
-	})
-
-	container.Provide(func() api.PingServer {
-		return &apiserver.PingServer{
-			Version: version,
-		}
-	})
-
-	container.Provide(func(
-		ping api.PingServer,
-	) *grpc.Server {
-		s := grpc.NewServer()
-
-		api.RegisterPingServer(s, ping)
-
-		return s
-	})
-
-	return container.Invoke(func(
+	return deps.Container.Invoke(func(
 		cfg config.Config,
 		s *grpc.Server,
 	) error {

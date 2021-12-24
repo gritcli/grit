@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/gritcli/grit/cmd/grit/internal/commands"
-	"github.com/gritcli/grit/internal/di"
-	"github.com/gritcli/grit/internal/di/cobradi"
+	"github.com/gritcli/grit/cmd/grit/internal/deps"
+	"github.com/gritcli/grit/internal/commondeps"
 )
 
 func main() {
@@ -32,11 +32,11 @@ func run() (err error) {
 	)
 	defer cancel()
 
-	container := di.New()
+	commondeps.Provide(&deps.Container, version)
 
-	return cobradi.Execute(
+	return deps.Execute(
 		ctx,
-		container,
+		&deps.Container,
 		commands.NewRoot(version),
 	)
 }

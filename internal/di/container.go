@@ -9,52 +9,40 @@ import (
 
 // Container is a dependency injection container.
 type Container struct {
-	c *dig.Container
+	conM sync.Mutex
+	con  *dig.Container
 
-	m        sync.Mutex
-	deferred []func() error
-}
-
-// New returns a new dependency injection container.
-func New() *Container {
-	c := &Container{
-		c: dig.New(),
-	}
-
-	c.Provide(func() *Container {
-		return c
-	})
-
-	return c
+	deferredM sync.Mutex
+	deferred  []func() error
 }
 
 // Provide registers a new provider with the container.
 func (c *Container) Provide(fn interface{}) {
-	if err := c.c.Provide(fn); err != nil {
+	if err := c.container().Provide(fn); err != nil {
 		panic(err)
 	}
 }
 
 // Invoke invokes fn with arguments supplied by the container.
 func (c *Container) Invoke(fn interface{}) error {
-	err := c.c.Invoke(fn)
+	err := c.container().Invoke(fn)
 	return unwrapError(err)
 }
 
 // Defer registers a function to be called when the container is closed.
 func (c *Container) Defer(fn func() error) {
-	c.m.Lock()
+	c.deferredM.Lock()
 	c.deferred = append(c.deferred, fn)
-	c.m.Unlock()
+	c.deferredM.Unlock()
 }
 
 // Close closes the container, calling any functions that were deferred via a
 // Deferrer.
 func (c *Container) Close() error {
-	c.m.Lock()
+	c.deferredM.Lock()
 	deferred := c.deferred
 	c.deferred = nil
-	c.m.Unlock()
+	c.deferredM.Unlock()
 
 	var err error
 
@@ -72,4 +60,15 @@ func (c *Container) Close() error {
 	}
 
 	return err
+}
+
+func (c *Container) container() *dig.Container {
+	c.conM.Lock()
+	defer c.conM.Unlock()
+
+	if c.con == nil {
+		c.con = dig.New()
+	}
+
+	return c.con
 }
