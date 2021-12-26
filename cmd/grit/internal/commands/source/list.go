@@ -1,6 +1,8 @@
 package source
 
 import (
+	"context"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
 	"github.com/gritcli/grit/internal/api"
@@ -19,12 +21,11 @@ func newListCommand() *cobra.Command {
 		their current status.
 		`),
 		RunE: deps.Run(func(
+			ctx context.Context,
 			cmd *cobra.Command,
 			args []string,
 			client api.APIClient,
 		) error {
-			ctx := cmd.Context()
-
 			res, err := client.ListSources(ctx, &api.ListSourcesRequest{})
 			if err != nil {
 				return err
