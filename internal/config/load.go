@@ -48,6 +48,10 @@ func (l *loader) LoadFile(filename string) error {
 		return err
 	}
 
+	if err := normalize(filename, &c); err != nil {
+		return err
+	}
+
 	if c.Daemon != nil {
 		if l.daemonFile != "" {
 			return fmt.Errorf("%s: the daemon configuration has already been defined in %s", filename, l.daemonFile)
@@ -55,6 +59,7 @@ func (l *loader) LoadFile(filename string) error {
 
 		l.daemonFile = filename
 		l.config.Daemon = *c.Daemon
+
 	}
 
 	for _, s := range c.Sources {
@@ -178,50 +183,29 @@ type anySource struct {
 	Body     hcl.Body `hcl:",remain"`
 }
 
-// // normalize normalizes the structure and values within cfg.
-// func normalize(cfg *Config, configDir string) error {
-// 	return normalizePath(&cfg.Daemon.Socket, configDir)
-// }
+func normalize(filename string, cfg *configFile) error {
+	if cfg.Daemon != nil {
+		return normalizePath(filename, &cfg.Daemon.Socket)
+	}
 
-// // expandPath expands references to ~ in filesystem names.
-// func normalizePath(p *string, configDir string) error {
-// 	n, err := homedir.Expand(*p)
-// 	if err != nil {
-// 		return err
-// 	}
+	return nil
+}
 
-// 	if !filepath.IsAbs(n) {
-// 		n = filepath.Join(configDir, n)
-// 	}
+// normalizePath expands references to ~ in filesystem names.
+func normalizePath(filename string, p *string) error {
+	n := *p
 
-// 	*p = filepath.Clean(n)
+	n, err := homedir.Expand(n)
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	if !filepath.IsAbs(n) {
+		dir := filepath.Dir(filename)
+		n = filepath.Join(dir, n)
+	}
 
-// // loadMainConfig loads the config in a "*.source.hcl" file.
-// func loadSourceConfig(filename string, cfg *Config) error {
-// 	var c sourceConfig
-// 	if err := hclsimple.DecodeFile(filename, nil, &c); err != nil {
-// 		return err
-// 	}
+	*p = filepath.Clean(n)
 
-// 	for _, s := range c.Sources {
-// 		if _, ok := cfg.Sources[s.Name]; ok {
-// 			return fmt.Errorf("%s: duplicate source definition: %s", filename, s.Name)
-// 		}
-
-// 		switch s.Provider {
-// 		case "github":
-// 			err = loadGitHubSource()
-// 		default:
-// 			err = fmt.Errorf("unrecognized source provider: %s", s.Provider)
-// 		}
-
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	return nil
-// }
+	return nil
+}

@@ -1,23 +1,10 @@
 package config
 
+import "github.com/mitchellh/go-homedir"
+
 // DefaultDirectory is the default directory to search for Grit configuration
 // files.
 const DefaultDirectory = "~/.config/grit"
-
-// DefaultConfig is the default Grit configuration.
-var DefaultConfig = Config{
-	Daemon: Daemon{
-		Socket: "~/grit/daemon.sock",
-	},
-	Sources: map[string]Source{
-		"github.com": {
-			Name: "github.com",
-			Config: GitHubConfig{
-				Domain: "github.com",
-			},
-		},
-	},
-}
 
 // Config contains an entire Grit configuration.
 type Config struct {
@@ -45,4 +32,24 @@ type Source struct {
 // SourceConfig is an interface for configuration that is specific to a
 // repository source "provider", such as GitHub or BitBucket.
 type SourceConfig interface {
+}
+
+// DefaultConfig is the default Grit configuration.
+var DefaultConfig = Config{
+	Daemon: Daemon{
+		Socket: "~/grit/daemon.sock",
+	},
+	Sources: map[string]Source{
+		"github.com": {
+			Name: "github.com",
+			Config: GitHubConfig{
+				Domain: "github.com",
+			},
+		},
+	},
+}
+
+// Normalize the paths in the default configuration.
+func init() {
+	DefaultConfig.Daemon.Socket, _ = homedir.Expand(DefaultConfig.Daemon.Socket)
 }
