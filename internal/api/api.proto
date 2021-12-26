@@ -34,7 +34,8 @@ message SearchRepositoriesRequest {
 message SearchRepositoriesResponse {
     string source_name = 1;
     string repo_id = 2;
-    string description = 3;
+    string repo_name = 3;
+    string description = 4;
 }
 
 message CloneRepositoryRequest {
