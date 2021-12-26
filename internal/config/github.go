@@ -1,18 +1,9 @@
 package config
 
-// GitHubDriver is a driver that supports GitHub.com and GitHub Enterprise
-// Server installations.
-const GitHubDriver SourceDriver = "github"
-
 // GitHubConfig contains configuration specific to a GitHub repository source.
 type GitHubConfig struct {
 	// Domain is the base domain name of the GitHub installation.
 	Domain string `hcl:"domain,optional"`
-}
-
-// Driver returns the driver used by this configuration.
-func (c GitHubConfig) Driver() SourceDriver {
-	return GitHubDriver
 }
 
 // String returns a short, human-readable description of the configuration.
@@ -27,7 +18,7 @@ func (c GitHubConfig) acceptVisitor(s Source, v SourceVisitor) {
 
 func init() {
 	registerDriver(
-		GitHubDriver,
+		"github",
 		GitHubConfig{},
 		Source{
 			Name: "github.com",

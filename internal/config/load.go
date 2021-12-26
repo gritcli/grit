@@ -134,7 +134,7 @@ func (l *loader) loadSource(filename string, s anySource) error {
 // decodeDriverConfig decodes a source's configuration using the appropriate
 // driver-specific configuration structure.
 func (l *loader) decodeDriverConfig(filename string, s anySource) (DriverConfig, error) {
-	p, ok := driverConfigPrototypes[SourceDriver(s.Driver)]
+	p, ok := driverConfigPrototypes[s.Driver]
 	if !ok {
 		return nil, fmt.Errorf("%s: unrecognized source driver: %s", filename, s.Driver)
 	}

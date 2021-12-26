@@ -1,17 +1,8 @@
 package config
 
-// SourceDriver is an enumeration of the supported source drivers.
-//
-// Each driver provides an implementation for communicating with a specific type
-// of repository source, such as GitHub, BitBucket or a vanilla Git server.
-type SourceDriver string
-
 // DriverConfig is an interface for configuration that is specific to a
 // particular source driver.
 type DriverConfig interface {
-	// Driver returns the driver used by this configuration.
-	Driver() SourceDriver
-
 	// String returns a short, human-readable description of the
 	// configuration.
 	//
@@ -27,7 +18,7 @@ type DriverConfig interface {
 
 // driverConfigPrototypes is a map of driver to an empty configuration structure
 // that can be used to parse source configuration.
-var driverConfigPrototypes = map[SourceDriver]DriverConfig{}
+var driverConfigPrototypes = map[string]DriverConfig{}
 
 // registerDriver registers a source driver so that its configuration can be
 // loaded.
@@ -35,11 +26,11 @@ var driverConfigPrototypes = map[SourceDriver]DriverConfig{}
 // p is an empty "prototype" of the configuration struct used to parse source
 // configuration for sources that use this driver.
 func registerDriver(
-	d SourceDriver,
-	p DriverConfig,
+	name string,
+	proto DriverConfig,
 	defaultSources ...Source,
 ) {
-	driverConfigPrototypes[d] = p
+	driverConfigPrototypes[name] = proto
 
 	for _, s := range defaultSources {
 		DefaultConfig.Sources[s.Name] = s
