@@ -3,14 +3,15 @@ package apiserver
 import (
 	"context"
 	"errors"
+	"sort"
 
+	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/internal/api"
-	"github.com/gritcli/grit/internal/config"
 )
 
 // Server is an implementation of api.APIServer
 type Server struct {
-	Config config.Config
+	Sources []source.Source
 }
 
 var _ api.APIServer = (*Server)(nil)
@@ -19,13 +20,16 @@ var _ api.APIServer = (*Server)(nil)
 func (s *Server) ListSources(ctx context.Context, _ *api.ListSourcesRequest) (*api.ListSourcesResponse, error) {
 	res := &api.ListSourcesResponse{}
 
-	for _, s := range s.Config.Sources {
+	for _, s := range s.Sources {
 		res.Sources = append(res.Sources, &api.Source{
-			Name:   s.Name,
-			Driver: string(s.Config.Driver()),
-			Config: s.Config.String(),
+			Name:        s.Name(),
+			Description: s.Description(),
 		})
 	}
+
+	sort.Slice(res.Sources, func(i, j int) bool {
+		return res.Sources[i].Name < res.Sources[j].Name
+	})
 
 	return res, nil
 }

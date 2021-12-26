@@ -12,6 +12,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
 	"github.com/gritcli/grit/cmd/gritd/internal/deps"
+	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/internal/config"
 	"google.golang.org/grpc"
 )
@@ -39,6 +40,7 @@ func run() (err error) {
 	return deps.Container.Invoke(func(
 		cfg config.Config,
 		s *grpc.Server,
+		sources []source.Source,
 		log logging.Logger,
 	) error {
 		go func() {
@@ -46,12 +48,16 @@ func run() (err error) {
 			s.GracefulStop()
 		}()
 
-		logging.Log(log, "grit daemon v%s, listening for API requests at %s", version, cfg.Daemon.Socket)
 		lis, err := apiserver.Listen(cfg.Daemon.Socket)
 		if err != nil {
 			return err
 		}
 		defer lis.Close()
+
+		logging.Log(log, "grit daemon v%s, listening for API requests at %s", version, cfg.Daemon.Socket)
+		for _, src := range sources {
+			logging.Log(log, "using '%s' repository source: %s", src.Name(), src.Description())
+		}
 
 		return s.Serve(lis)
 	})

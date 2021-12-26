@@ -23,8 +23,7 @@ message ListSourcesResponse {
 
 message Source {
     string name = 1;
-    string driver = 2;
-    string config = 3;
+    string description = 2;
 }
 
 message SearchRepositoriesRequest {
