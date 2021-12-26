@@ -3,17 +3,20 @@ package grit.v2.api;
 
 option go_package = "github.com/gritcli/grit/internal/api";
 
-service Ping {
-    // Ping is a no-op used to test that the server is reachable.
-    rpc Ping(PingRequest) returns (PingResponse);
+service SourceAPI {
+    // ListSources lists the configured repository sources.
+    rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse);
 }
 
-// PingRequest is the request value for the Ping operation.
-message PingRequest {
-    string version = 1;
+message ListSourcesRequest {
 }
 
-// PingRequest is the response value for the Ping operation.
-message PingResponse {
-    string version = 1;
+message ListSourcesResponse {
+    repeated Source sources = 1;
+}
+
+message Source {
+    string name = 1;
+    string driver = 2;
+    string config = 3;
 }

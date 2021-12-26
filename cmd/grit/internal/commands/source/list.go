@@ -3,7 +3,7 @@ package source
 import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
-	"github.com/gritcli/grit/internal/source"
+	"github.com/gritcli/grit/internal/api"
 	"github.com/spf13/cobra"
 )
 
@@ -21,20 +21,21 @@ func newListCommand() *cobra.Command {
 		RunE: deps.Run(func(
 			cmd *cobra.Command,
 			args []string,
-			sources []source.Source,
+			sourceClient api.SourceAPIClient,
 		) error {
 			ctx := cmd.Context()
 
-			for _, src := range sources {
-				status, err := src.Status(ctx)
-				if err != nil {
-					status = "error: " + err.Error()
-				}
+			res, err := sourceClient.ListSources(ctx, &api.ListSourcesRequest{})
+			if err != nil {
+				return err
+			}
 
+			for _, src := range res.Sources {
 				cmd.Printf(
-					"%s: %s\n",
-					src.Description(),
-					status,
+					"%s (%s): %s\n",
+					src.Name,
+					src.Driver,
+					src.Config,
 				)
 			}
 

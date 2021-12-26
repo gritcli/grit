@@ -3,25 +3,25 @@ package deps
 import (
 	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
 	"github.com/gritcli/grit/internal/api"
-	"github.com/gritcli/grit/internal/commondeps"
+	"github.com/gritcli/grit/internal/config"
 	"google.golang.org/grpc"
 )
 
 func init() {
 	Container.Provide(func(
-		info commondeps.ExecutableInfo,
-	) api.PingServer {
-		return &apiserver.PingServer{
-			Version: info.Version,
+		cfg config.Config,
+	) api.SourceAPIServer {
+		return &apiserver.SourceAPIServer{
+			Config: cfg,
 		}
 	})
 
 	Container.Provide(func(
-		ping api.PingServer,
+		source api.SourceAPIServer,
 	) *grpc.Server {
 		s := grpc.NewServer()
 
-		api.RegisterPingServer(s, ping)
+		api.RegisterSourceAPIServer(s, source)
 
 		return s
 	})

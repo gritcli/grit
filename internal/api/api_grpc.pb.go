@@ -18,86 +18,86 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// PingClient is the client API for Ping service.
+// SourceAPIClient is the client API for SourceAPI service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type PingClient interface {
-	// Ping is a no-op used to test that the server is reachable.
-	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
+type SourceAPIClient interface {
+	// ListSources lists the configured repository sources.
+	ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error)
 }
 
-type pingClient struct {
+type sourceAPIClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewPingClient(cc grpc.ClientConnInterface) PingClient {
-	return &pingClient{cc}
+func NewSourceAPIClient(cc grpc.ClientConnInterface) SourceAPIClient {
+	return &sourceAPIClient{cc}
 }
 
-func (c *pingClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
-	out := new(PingResponse)
-	err := c.cc.Invoke(ctx, "/grit.v2.api.Ping/Ping", in, out, opts...)
+func (c *sourceAPIClient) ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error) {
+	out := new(ListSourcesResponse)
+	err := c.cc.Invoke(ctx, "/grit.v2.api.SourceAPI/ListSources", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// PingServer is the server API for Ping service.
-// All implementations should embed UnimplementedPingServer
+// SourceAPIServer is the server API for SourceAPI service.
+// All implementations should embed UnimplementedSourceAPIServer
 // for forward compatibility
-type PingServer interface {
-	// Ping is a no-op used to test that the server is reachable.
-	Ping(context.Context, *PingRequest) (*PingResponse, error)
+type SourceAPIServer interface {
+	// ListSources lists the configured repository sources.
+	ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error)
 }
 
-// UnimplementedPingServer should be embedded to have forward compatible implementations.
-type UnimplementedPingServer struct {
+// UnimplementedSourceAPIServer should be embedded to have forward compatible implementations.
+type UnimplementedSourceAPIServer struct {
 }
 
-func (UnimplementedPingServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+func (UnimplementedSourceAPIServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSources not implemented")
 }
 
-// UnsafePingServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to PingServer will
+// UnsafeSourceAPIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SourceAPIServer will
 // result in compilation errors.
-type UnsafePingServer interface {
-	mustEmbedUnimplementedPingServer()
+type UnsafeSourceAPIServer interface {
+	mustEmbedUnimplementedSourceAPIServer()
 }
 
-func RegisterPingServer(s grpc.ServiceRegistrar, srv PingServer) {
-	s.RegisterService(&Ping_ServiceDesc, srv)
+func RegisterSourceAPIServer(s grpc.ServiceRegistrar, srv SourceAPIServer) {
+	s.RegisterService(&SourceAPI_ServiceDesc, srv)
 }
 
-func _Ping_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PingRequest)
+func _SourceAPI_ListSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSourcesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PingServer).Ping(ctx, in)
+		return srv.(SourceAPIServer).ListSources(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grit.v2.api.Ping/Ping",
+		FullMethod: "/grit.v2.api.SourceAPI/ListSources",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PingServer).Ping(ctx, req.(*PingRequest))
+		return srv.(SourceAPIServer).ListSources(ctx, req.(*ListSourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Ping_ServiceDesc is the grpc.ServiceDesc for Ping service.
+// SourceAPI_ServiceDesc is the grpc.ServiceDesc for SourceAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Ping_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grit.v2.api.Ping",
-	HandlerType: (*PingServer)(nil),
+var SourceAPI_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "grit.v2.api.SourceAPI",
+	HandlerType: (*SourceAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Ping",
-			Handler:    _Ping_Ping_Handler,
+			MethodName: "ListSources",
+			Handler:    _SourceAPI_ListSources_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

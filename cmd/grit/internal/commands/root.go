@@ -45,7 +45,6 @@ func NewRoot(v string) *cobra.Command {
 		source.NewRoot(),
 		newShellIntegrationCommand(),
 		newCloneCommand(),
-		newPingCommand(),
 	)
 
 	return root

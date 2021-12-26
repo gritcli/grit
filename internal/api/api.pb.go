@@ -20,17 +20,14 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// PingRequest is the request value for the Ping operation.
-type PingRequest struct {
+type ListSourcesRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	Version string `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
 }
 
-func (x *PingRequest) Reset() {
-	*x = PingRequest{}
+func (x *ListSourcesRequest) Reset() {
+	*x = ListSourcesRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -38,13 +35,13 @@ func (x *PingRequest) Reset() {
 	}
 }
 
-func (x *PingRequest) String() string {
+func (x *ListSourcesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PingRequest) ProtoMessage() {}
+func (*ListSourcesRequest) ProtoMessage() {}
 
-func (x *PingRequest) ProtoReflect() protoreflect.Message {
+func (x *ListSourcesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -56,29 +53,21 @@ func (x *PingRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PingRequest.ProtoReflect.Descriptor instead.
-func (*PingRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListSourcesRequest.ProtoReflect.Descriptor instead.
+func (*ListSourcesRequest) Descriptor() ([]byte, []int) {
 	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *PingRequest) GetVersion() string {
-	if x != nil {
-		return x.Version
-	}
-	return ""
-}
-
-// PingRequest is the response value for the Ping operation.
-type PingResponse struct {
+type ListSourcesResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Version string `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	Sources []*Source `protobuf:"bytes,1,rep,name=sources,proto3" json:"sources,omitempty"`
 }
 
-func (x *PingResponse) Reset() {
-	*x = PingResponse{}
+func (x *ListSourcesResponse) Reset() {
+	*x = ListSourcesResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -86,13 +75,13 @@ func (x *PingResponse) Reset() {
 	}
 }
 
-func (x *PingResponse) String() string {
+func (x *ListSourcesResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PingResponse) ProtoMessage() {}
+func (*ListSourcesResponse) ProtoMessage() {}
 
-func (x *PingResponse) ProtoReflect() protoreflect.Message {
+func (x *ListSourcesResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -104,14 +93,77 @@ func (x *PingResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PingResponse.ProtoReflect.Descriptor instead.
-func (*PingResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListSourcesResponse.ProtoReflect.Descriptor instead.
+func (*ListSourcesResponse) Descriptor() ([]byte, []int) {
 	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PingResponse) GetVersion() string {
+func (x *ListSourcesResponse) GetSources() []*Source {
 	if x != nil {
-		return x.Version
+		return x.Sources
+	}
+	return nil
+}
+
+type Source struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name   string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Driver string `protobuf:"bytes,2,opt,name=driver,proto3" json:"driver,omitempty"`
+	Config string `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`
+}
+
+func (x *Source) Reset() {
+	*x = Source{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Source) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Source) ProtoMessage() {}
+
+func (x *Source) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Source.ProtoReflect.Descriptor instead.
+func (*Source) Descriptor() ([]byte, []int) {
+	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Source) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Source) GetDriver() string {
+	if x != nil {
+		return x.Driver
+	}
+	return ""
+}
+
+func (x *Source) GetConfig() string {
+	if x != nil {
+		return x.Config
 	}
 	return ""
 }
@@ -122,20 +174,27 @@ var file_github_com_gritcli_grit_internal_api_api_proto_rawDesc = []byte{
 	0x0a, 0x2e, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x69,
 	0x74, 0x63, 0x6c, 0x69, 0x2f, 0x67, 0x72, 0x69, 0x74, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e,
 	0x61, 0x6c, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x70, 0x69, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x12, 0x0b, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x22, 0x27, 0x0a,
-	0x0b, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07,
-	0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76,
-	0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x22, 0x28, 0x0a, 0x0c, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f,
-	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e,
-	0x32, 0x43, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x3b, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67,
-	0x12, 0x18, 0x2e, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50,
-	0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x67, 0x72, 0x69,
-	0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x26, 0x5a, 0x24, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x69, 0x74, 0x63, 0x6c, 0x69, 0x2f, 0x67, 0x72, 0x69, 0x74,
-	0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x12, 0x0b, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x22, 0x14, 0x0a,
+	0x12, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x22, 0x44, 0x0a, 0x13, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x6f, 0x75, 0x72, 0x63,
+	0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2d, 0x0a, 0x07, 0x73, 0x6f,
+	0x75, 0x72, 0x63, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x67, 0x72,
+	0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65,
+	0x52, 0x07, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x22, 0x4c, 0x0a, 0x06, 0x53, 0x6f, 0x75,
+	0x72, 0x63, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x64, 0x72, 0x69, 0x76, 0x65,
+	0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x64, 0x72, 0x69, 0x76, 0x65, 0x72, 0x12,
+	0x16, 0x0a, 0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x32, 0x5d, 0x0a, 0x09, 0x53, 0x6f, 0x75, 0x72, 0x63,
+	0x65, 0x41, 0x50, 0x49, 0x12, 0x50, 0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x6f, 0x75, 0x72,
+	0x63, 0x65, 0x73, 0x12, 0x1f, 0x2e, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x26, 0x5a, 0x24, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x69, 0x74, 0x63, 0x6c, 0x69, 0x2f, 0x67, 0x72, 0x69,
+	0x74, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -150,19 +209,21 @@ func file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP() []byte {
 	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescData
 }
 
-var file_github_com_gritcli_grit_internal_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_github_com_gritcli_grit_internal_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_github_com_gritcli_grit_internal_api_api_proto_goTypes = []interface{}{
-	(*PingRequest)(nil),  // 0: grit.v2.api.PingRequest
-	(*PingResponse)(nil), // 1: grit.v2.api.PingResponse
+	(*ListSourcesRequest)(nil),  // 0: grit.v2.api.ListSourcesRequest
+	(*ListSourcesResponse)(nil), // 1: grit.v2.api.ListSourcesResponse
+	(*Source)(nil),              // 2: grit.v2.api.Source
 }
 var file_github_com_gritcli_grit_internal_api_api_proto_depIdxs = []int32{
-	0, // 0: grit.v2.api.Ping.Ping:input_type -> grit.v2.api.PingRequest
-	1, // 1: grit.v2.api.Ping.Ping:output_type -> grit.v2.api.PingResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: grit.v2.api.ListSourcesResponse.sources:type_name -> grit.v2.api.Source
+	0, // 1: grit.v2.api.SourceAPI.ListSources:input_type -> grit.v2.api.ListSourcesRequest
+	1, // 2: grit.v2.api.SourceAPI.ListSources:output_type -> grit.v2.api.ListSourcesResponse
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_github_com_gritcli_grit_internal_api_api_proto_init() }
@@ -172,7 +233,7 @@ func file_github_com_gritcli_grit_internal_api_api_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PingRequest); i {
+			switch v := v.(*ListSourcesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -184,7 +245,19 @@ func file_github_com_gritcli_grit_internal_api_api_proto_init() {
 			}
 		}
 		file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PingResponse); i {
+			switch v := v.(*ListSourcesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Source); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -202,7 +275,7 @@ func file_github_com_gritcli_grit_internal_api_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_github_com_gritcli_grit_internal_api_api_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
