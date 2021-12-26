@@ -10,10 +10,14 @@ type GitHubConfig struct {
 	Domain string `hcl:"domain,optional"`
 }
 
-// DescribeConfig returns a short, human-readable description of the
-// configuration.
-func (c GitHubConfig) DescribeConfig() string {
+// String returns a short, human-readable description of the configuration.
+func (c GitHubConfig) String() string {
 	return c.Domain
+}
+
+// acceptVisitor calls v.VisitGitHubSource(s, c).
+func (c GitHubConfig) acceptVisitor(s Source, v SourceVisitor) {
+	v.VisitGitHubSource(s, c)
 }
 
 func init() {

@@ -32,6 +32,16 @@ type Source struct {
 	Config DriverConfig
 }
 
+// AcceptVisitor calls the appropriate driver-specific method on v.
+func (s Source) AcceptVisitor(v SourceVisitor) {
+	s.Config.acceptVisitor(s, v)
+}
+
+// SourceVisitor visits sources based on their driver.
+type SourceVisitor interface {
+	VisitGitHubSource(s Source, cfg GitHubConfig)
+}
+
 // DefaultConfig is the default Grit configuration.
 var DefaultConfig = Config{
 	Daemon: Daemon{
