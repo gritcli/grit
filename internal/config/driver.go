@@ -3,15 +3,6 @@ package config
 // DriverConfig is an interface for configuration that is specific to a
 // particular source driver.
 type DriverConfig interface {
-	// String returns a short, human-readable description of the
-	// configuration.
-	//
-	// It may not include information about all its available configuration
-	// directives. It typically would include the most important aspects of the
-	// configuration that can be used to disambiguate two sources that use the
-	// same driver, or unusual non-default settings.
-	String() string
-
 	// acceptVisitor calls the appropriate driver-specific method on v.
 	acceptVisitor(s Source, v SourceVisitor)
 }
