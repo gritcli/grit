@@ -3,9 +3,15 @@ package grit.v2.api;
 
 option go_package = "github.com/gritcli/grit/internal/api";
 
-service SourceAPI {
+service API {
     // ListSources lists the configured repository sources.
     rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse);
+
+    // SearchRepositories looks for a repository by (partial) name.
+    rpc SearchRepositories(SearchRepositoriesRequest) returns (stream SearchRepositoriesResponse);
+
+    // CloneRepository clones a remote repository.
+    rpc CloneRepository(CloneRepositoryRequest) returns (CloneRepositoryResponse);
 }
 
 message ListSourcesRequest {
@@ -19,4 +25,23 @@ message Source {
     string name = 1;
     string driver = 2;
     string config = 3;
+}
+
+message SearchRepositoriesRequest {
+    string name = 1;
+}
+
+message SearchRepositoriesResponse {
+    string source_name = 1;
+    string repo_id = 2;
+    string description = 3;
+}
+
+message CloneRepositoryRequest {
+    string source_name = 1;
+    string repo_id = 2;
+}
+
+message CloneRepositoryResponse {
+    string directory = 1;
 }

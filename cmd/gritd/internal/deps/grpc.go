@@ -10,20 +10,19 @@ import (
 func init() {
 	Container.Provide(func(
 		cfg config.Config,
-	) api.SourceAPIServer {
-		return &apiserver.SourceAPIServer{
+	) api.APIServer {
+		return &apiserver.Server{
 			Config: cfg,
 		}
 	})
 
 	Container.Provide(func(
-		source api.SourceAPIServer,
+		s api.APIServer,
 	) *grpc.Server {
-		s := grpc.NewServer()
+		g := grpc.NewServer()
+		api.RegisterAPIServer(g, s)
 
-		api.RegisterSourceAPIServer(s, source)
-
-		return s
+		return g
 	})
 
 }

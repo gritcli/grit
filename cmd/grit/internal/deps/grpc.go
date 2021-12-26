@@ -20,5 +20,5 @@ func init() {
 		return conn, nil
 	})
 
-	Container.Provide(api.NewSourceAPIClient)
+	Container.Provide(api.NewAPIClient)
 }

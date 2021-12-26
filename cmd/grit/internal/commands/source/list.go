@@ -21,11 +21,11 @@ func newListCommand() *cobra.Command {
 		RunE: deps.Run(func(
 			cmd *cobra.Command,
 			args []string,
-			sourceClient api.SourceAPIClient,
+			client api.APIClient,
 		) error {
 			ctx := cmd.Context()
 
-			res, err := sourceClient.ListSources(ctx, &api.ListSourcesRequest{})
+			res, err := client.ListSources(ctx, &api.ListSourcesRequest{})
 			if err != nil {
 				return err
 			}

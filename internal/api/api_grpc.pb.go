@@ -18,88 +18,192 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// SourceAPIClient is the client API for SourceAPI service.
+// APIClient is the client API for API service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type SourceAPIClient interface {
+type APIClient interface {
 	// ListSources lists the configured repository sources.
 	ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error)
+	// SearchRepositories looks for a repository by (partial) name.
+	SearchRepositories(ctx context.Context, in *SearchRepositoriesRequest, opts ...grpc.CallOption) (API_SearchRepositoriesClient, error)
+	// CloneRepository clones a remote repository.
+	CloneRepository(ctx context.Context, in *CloneRepositoryRequest, opts ...grpc.CallOption) (*CloneRepositoryResponse, error)
 }
 
-type sourceAPIClient struct {
+type aPIClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewSourceAPIClient(cc grpc.ClientConnInterface) SourceAPIClient {
-	return &sourceAPIClient{cc}
+func NewAPIClient(cc grpc.ClientConnInterface) APIClient {
+	return &aPIClient{cc}
 }
 
-func (c *sourceAPIClient) ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error) {
+func (c *aPIClient) ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error) {
 	out := new(ListSourcesResponse)
-	err := c.cc.Invoke(ctx, "/grit.v2.api.SourceAPI/ListSources", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grit.v2.api.API/ListSources", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SourceAPIServer is the server API for SourceAPI service.
-// All implementations should embed UnimplementedSourceAPIServer
+func (c *aPIClient) SearchRepositories(ctx context.Context, in *SearchRepositoriesRequest, opts ...grpc.CallOption) (API_SearchRepositoriesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], "/grit.v2.api.API/SearchRepositories", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &aPISearchRepositoriesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type API_SearchRepositoriesClient interface {
+	Recv() (*SearchRepositoriesResponse, error)
+	grpc.ClientStream
+}
+
+type aPISearchRepositoriesClient struct {
+	grpc.ClientStream
+}
+
+func (x *aPISearchRepositoriesClient) Recv() (*SearchRepositoriesResponse, error) {
+	m := new(SearchRepositoriesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *aPIClient) CloneRepository(ctx context.Context, in *CloneRepositoryRequest, opts ...grpc.CallOption) (*CloneRepositoryResponse, error) {
+	out := new(CloneRepositoryResponse)
+	err := c.cc.Invoke(ctx, "/grit.v2.api.API/CloneRepository", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// APIServer is the server API for API service.
+// All implementations should embed UnimplementedAPIServer
 // for forward compatibility
-type SourceAPIServer interface {
+type APIServer interface {
 	// ListSources lists the configured repository sources.
 	ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error)
+	// SearchRepositories looks for a repository by (partial) name.
+	SearchRepositories(*SearchRepositoriesRequest, API_SearchRepositoriesServer) error
+	// CloneRepository clones a remote repository.
+	CloneRepository(context.Context, *CloneRepositoryRequest) (*CloneRepositoryResponse, error)
 }
 
-// UnimplementedSourceAPIServer should be embedded to have forward compatible implementations.
-type UnimplementedSourceAPIServer struct {
+// UnimplementedAPIServer should be embedded to have forward compatible implementations.
+type UnimplementedAPIServer struct {
 }
 
-func (UnimplementedSourceAPIServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
+func (UnimplementedAPIServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListSources not implemented")
 }
+func (UnimplementedAPIServer) SearchRepositories(*SearchRepositoriesRequest, API_SearchRepositoriesServer) error {
+	return status.Errorf(codes.Unimplemented, "method SearchRepositories not implemented")
+}
+func (UnimplementedAPIServer) CloneRepository(context.Context, *CloneRepositoryRequest) (*CloneRepositoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CloneRepository not implemented")
+}
 
-// UnsafeSourceAPIServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to SourceAPIServer will
+// UnsafeAPIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to APIServer will
 // result in compilation errors.
-type UnsafeSourceAPIServer interface {
-	mustEmbedUnimplementedSourceAPIServer()
+type UnsafeAPIServer interface {
+	mustEmbedUnimplementedAPIServer()
 }
 
-func RegisterSourceAPIServer(s grpc.ServiceRegistrar, srv SourceAPIServer) {
-	s.RegisterService(&SourceAPI_ServiceDesc, srv)
+func RegisterAPIServer(s grpc.ServiceRegistrar, srv APIServer) {
+	s.RegisterService(&API_ServiceDesc, srv)
 }
 
-func _SourceAPI_ListSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _API_ListSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListSourcesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SourceAPIServer).ListSources(ctx, in)
+		return srv.(APIServer).ListSources(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grit.v2.api.SourceAPI/ListSources",
+		FullMethod: "/grit.v2.api.API/ListSources",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SourceAPIServer).ListSources(ctx, req.(*ListSourcesRequest))
+		return srv.(APIServer).ListSources(ctx, req.(*ListSourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// SourceAPI_ServiceDesc is the grpc.ServiceDesc for SourceAPI service.
+func _API_SearchRepositories_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SearchRepositoriesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(APIServer).SearchRepositories(m, &aPISearchRepositoriesServer{stream})
+}
+
+type API_SearchRepositoriesServer interface {
+	Send(*SearchRepositoriesResponse) error
+	grpc.ServerStream
+}
+
+type aPISearchRepositoriesServer struct {
+	grpc.ServerStream
+}
+
+func (x *aPISearchRepositoriesServer) Send(m *SearchRepositoriesResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _API_CloneRepository_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloneRepositoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(APIServer).CloneRepository(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grit.v2.api.API/CloneRepository",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(APIServer).CloneRepository(ctx, req.(*CloneRepositoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// API_ServiceDesc is the grpc.ServiceDesc for API service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var SourceAPI_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grit.v2.api.SourceAPI",
-	HandlerType: (*SourceAPIServer)(nil),
+var API_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "grit.v2.api.API",
+	HandlerType: (*APIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ListSources",
-			Handler:    _SourceAPI_ListSources_Handler,
+			Handler:    _API_ListSources_Handler,
+		},
+		{
+			MethodName: "CloneRepository",
+			Handler:    _API_CloneRepository_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SearchRepositories",
+			Handler:       _API_SearchRepositories_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "github.com/gritcli/grit/internal/api/api.proto",
 }
