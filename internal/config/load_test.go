@@ -40,82 +40,16 @@ var _ = Describe("func Load()", func() {
 			"testdata/valid/ignore",
 			DefaultConfig,
 		),
-		// Entry(
-		// 	"implicit github source disabled",
-		// 	"testdata/valid/github-disabled.conf",
-		// 	Config{Dir: "~/grit"},
-		// ),
-		// Entry(
-		// 	"implicit github source overridden",
-		// 	"testdata/valid/github-overridden.conf",
-		// 	Config{
-		// 		Dir: "~/grit",
-		// 		Sources: map[string]Source{
-		// 			"github": GitHubSource{
-		// 				SourceName: "github",
-		// 				API: &url.URL{
-		// 					Scheme: "https",
-		// 					Host:   "github.example.com",
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// ),
-		// Entry(
-		// 	"implicit github source augmented with token",
-		// 	"testdata/valid/github-augmented.conf",
-		// 	Config{
-		// 		Dir: "~/grit",
-		// 		Sources: map[string]Source{
-		// 			"github": GitHubSource{
-		// 				SourceName: "github",
-		// 				API: &url.URL{
-		// 					Scheme: "https",
-		// 					Host:   "api.github.com",
-		// 				},
-		// 				Token: "<token>",
-		// 			},
-		// 		},
-		// 	},
-		// ),
-		// Entry(
-		// 	"custom git source defined",
-		// 	"testdata/valid/git-custom.conf",
-		// 	Config{
-		// 		Dir: "~/grit",
-		// 		Sources: map[string]Source{
-		// 			"github": DefaultConfig.Sources["github"],
-		// 			"my-company": GitSource{
-		// 				SourceName: "my-company",
-		// 				Endpoint: &transport.Endpoint{
-		// 					Protocol: "ssh",
-		// 					User:     "git",
-		// 					Host:     "git.example.com",
-		// 					Port:     22,
-		// 					Path:     "{repo}.git",
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// ),
-		// Entry(
-		// 	"custom github source defined",
-		// 	"testdata/valid/github-custom.conf",
-		// 	Config{
-		// 		Dir: "~/grit",
-		// 		Sources: map[string]Source{
-		// 			"github": DefaultConfig.Sources["github"],
-		// 			"my-company": GitHubSource{
-		// 				SourceName: "my-company",
-		// 				API: &url.URL{
-		// 					Scheme: "https",
-		// 					Host:   "github.example.com",
-		// 				},
-		// 				Token: "<token>",
-		// 			},
-		// 		},
-		// 	},
-		// ),
+		Entry(
+			"github enterprise",
+			"testdata/valid/github-enterprise",
+			withSource(DefaultConfig, Source{
+				Name: "my-company",
+				Config: GitHubConfig{
+					Domain: "github.example.com",
+				},
+			}),
+		),
 	)
 
 	DescribeTable(
@@ -131,9 +65,28 @@ var _ = Describe("func Load()", func() {
 			`testdata/invalid/syntax-error/grit.hcl:1,1-2: Argument or block definition required; An argument or block definition is required here.`,
 		),
 		Entry(
-			`unrecognized file`,
-			`testdata/invalid/unrecognized-file`,
-			`testdata/invalid/unrecognized-file/unrecognized.hcl: unrecognized configuration file`,
+			`multiple files with daemon blocks`,
+			`testdata/invalid/multiple-files-with-daemon-block`,
+			`testdata/invalid/multiple-files-with-daemon-block/b.hcl: the daemon configuration has already been defined in testdata/invalid/multiple-files-with-daemon-block/a.hcl`,
+		),
+		Entry(
+			`duplicate source names`,
+			`testdata/invalid/duplicate-source-names`,
+			`testdata/invalid/duplicate-source-names/b.hcl: the 'my-company' repository source has already been defined in testdata/invalid/duplicate-source-names/a.hcl`,
 		),
 	)
 })
+
+// withSource returns a copy of cfg with an additional repository source.
+func withSource(cfg Config, src Source) Config {
+	prev := cfg.Sources
+	cfg.Sources = map[string]Source{}
+
+	for n, s := range prev {
+		cfg.Sources[n] = s
+	}
+
+	cfg.Sources[src.Name] = src
+
+	return cfg
+}
