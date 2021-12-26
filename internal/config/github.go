@@ -16,7 +16,7 @@ func init() {
 		"github",
 		GitHubConfig{},
 		Source{
-			Name: "github.com",
+			Name: "github",
 			Config: GitHubConfig{
 				Domain: "github.com",
 			},
