@@ -25,13 +25,11 @@ type Source struct {
 	// configuration has a unique name.
 	Name string
 
-	// Config contains configuration that is specific to this specific source.
-	Config SourceConfig
-}
+	// Driver is the driver used by this source.
+	Driver SourceDriver
 
-// SourceConfig is an interface for configuration that is specific to a
-// repository source "provider", such as GitHub or BitBucket.
-type SourceConfig interface {
+	// Config contains driver-specific configuration for this source.
+	Config DriverConfig
 }
 
 // DefaultConfig is the default Grit configuration.
@@ -39,14 +37,7 @@ var DefaultConfig = Config{
 	Daemon: Daemon{
 		Socket: "~/grit/daemon.sock",
 	},
-	Sources: map[string]Source{
-		"github.com": {
-			Name: "github.com",
-			Config: GitHubConfig{
-				Domain: "github.com",
-			},
-		},
-	},
+	Sources: map[string]Source{},
 }
 
 // Normalize the paths in the default configuration.

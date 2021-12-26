@@ -44,7 +44,8 @@ var _ = Describe("func Load()", func() {
 			"github enterprise",
 			"testdata/valid/github-enterprise",
 			withSource(DefaultConfig, Source{
-				Name: "my-company",
+				Name:   "my-company",
+				Driver: GitHubDriver,
 				Config: GitHubConfig{
 					Domain: "github.example.com",
 				},

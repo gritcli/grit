@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -109,7 +110,7 @@ func (l *loader) LoadDir(dir string) error {
 
 // loadSource loads a source that was parsed in a configuration file.
 func (l *loader) loadSource(filename string, s anySource) error {
-	cfg, err := l.decodeSourceConfig(filename, s)
+	cfg, err := l.decodeDriverConfig(filename, s)
 	if err != nil {
 		return err
 	}
@@ -124,32 +125,29 @@ func (l *loader) loadSource(filename string, s anySource) error {
 	l.sourceFiles[s.Name] = filename
 	l.config.Sources[s.Name] = Source{
 		Name:   s.Name,
+		Driver: SourceDriver(s.Driver),
 		Config: cfg,
 	}
 
 	return nil
 }
 
-// decodeSourceConfig decodes a source's configuration using the appropriate
-// provider configuration structure.
-func (l *loader) decodeSourceConfig(filename string, s anySource) (SourceConfig, error) {
-	switch s.Provider {
-	case "github":
-		var cfg GitHubConfig
-		return cfg, l.decodeSourceBody(filename, s, &cfg)
-	default:
-		return nil, fmt.Errorf("%s: unrecognized source provider: %s", filename, s.Provider)
+// decodeDriverConfig decodes a source's configuration using the appropriate
+// driver-specific configuration structure.
+func (l *loader) decodeDriverConfig(filename string, s anySource) (DriverConfig, error) {
+	p, ok := driverConfigPrototypes[SourceDriver(s.Driver)]
+	if !ok {
+		return nil, fmt.Errorf("%s: unrecognized source driver: %s", filename, s.Driver)
 	}
-}
 
-// decodeSourceBody decodes s.Body into cfg.
-func (l *loader) decodeSourceBody(filename string, s anySource, ptr interface{}) error {
-	diag := gohcl.DecodeBody(s.Body, nil, ptr)
+	ptr := reflect.New(reflect.TypeOf(p))
+
+	diag := gohcl.DecodeBody(s.Body, nil, ptr.Interface())
 	if diag.HasErrors() {
-		return fmt.Errorf("%s: %w", filename, diag)
+		return nil, fmt.Errorf("%s: %w", filename, diag)
 	}
 
-	return nil
+	return ptr.Elem().Interface().(DriverConfig), nil
 }
 
 // applyDefaults merges missing values from DefaultConfig into cfg.
@@ -178,9 +176,9 @@ type configFile struct {
 
 // anySource is a source block that has not been fully parsed.
 type anySource struct {
-	Name     string   `hcl:"name,label"`
-	Provider string   `hcl:"provider,label"`
-	Body     hcl.Body `hcl:",remain"`
+	Name   string   `hcl:",label"`
+	Driver string   `hcl:",label"`
+	Body   hcl.Body `hcl:",remain"`
 }
 
 func normalize(filename string, cfg *configFile) error {
