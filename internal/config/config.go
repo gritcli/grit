@@ -25,9 +25,6 @@ type Source struct {
 	// configuration has a unique name.
 	Name string
 
-	// Driver is the driver used by this source.
-	Driver SourceDriver
-
 	// Config contains driver-specific configuration for this source.
 	Config DriverConfig
 }

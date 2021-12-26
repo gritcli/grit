@@ -22,8 +22,8 @@ func (s *Server) ListSources(ctx context.Context, _ *api.ListSourcesRequest) (*a
 	for _, s := range s.Config.Sources {
 		res.Sources = append(res.Sources, &api.Source{
 			Name:   s.Name,
-			Driver: string(s.Driver),
-			Config: s.Config.DescribeConfig(),
+			Driver: string(s.Config.Driver()),
+			Config: s.Config.String(),
 		})
 	}
 

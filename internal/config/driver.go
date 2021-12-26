@@ -9,6 +9,9 @@ type SourceDriver string
 // DriverConfig is an interface for configuration that is specific to a
 // particular source driver.
 type DriverConfig interface {
+	// Driver returns the driver used by this configuration.
+	Driver() SourceDriver
+
 	// String returns a short, human-readable description of the
 	// configuration.
 	//

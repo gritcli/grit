@@ -10,6 +10,11 @@ type GitHubConfig struct {
 	Domain string `hcl:"domain,optional"`
 }
 
+// Driver returns the driver used by this configuration.
+func (c GitHubConfig) Driver() SourceDriver {
+	return GitHubDriver
+}
+
 // String returns a short, human-readable description of the configuration.
 func (c GitHubConfig) String() string {
 	return c.Domain
@@ -25,8 +30,7 @@ func init() {
 		GitHubDriver,
 		GitHubConfig{},
 		Source{
-			Name:   "github.com",
-			Driver: GitHubDriver,
+			Name: "github.com",
 			Config: GitHubConfig{
 				Domain: "github.com",
 			},
