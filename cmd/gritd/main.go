@@ -9,10 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/dogmatiq/dapper"
+	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
 	"github.com/gritcli/grit/cmd/gritd/internal/deps"
-	"github.com/gritcli/grit/internal/commondeps"
 	"github.com/gritcli/grit/internal/config"
 	"google.golang.org/grpc"
 )
@@ -37,25 +36,23 @@ func run() (err error) {
 	)
 	defer cancel()
 
-	commondeps.Provide(&deps.Container, version)
-
 	return deps.Container.Invoke(func(
 		cfg config.Config,
 		s *grpc.Server,
+		log logging.Logger,
 	) error {
-		dapper.Print(cfg)
-
 		go func() {
 			<-ctx.Done()
 			s.GracefulStop()
 		}()
 
-		l, err := apiserver.Listen(cfg.Daemon.Socket)
+		logging.Log(log, "grit daemon v%s, listening for API requests at %s", version, cfg.Daemon.Socket)
+		lis, err := apiserver.Listen(cfg.Daemon.Socket)
 		if err != nil {
 			return err
 		}
-		defer l.Close()
+		defer lis.Close()
 
-		return s.Serve(l)
+		return s.Serve(lis)
 	})
 }

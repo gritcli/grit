@@ -10,7 +10,6 @@ import (
 
 	"github.com/gritcli/grit/cmd/grit/internal/commands"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
-	"github.com/gritcli/grit/internal/commondeps"
 )
 
 func main() {
@@ -31,8 +30,6 @@ func run() (err error) {
 		syscall.SIGTERM,
 	)
 	defer cancel()
-
-	commondeps.Provide(&deps.Container, version)
 
 	return deps.Execute(
 		ctx,

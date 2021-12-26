@@ -8,7 +8,6 @@ import (
 	"github.com/gritcli/grit/cmd/grit/internal/commands/source"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
 	"github.com/gritcli/grit/cmd/grit/internal/shell"
-	"github.com/gritcli/grit/internal/commondeps"
 	"github.com/gritcli/grit/internal/config"
 	"github.com/gritcli/grit/internal/di"
 	"github.com/spf13/cobra"
@@ -92,7 +91,6 @@ func provideShellExecutor(c *di.Container, root *cobra.Command) {
 	// Setup a DI provider that provides a shell.Executor that writes to the
 	// file specified by the --shell-executor-output flag.
 	c.Provide(func(
-		info commondeps.ExecutableInfo,
 		cmd *cobra.Command,
 	) (shell.Executor, error) {
 		filename, err := cmd.Flags().GetString("shell-executor-output")
@@ -102,7 +100,7 @@ func provideShellExecutor(c *di.Container, root *cobra.Command) {
 
 		if filename == "" {
 			cmd.PrintErrf("Shell integration has not been configured. For more information run:\n\n")
-			cmd.PrintErrf("    %s help shell-integration\n\n", info.Name)
+			cmd.PrintErrf("    %s help shell-integration\n\n", os.Args[0])
 			return shell.NewExecutor(io.Discard), nil
 		}
 
