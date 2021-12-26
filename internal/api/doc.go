@@ -1,3 +1,3 @@
-// Package api contains the definition for a gRPC API used to communicate
-// between the Grit CLI and the Grit daemon.
+// Package api contains the definition for the gRPC services that the CLI uses
+// to communicate with the daemon.
 package api

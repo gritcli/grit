@@ -1,3 +1,2 @@
-// Package commands contains the definitions of the Cobra CLI commands that
-// comprise the grit CLI.
+// Package commands contains the root-level CLI commands.
 package commands
