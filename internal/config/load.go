@@ -125,7 +125,7 @@ func (l *loader) loadSource(filename string, s anySource) error {
 	l.sourceFiles[s.Name] = filename
 	l.config.Sources[s.Name] = Source{
 		Name:   s.Name,
-		Config: cfg,
+		Config: cfg.withDefaults(),
 	}
 
 	return nil

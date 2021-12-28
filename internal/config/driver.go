@@ -5,6 +5,10 @@ package config
 type DriverConfig interface {
 	// acceptVisitor calls the appropriate driver-specific method on v.
 	acceptVisitor(s Source, v SourceVisitor)
+
+	// withDefaults returns a copy of the configuration populated with default
+	// values.
+	withDefaults() DriverConfig
 }
 
 // driverConfigPrototypes is a map of driver to an empty configuration structure

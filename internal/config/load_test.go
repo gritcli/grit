@@ -41,8 +41,19 @@ var _ = Describe("func Load()", func() {
 			DefaultConfig,
 		),
 		Entry(
+			"github token",
+			"testdata/valid/github/token",
+			withSource(DefaultConfig, Source{
+				Name: "github",
+				Config: GitHubConfig{
+					Domain: "github.com",
+					Token:  "<token>",
+				},
+			}),
+		),
+		Entry(
 			"github enterprise",
-			"testdata/valid/github-enterprise",
+			"testdata/valid/github/enterprise",
 			withSource(DefaultConfig, Source{
 				Name: "my-company",
 				Config: GitHubConfig{
