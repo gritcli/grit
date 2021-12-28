@@ -44,33 +44,74 @@ func run() (err error) {
 		sources []source.Source,
 		logger logging.Logger,
 	) error {
+		logging.Log(logger, "grit daemon v%s", version)
+
+		if err := initSources(ctx, logger, sources); err != nil {
+			return err
+		}
+
 		g, ctx := errgroup.WithContext(ctx)
 
-		logging.Log(logger, "grit daemon v%s, listening for API requests at %s", version, cfg.Daemon.Socket)
-
 		g.Go(func() error {
-			lis, err := apiserver.Listen(cfg.Daemon.Socket)
-			if err != nil {
-				return err
-			}
-			defer lis.Close()
-
-			go func() {
-				<-ctx.Done()
-				s.GracefulStop()
-			}()
-
-			return s.Serve(lis)
+			return runSources(ctx, logger, sources)
 		})
 
-		for _, src := range sources {
-			src := src // capture loop variable
-
-			g.Go(func() error {
-				return src.Run(ctx)
-			})
-		}
+		g.Go(func() error {
+			return runGRPCServer(ctx, logger, cfg.Daemon.Socket, s)
+		})
 
 		return g.Wait()
 	})
+}
+
+// initSources initializes each source in parallel.
+func initSources(ctx context.Context, logger logging.Logger, sources []source.Source) error {
+	g, ctx := errgroup.WithContext(ctx)
+
+	for _, src := range sources {
+		src := src // capture loop variable
+		g.Go(func() error {
+			return src.Init(ctx)
+		})
+	}
+
+	return g.Wait()
+}
+
+// runSources runs each source in parallel.
+func runSources(ctx context.Context, logger logging.Logger, sources []source.Source) error {
+	g, ctx := errgroup.WithContext(ctx)
+
+	for _, src := range sources {
+		src := src // capture loop variable
+		g.Go(func() error {
+			return src.Run(ctx)
+		})
+	}
+
+	return g.Wait()
+}
+
+// runGRPCServer runs the gRPC server.
+func runGRPCServer(
+	ctx context.Context,
+	logger logging.Logger,
+	socket string,
+	s *grpc.Server,
+) error {
+	lis, err := apiserver.Listen(socket)
+	if err != nil {
+		return err
+	}
+	defer lis.Close()
+
+	go func() {
+		<-ctx.Done()
+		s.GracefulStop()
+	}()
+
+	logging.Log(logger, "api: accepting requests on unix socket: %s", socket)
+	defer logging.Log(logger, "api: server stopped")
+
+	return s.Serve(lis)
 }

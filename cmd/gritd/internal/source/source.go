@@ -12,6 +12,9 @@ type Source interface {
 	// Description returns a brief description of the repository source.
 	Description() string
 
+	// Init initializes the source.
+	Init(ctx context.Context) error
+
 	// Run runs any background processes required by the source until ctx is
 	// canceled or a fatal error occurs.
 	Run(ctx context.Context) error

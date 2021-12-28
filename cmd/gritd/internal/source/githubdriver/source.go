@@ -58,10 +58,18 @@ func (s *Source) Description() string {
 	return fmt.Sprintf("%s (github enterprise)", s.domain)
 }
 
+// Init initializes the source.
+func (s *Source) Init(ctx context.Context) error {
+	logging.Log(s.logger, "initializing %s", s.Description())
+	logging.Log(s.logger, "initialization complete")
+	return nil
+}
+
 // Run runs any background processes required by the source until ctx is
 // canceled or a fatal error occurs.
 func (s *Source) Run(ctx context.Context) error {
-	logging.Log(s.logger, s.Description())
+	logging.Log(s.logger, "running")
+	defer logging.Log(s.logger, "stopped")
 	return nil
 }
 
