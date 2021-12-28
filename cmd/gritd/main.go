@@ -14,6 +14,7 @@ import (
 	"github.com/gritcli/grit/cmd/gritd/internal/deps"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/internal/config"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )
 
@@ -41,24 +42,35 @@ func run() (err error) {
 		cfg config.Config,
 		s *grpc.Server,
 		sources []source.Source,
-		log logging.Logger,
+		logger logging.Logger,
 	) error {
-		go func() {
-			<-ctx.Done()
-			s.GracefulStop()
-		}()
+		g, ctx := errgroup.WithContext(ctx)
 
-		lis, err := apiserver.Listen(cfg.Daemon.Socket)
-		if err != nil {
-			return err
-		}
-		defer lis.Close()
+		logging.Log(logger, "grit daemon v%s, listening for API requests at %s", version, cfg.Daemon.Socket)
 
-		logging.Log(log, "grit daemon v%s, listening for API requests at %s", version, cfg.Daemon.Socket)
+		g.Go(func() error {
+			lis, err := apiserver.Listen(cfg.Daemon.Socket)
+			if err != nil {
+				return err
+			}
+			defer lis.Close()
+
+			go func() {
+				<-ctx.Done()
+				s.GracefulStop()
+			}()
+
+			return s.Serve(lis)
+		})
+
 		for _, src := range sources {
-			logging.Log(log, "using '%s' repository source: %s", src.Name(), src.Description())
+			src := src // capture loop variable
+
+			g.Go(func() error {
+				return src.Run(ctx)
+			})
 		}
 
-		return s.Serve(lis)
+		return g.Wait()
 	})
 }

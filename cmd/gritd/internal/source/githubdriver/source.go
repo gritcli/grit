@@ -1,9 +1,11 @@
 package githubdriver
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/internal/config"
 )
@@ -14,13 +16,19 @@ type Source struct {
 	name   string
 	domain string
 	client *github.Client
+	logger logging.Logger
 }
 
 // NewSource returns a new source with the given configuration.
-func NewSource(name string, cfg config.GitHubConfig) (*Source, error) {
+func NewSource(
+	name string,
+	cfg config.GitHubConfig,
+	logger logging.Logger,
+) (*Source, error) {
 	src := &Source{
 		name:   name,
 		domain: cfg.Domain,
+		logger: logger,
 	}
 
 	if isGitHubDotCom(cfg.Domain) {
@@ -50,8 +58,10 @@ func (s *Source) Description() string {
 	return fmt.Sprintf("%s (github enterprise)", s.domain)
 }
 
-// Close frees any resources allocated for this source.
-func (s *Source) Close() error {
+// Run runs any background processes required by the source until ctx is
+// canceled or a fatal error occurs.
+func (s *Source) Run(ctx context.Context) error {
+	logging.Log(s.logger, s.Description())
 	return nil
 }
 
