@@ -27,7 +27,7 @@ message Source {
 }
 
 message SearchRepositoriesRequest {
-    string name = 1;
+    string query = 1;
 }
 
 message SearchRepositoriesResponse {
@@ -35,6 +35,7 @@ message SearchRepositoriesResponse {
     string repo_id = 2;
     string repo_name = 3;
     string description = 4;
+    string web_url = 5;
 }
 
 message CloneRepositoryRequest {
