@@ -3,11 +3,13 @@ package githubdriver
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/internal/config"
+	"golang.org/x/oauth2"
 )
 
 // Source is an implementation of source.Source that provides repositories from
@@ -17,6 +19,9 @@ type Source struct {
 	domain string
 	client *github.Client
 	logger logging.Logger
+
+	user  *github.User
+	repos map[string]map[string]*github.Repository
 }
 
 // NewSource returns a new source with the given configuration.
@@ -31,11 +36,21 @@ func NewSource(
 		logger: logger,
 	}
 
+	httpClient := http.DefaultClient
+	if cfg.Token != "" {
+		httpClient = oauth2.NewClient(
+			context.Background(),
+			oauth2.StaticTokenSource(
+				&oauth2.Token{AccessToken: cfg.Token},
+			),
+		)
+	}
+
 	if isGitHubDotCom(cfg.Domain) {
-		src.client = github.NewClient(nil)
+		src.client = github.NewClient(httpClient)
 	} else {
 		var err error
-		src.client, err = github.NewEnterpriseClient(cfg.Domain, "", nil)
+		src.client, err = github.NewEnterpriseClient(cfg.Domain, "", httpClient)
 		if err != nil {
 			return nil, err
 		}
@@ -60,16 +75,67 @@ func (s *Source) Description() string {
 
 // Init initializes the source.
 func (s *Source) Init(ctx context.Context) error {
-	logging.Log(s.logger, "initializing %s", s.Description())
-	logging.Log(s.logger, "initialization complete")
+	user, res, err := s.client.Users.Get(ctx, "")
+	if err != nil {
+		if res.StatusCode != http.StatusUnauthorized {
+			return err
+		}
+
+		logging.Log(s.logger, "not authenticated")
+		return nil
+	}
+
+	logging.Log(s.logger, "authenticated as %s", user.GetLogin())
+
+	s.user = user
+
+	if err := s.fetchRepos(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Run runs any background processes required by the source until ctx is
 // canceled or a fatal error occurs.
 func (s *Source) Run(ctx context.Context) error {
-	logging.Log(s.logger, "running")
-	defer logging.Log(s.logger, "stopped")
+	return nil
+}
+
+func (s *Source) fetchRepos(ctx context.Context) error {
+	opts := &github.RepositoryListOptions{
+		ListOptions: github.ListOptions{
+			Page:    1,
+			PerPage: 100,
+		},
+	}
+
+	for opts.Page != 0 {
+		repos, res, err := s.client.Repositories.List(ctx, "", opts)
+		if err != nil {
+			return err
+		}
+
+		for _, repo := range repos {
+			owner := repo.GetOwner()
+
+			if s.repos == nil {
+				s.repos = map[string]map[string]*github.Repository{}
+			}
+
+			repoMap := s.repos[owner.GetLogin()]
+			if repoMap == nil {
+				repoMap = map[string]*github.Repository{}
+				s.repos[owner.GetLogin()] = repoMap
+			}
+
+			logging.Log(s.logger, "indexed repository: %s", repo.GetFullName())
+			repoMap[repo.GetName()] = repo
+		}
+
+		opts.Page = res.NextPage
+	}
+
 	return nil
 }
 
