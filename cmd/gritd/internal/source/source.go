@@ -6,10 +6,6 @@ import (
 
 // Source is an interface for a "repository source" that makes repositories
 // available to Grit.
-//
-// Each source is a named instance of some driver-specific source
-// implementation. Each driver implementation is specific to some service
-// provider, such as GitHub, BitBucket, etc.
 type Source interface {
 	// Name returns a short, human-readable identifier of the repository source.
 	Name() string
@@ -35,17 +31,15 @@ type Source interface {
 
 	// Resolve resolves a repository name to a set of possible repositories.
 	//
-	// The name-matching logic is driver-specific. Implementations should be as
-	// generous as possible in what they accept but should avoid repositories
-	// with names that only partially match the input.
-	//
+	// The exact name-matching logic is implementation defined. Implementations
+	// should be as generous as possible in what they accept but should avoid
+	// returning repositories with names that only partially match the input.
 	// Multiple repositories may be returned to indicate that the name is
 	// ambiguous.
 	//
 	// The name is typically captured directly from user input and has not been
-	// sanitized. The implementation should not return an error if the name is
-	// invalid, instead just return zero matches. An invalid name may be valid
-	// for other sources.
+	// sanitized. The implementation must not return an error if the name is
+	// invalid; an invalid name may be valid for other sources.
 	Resolve(ctx context.Context, name string) ([]Repo, error)
 }
 

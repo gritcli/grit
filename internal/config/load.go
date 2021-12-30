@@ -110,7 +110,7 @@ func (l *loader) LoadDir(dir string) error {
 
 // loadSource loads a source that was parsed in a configuration file.
 func (l *loader) loadSource(filename string, s anySource) error {
-	cfg, err := l.decodeDriverConfig(filename, s)
+	cfg, err := l.decodeSourceConfig(filename, s)
 	if err != nil {
 		return err
 	}
@@ -131,22 +131,22 @@ func (l *loader) loadSource(filename string, s anySource) error {
 	return nil
 }
 
-// decodeDriverConfig decodes a source's configuration using the appropriate
-// driver-specific configuration structure.
-func (l *loader) decodeDriverConfig(filename string, s anySource) (DriverConfig, error) {
-	p, ok := driverConfigPrototypes[s.Driver]
+// decodeSourceConfig decodes a source's configuration using the appropriate
+// configuration structure.
+func (l *loader) decodeSourceConfig(filename string, s anySource) (SourceConfig, error) {
+	rt, ok := sourceConfigTypes[s.Implementation]
 	if !ok {
-		return nil, fmt.Errorf("%s: unrecognized source driver: %s", filename, s.Driver)
+		return nil, fmt.Errorf("%s: unrecognized source implementation: %s", filename, s.Implementation)
 	}
 
-	ptr := reflect.New(reflect.TypeOf(p))
+	ptr := reflect.New(rt)
 
 	diag := gohcl.DecodeBody(s.Body, nil, ptr.Interface())
 	if diag.HasErrors() {
 		return nil, fmt.Errorf("%s: %w", filename, diag)
 	}
 
-	return ptr.Elem().Interface().(DriverConfig), nil
+	return ptr.Elem().Interface().(SourceConfig), nil
 }
 
 // applyDefaults merges missing values from DefaultConfig into cfg.
@@ -175,9 +175,9 @@ type configFile struct {
 
 // anySource is a source block that has not been fully parsed.
 type anySource struct {
-	Name   string   `hcl:",label"`
-	Driver string   `hcl:",label"`
-	Body   hcl.Body `hcl:",remain"`
+	Name           string   `hcl:",label"`
+	Implementation string   `hcl:",label"`
+	Body           hcl.Body `hcl:",remain"`
 }
 
 func normalize(filename string, cfg *configFile) error {

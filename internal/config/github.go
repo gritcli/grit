@@ -15,9 +15,9 @@ func (c GitHubConfig) acceptVisitor(s Source, v SourceVisitor) {
 	v.VisitGitHubSource(s, c)
 }
 
-// withDefaults returns a copy of the configuration populated with default
-// values.
-func (c GitHubConfig) withDefaults() DriverConfig {
+// withDefaults returns a copy of the configuration with any missing values
+// replaced by their defaults.
+func (c GitHubConfig) withDefaults() SourceConfig {
 	if c.Domain == "" {
 		c.Domain = "github.com"
 	}
@@ -26,7 +26,7 @@ func (c GitHubConfig) withDefaults() DriverConfig {
 }
 
 func init() {
-	registerDriver(
+	registerSourceType(
 		"github",
 		GitHubConfig{},
 		Source{

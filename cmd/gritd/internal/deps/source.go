@@ -32,7 +32,7 @@ func init() {
 	})
 }
 
-// sourceFactory constructs driver-specific sources from source configurations.
+// sourceFactory constructs source.Source instances from config.Source values.
 type sourceFactory struct {
 	Logger logging.Logger
 	Source source.Source
