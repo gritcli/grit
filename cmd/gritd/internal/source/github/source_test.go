@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	. "github.com/gritcli/grit/cmd/gritd/internal/source/github"
 	"github.com/gritcli/grit/internal/config"
@@ -71,7 +72,7 @@ var _ = Describe("type Source", func() {
 	When("the source has been initialized", func() {
 		JustBeforeEach(func() {
 			err := src.Init(ctx)
-			Expect(err).ShouldNot(HaveOccurred())
+			skipIfRateLimited(err)
 		})
 
 		When("unauthenticated (invalid token)", func() {
@@ -92,13 +93,13 @@ var _ = Describe("type Source", func() {
 			Describe("func Resolve()", func() {
 				It("does not resolve unqualified names", func() {
 					repos, err := src.Resolve(ctx, "grit")
-					Expect(err).ShouldNot(HaveOccurred())
+					skipIfRateLimited(err)
 					Expect(repos).To(BeEmpty())
 				})
 
 				It("resolves an exact match using the API", func() {
 					repos, err := src.Resolve(ctx, "gritcli/grit")
-					Expect(err).ShouldNot(HaveOccurred())
+					skipIfRateLimited(err)
 					Expect(repos).To(ConsistOf(
 						source.Repo{
 							ID:          "397822937",
@@ -111,7 +112,7 @@ var _ = Describe("type Source", func() {
 
 				It("returns nothing for a qualified name that does not exist", func() {
 					repos, err := src.Resolve(ctx, "gritcli/non-existant")
-					Expect(err).ShouldNot(HaveOccurred())
+					skipIfRateLimited(err)
 					Expect(repos).To(BeEmpty())
 				})
 			})
@@ -137,7 +138,7 @@ var _ = Describe("type Source", func() {
 					Expect(repos).To(BeEmpty())
 				})
 
-				It("resolves unqualified repo names", func() {
+				It("resolves unqualified repo names using the cache", func() {
 					repos, err := src.Resolve(ctx, "grit")
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(repos).To(ConsistOf(
@@ -173,7 +174,7 @@ var _ = Describe("type Source", func() {
 					// google/go-github this will never be in the cache for
 					// @jmalloc (who owns the token used under CI)
 					repos, err := src.Resolve(ctx, "google/go-github")
-					Expect(err).ShouldNot(HaveOccurred())
+					skipIfRateLimited(err)
 					Expect(repos).To(ConsistOf(
 						source.Repo{
 							ID:          "10270722",
@@ -186,3 +187,13 @@ var _ = Describe("type Source", func() {
 		})
 	})
 })
+
+// skipIfRateLimited asserts that err is nil, or skips the test if err is a
+// GitHub rate limit error.
+func skipIfRateLimited(err error) {
+	if _, ok := err.(*github.RateLimitError); ok {
+		Skip("GitHub rate limit exceeded")
+	}
+
+	Expect(err).ShouldNot(HaveOccurred())
+}
