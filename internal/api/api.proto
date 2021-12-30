@@ -7,8 +7,9 @@ service API {
     // ListSources lists the configured repository sources.
     rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse);
 
-    // SearchRepositories looks for a repository by (partial) name.
-    rpc SearchRepositories(SearchRepositoriesRequest) returns (stream SearchRepositoriesResponse);
+    // ResolveRepoName resolves a repository name to a list of candidate
+    // repositories.
+    rpc ResolveRepoName(ResolveRepoNameRequest) returns (stream ResolveRepoNameResponse);
 
     // CloneRepository clones a remote repository.
     rpc CloneRepository(CloneRepositoryRequest) returns (CloneRepositoryResponse);
@@ -26,16 +27,20 @@ message Source {
     string description = 2;
 }
 
-message SearchRepositoriesRequest {
-    string query = 1;
-}
-
-message SearchRepositoriesResponse {
+message Repo {
     string source_name = 1;
     string repo_id = 2;
     string repo_name = 3;
     string description = 4;
     string web_url = 5;
+}
+
+message ResolveRepoNameRequest {
+    string name = 1;
+}
+
+message ResolveRepoNameResponse {
+    Repo repo = 1;
 }
 
 message CloneRepositoryRequest {

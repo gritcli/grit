@@ -23,4 +23,27 @@ type Source interface {
 	//
 	// It is called after the source is initialized.
 	Run(ctx context.Context) error
+
+	// Resolve resolves a repository name to a set of possible repositories.
+	//
+	// It does not perform partial-matching of the name, but may treat the name
+	// as ambiguous by returning multiple repositories.
+	//
+	// l is a target for log messages to display to the user.
+	Resolve(ctx context.Context, name string) ([]Repo, error)
+}
+
+// Repo is a reference to a remote repository provided by a source.
+type Repo struct {
+	// ID is a unique (within the source) identifier for the repository.
+	ID string
+
+	// Name is the name of the repository.
+	Name string
+
+	// Description is a human-readable description of the repository.
+	Description string
+
+	// WebURL is the URL of the repository's web page, if available.
+	WebURL string
 }

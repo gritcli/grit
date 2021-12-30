@@ -24,8 +24,9 @@ const _ = grpc.SupportPackageIsVersion7
 type APIClient interface {
 	// ListSources lists the configured repository sources.
 	ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error)
-	// SearchRepositories looks for a repository by (partial) name.
-	SearchRepositories(ctx context.Context, in *SearchRepositoriesRequest, opts ...grpc.CallOption) (API_SearchRepositoriesClient, error)
+	// ResolveRepoName resolves a repository name to a list of candidate
+	// repositories.
+	ResolveRepoName(ctx context.Context, in *ResolveRepoNameRequest, opts ...grpc.CallOption) (API_ResolveRepoNameClient, error)
 	// CloneRepository clones a remote repository.
 	CloneRepository(ctx context.Context, in *CloneRepositoryRequest, opts ...grpc.CallOption) (*CloneRepositoryResponse, error)
 }
@@ -47,12 +48,12 @@ func (c *aPIClient) ListSources(ctx context.Context, in *ListSourcesRequest, opt
 	return out, nil
 }
 
-func (c *aPIClient) SearchRepositories(ctx context.Context, in *SearchRepositoriesRequest, opts ...grpc.CallOption) (API_SearchRepositoriesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], "/grit.v2.api.API/SearchRepositories", opts...)
+func (c *aPIClient) ResolveRepoName(ctx context.Context, in *ResolveRepoNameRequest, opts ...grpc.CallOption) (API_ResolveRepoNameClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], "/grit.v2.api.API/ResolveRepoName", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &aPISearchRepositoriesClient{stream}
+	x := &aPIResolveRepoNameClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -62,17 +63,17 @@ func (c *aPIClient) SearchRepositories(ctx context.Context, in *SearchRepositori
 	return x, nil
 }
 
-type API_SearchRepositoriesClient interface {
-	Recv() (*SearchRepositoriesResponse, error)
+type API_ResolveRepoNameClient interface {
+	Recv() (*ResolveRepoNameResponse, error)
 	grpc.ClientStream
 }
 
-type aPISearchRepositoriesClient struct {
+type aPIResolveRepoNameClient struct {
 	grpc.ClientStream
 }
 
-func (x *aPISearchRepositoriesClient) Recv() (*SearchRepositoriesResponse, error) {
-	m := new(SearchRepositoriesResponse)
+func (x *aPIResolveRepoNameClient) Recv() (*ResolveRepoNameResponse, error) {
+	m := new(ResolveRepoNameResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -94,8 +95,9 @@ func (c *aPIClient) CloneRepository(ctx context.Context, in *CloneRepositoryRequ
 type APIServer interface {
 	// ListSources lists the configured repository sources.
 	ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error)
-	// SearchRepositories looks for a repository by (partial) name.
-	SearchRepositories(*SearchRepositoriesRequest, API_SearchRepositoriesServer) error
+	// ResolveRepoName resolves a repository name to a list of candidate
+	// repositories.
+	ResolveRepoName(*ResolveRepoNameRequest, API_ResolveRepoNameServer) error
 	// CloneRepository clones a remote repository.
 	CloneRepository(context.Context, *CloneRepositoryRequest) (*CloneRepositoryResponse, error)
 }
@@ -107,8 +109,8 @@ type UnimplementedAPIServer struct {
 func (UnimplementedAPIServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListSources not implemented")
 }
-func (UnimplementedAPIServer) SearchRepositories(*SearchRepositoriesRequest, API_SearchRepositoriesServer) error {
-	return status.Errorf(codes.Unimplemented, "method SearchRepositories not implemented")
+func (UnimplementedAPIServer) ResolveRepoName(*ResolveRepoNameRequest, API_ResolveRepoNameServer) error {
+	return status.Errorf(codes.Unimplemented, "method ResolveRepoName not implemented")
 }
 func (UnimplementedAPIServer) CloneRepository(context.Context, *CloneRepositoryRequest) (*CloneRepositoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CloneRepository not implemented")
@@ -143,24 +145,24 @@ func _API_ListSources_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _API_SearchRepositories_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(SearchRepositoriesRequest)
+func _API_ResolveRepoName_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ResolveRepoNameRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(APIServer).SearchRepositories(m, &aPISearchRepositoriesServer{stream})
+	return srv.(APIServer).ResolveRepoName(m, &aPIResolveRepoNameServer{stream})
 }
 
-type API_SearchRepositoriesServer interface {
-	Send(*SearchRepositoriesResponse) error
+type API_ResolveRepoNameServer interface {
+	Send(*ResolveRepoNameResponse) error
 	grpc.ServerStream
 }
 
-type aPISearchRepositoriesServer struct {
+type aPIResolveRepoNameServer struct {
 	grpc.ServerStream
 }
 
-func (x *aPISearchRepositoriesServer) Send(m *SearchRepositoriesResponse) error {
+func (x *aPIResolveRepoNameServer) Send(m *ResolveRepoNameResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -200,8 +202,8 @@ var API_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "SearchRepositories",
-			Handler:       _API_SearchRepositories_Handler,
+			StreamName:    "ResolveRepoName",
+			Handler:       _API_ResolveRepoName_Handler,
 			ServerStreams: true,
 		},
 	},
