@@ -10,12 +10,17 @@ type Source interface {
 	Name() string
 
 	// Description returns a brief description of the repository source.
+	//
+	// It may return limited information before the source has been initialized.
 	Description() string
 
 	// Init initializes the source.
+	//
+	// It is called before the daemon starts serving API requests.
 	Init(ctx context.Context) error
 
-	// Run runs any background processes required by the source until ctx is
-	// canceled or a fatal error occurs.
+	// Run performs any background tasks required by the source.
+	//
+	// It is called after the source is initialized.
 	Run(ctx context.Context) error
 }

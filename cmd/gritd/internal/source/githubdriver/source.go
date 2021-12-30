@@ -73,6 +73,8 @@ func (s *Source) Name() string {
 }
 
 // Description returns a brief description of the repository source.
+//
+// It may return limited information before Init() has been called.
 func (s *Source) Description() string {
 	var info []string
 
@@ -96,6 +98,8 @@ func (s *Source) Description() string {
 }
 
 // Init initializes the source.
+//
+// It is called before the daemon starts serving API requests.
 func (s *Source) Init(ctx context.Context) error {
 	user, res, err := s.client.Users.Get(ctx, "")
 	if err != nil {
@@ -120,8 +124,9 @@ func (s *Source) Init(ctx context.Context) error {
 	return nil
 }
 
-// Run runs any background processes required by the source until ctx is
-// canceled or a fatal error occurs.
+// Run performs any background tasks required by the source.
+//
+// It is called after the source is initialized.
 func (s *Source) Run(ctx context.Context) error {
 	return nil
 }
