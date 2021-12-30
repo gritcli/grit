@@ -31,7 +31,7 @@ func (s *Source) Resolve(ctx context.Context, name string) ([]source.Repo, error
 	if ownerName == "" {
 		for _, reposByOwner := range repoCache {
 			if r, ok := reposByOwner[repoName]; ok {
-				results = append(results, convertRepo(r))
+				results = append(results, r)
 			}
 		}
 
@@ -54,9 +54,7 @@ func (s *Source) Resolve(ctx context.Context, name string) ([]source.Repo, error
 			len(results),
 		)
 
-		return []source.Repo{
-			convertRepo(r),
-		}, nil
+		return []source.Repo{r}, nil
 	}
 
 	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)

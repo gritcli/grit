@@ -31,7 +31,7 @@ type Source struct {
 	// repoCache is an in-memory cache of the repositores to which the
 	// authenticated user has explicit read, wrote or admin access.
 	repoCacheM sync.RWMutex
-	repoCache  map[string]map[string]*github.Repository
+	repoCache  map[string]map[string]source.Repo
 }
 
 // NewSource returns a new source with the given configuration.
@@ -137,7 +137,7 @@ func (s *Source) populateRepoCache(ctx context.Context) error {
 		},
 	}
 
-	repos := map[string]map[string]*github.Repository{}
+	repos := map[string]map[string]source.Repo{}
 	count := 0
 
 	for opts.Page != 0 {
@@ -151,14 +151,14 @@ func (s *Source) populateRepoCache(ctx context.Context) error {
 
 			reposByOwner := repos[owner.GetLogin()]
 			if reposByOwner == nil {
-				reposByOwner = map[string]*github.Repository{}
+				reposByOwner = map[string]source.Repo{}
 				repos[owner.GetLogin()] = reposByOwner
 			}
 
 			logging.Debug(s.logger, "cached repository: %s", r.GetFullName())
 			count++
 
-			reposByOwner[r.GetName()] = r
+			reposByOwner[r.GetName()] = convertRepo(r)
 		}
 
 		opts.Page = res.NextPage

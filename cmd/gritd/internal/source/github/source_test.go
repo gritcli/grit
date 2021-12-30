@@ -88,9 +88,19 @@ var _ = Describe("type Source", func() {
 			})
 		})
 
-		When("unauthenticated", func() {
+		When("unauthenticated (no token)", func() {
 			BeforeEach(func() {
 				cfg.Token = ""
+			})
+		})
+
+		When("unauthenticated (invalid token)", func() {
+			BeforeEach(func() {
+				cfg.Token = "<invalid>"
+			})
+
+			It("works in unauthenticated mode", func() {
+				Expect(source.Description()).To(Equal("github.com"))
 			})
 		})
 	})
