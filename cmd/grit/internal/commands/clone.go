@@ -1,10 +1,14 @@
 package commands
 
 import (
+	"context"
 	"errors"
+	"fmt"
+	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
+	"github.com/gritcli/grit/internal/api"
 	"github.com/spf13/cobra"
 )
 
@@ -29,10 +33,38 @@ func newCloneCommand() *cobra.Command {
 		select the desired repository.
 		`),
 		RunE: deps.Run(func(
+			ctx context.Context,
 			cmd *cobra.Command,
 			args []string,
+			client api.APIClient,
 		) error {
-			return errors.New("not implemented")
+			if args[0] == "" {
+				return errors.New("<repo> argument must not be empty")
+			}
+
+			req := &api.ResolveRepoNameRequest{
+				Name: args[0],
+			}
+
+			stream, err := client.ResolveRepoName(ctx, req)
+			if err != nil {
+				return err
+			}
+
+			for {
+				res, err := stream.Recv()
+				if err != nil {
+					if err == io.EOF {
+						break
+					}
+
+					return err
+				}
+
+				fmt.Println(res)
+			}
+
+			return nil
 		}),
 	}
 }

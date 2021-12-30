@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
+	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/internal/config"
 	"golang.org/x/oauth2"
 )
@@ -131,6 +133,90 @@ func (s *Source) Run(ctx context.Context) error {
 	return nil
 }
 
+// Resolve resolves a repository name to a set of possible repositories.
+//
+// It does not perform partial-matching of the name, but may treat the name
+// as ambiguous by returning multiple repositories.
+//
+// l is a target for log messages to display to the user.
+func (s *Source) Resolve(ctx context.Context, name string) ([]source.Repo, error) {
+	ownerName, repoName, err := parseRepoName(name)
+	if err != nil {
+		logging.Debug(
+			s.logger,
+			"resolve[%s]: ignoring invalid repository name: %s",
+			name,
+			err,
+		)
+
+		return nil, nil
+	}
+
+	s.repoCacheM.RLock()
+	repoCache := s.repoCache
+	s.repoCacheM.RUnlock()
+
+	var results []source.Repo
+
+	if ownerName == "" {
+		for _, reposByOwner := range repoCache {
+			if r, ok := reposByOwner[repoName]; ok {
+				results = append(results, convertRepo(r))
+			}
+		}
+
+		logging.Debug(
+			s.logger,
+			"resolve[%s]: owner not known, found %d repo(s) named '%s' by scanning the user's repo cache",
+			name,
+			len(results),
+			repoName,
+		)
+
+		return results, nil
+	}
+
+	if r, ok := repoCache[ownerName][repoName]; ok {
+		logging.Debug(
+			s.logger,
+			"resolve[%s]: found an exact match in the user's repo cache",
+			name,
+			len(results),
+		)
+
+		return []source.Repo{
+			convertRepo(r),
+		}, nil
+	}
+
+	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode == http.StatusNotFound {
+		logging.Debug(
+			s.logger,
+			"resolve[%s]: no matches found when querying the API",
+			name,
+			len(results),
+		)
+
+		return nil, nil
+	}
+
+	logging.Debug(
+		s.logger,
+		"resolve[%s]: found an exact match by querying the API",
+		name,
+		len(results),
+	)
+
+	return []source.Repo{
+		convertRepo(r),
+	}, nil
+}
+
 // populateRepoCache populates s.populateRepoCache with the repositories to
 // which the authenticated user has explicit read, write or admin access.
 func (s *Source) populateRepoCache(ctx context.Context) error {
@@ -142,6 +228,7 @@ func (s *Source) populateRepoCache(ctx context.Context) error {
 	}
 
 	repos := map[string]map[string]*github.Repository{}
+	count := 0
 
 	for opts.Page != 0 {
 		repoPage, res, err := s.client.Repositories.List(ctx, "", opts)
@@ -158,7 +245,9 @@ func (s *Source) populateRepoCache(ctx context.Context) error {
 				repos[owner.GetLogin()] = reposByOwner
 			}
 
-			logging.Log(s.logger, "cached repository: %s", r.GetFullName())
+			logging.Debug(s.logger, "cached repository: %s", r.GetFullName())
+			count++
+
 			reposByOwner[r.GetName()] = r
 		}
 
@@ -169,10 +258,22 @@ func (s *Source) populateRepoCache(ctx context.Context) error {
 	s.repoCache = repos
 	s.repoCacheM.Unlock()
 
+	logging.Log(s.logger, "cached %d repositories across %d owner(s)", count, len(repos))
+
 	return nil
 }
 
 // isGitHubDotCom returns true if domain is the domain for github.com.
 func isGitHubDotCom(domain string) bool {
 	return strings.EqualFold(domain, "github.com")
+}
+
+// convertRepo converts a github.Repository to a source.Repo.
+func convertRepo(r *github.Repository) source.Repo {
+	return source.Repo{
+		ID:          strconv.FormatInt(r.GetID(), 10),
+		Name:        r.GetFullName(),
+		Description: r.GetDescription(),
+		WebURL:      r.GetHTMLURL(),
+	}
 }
