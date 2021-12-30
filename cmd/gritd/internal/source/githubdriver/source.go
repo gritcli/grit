@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
@@ -20,6 +21,7 @@ type Source struct {
 	client *github.Client
 	logger logging.Logger
 
+	m     sync.RWMutex
 	user  *github.User
 	repos map[string]map[string]*github.Repository
 }
@@ -66,11 +68,25 @@ func (s *Source) Name() string {
 
 // Description returns a brief description of the repository source.
 func (s *Source) Description() string {
-	if isGitHubDotCom(s.domain) {
-		return s.domain
+	var info []string
+
+	if !isGitHubDotCom(s.domain) {
+		info = append(info, "github enterprise")
 	}
 
-	return fmt.Sprintf("%s (github enterprise)", s.domain)
+	s.m.RLock()
+	user := s.user
+	s.m.RUnlock()
+
+	if user != nil {
+		info = append(info, "@"+user.GetLogin())
+	}
+
+	if len(info) > 0 {
+		return fmt.Sprintf("%s (%s)", s.domain, strings.Join(info, ", "))
+	}
+
+	return s.domain
 }
 
 // Init initializes the source.
@@ -87,7 +103,9 @@ func (s *Source) Init(ctx context.Context) error {
 
 	logging.Log(s.logger, "authenticated as %s", user.GetLogin())
 
+	s.m.Lock()
 	s.user = user
+	s.m.Unlock()
 
 	if err := s.fetchRepos(ctx); err != nil {
 		return err
