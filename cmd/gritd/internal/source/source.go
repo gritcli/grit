@@ -35,9 +35,17 @@ type Source interface {
 
 	// Resolve resolves a repository name to a set of possible repositories.
 	//
-	// The name-matching logic is driver-specific. Generally, the implementation
-	// should not return "partial matches", instead favouring exact matches. It
-	// may return multiple repositories to indicate that the name is ambiguous.
+	// The name-matching logic is driver-specific. Implementations should be as
+	// generous as possible in what they accept but should avoid repositories
+	// with names that only partially match the input.
+	//
+	// Multiple repositories may be returned to indicate that the name is
+	// ambiguous.
+	//
+	// The name is typically captured directly from user input and has not been
+	// sanitized. The implementation should not return an error if the name is
+	// invalid, instead just return zero matches. An invalid name may be valid
+	// for other sources.
 	Resolve(ctx context.Context, name string) ([]Repo, error)
 }
 
