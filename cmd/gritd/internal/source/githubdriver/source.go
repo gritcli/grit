@@ -21,9 +21,15 @@ type Source struct {
 	client *github.Client
 	logger logging.Logger
 
-	m     sync.RWMutex
+	// user is the authenticated user, based on the token in the source
+	// configuration. If no token is provided, or it is invalid, user is nil.
+	userM sync.RWMutex
 	user  *github.User
-	repos map[string]map[string]*github.Repository
+
+	// repoCache is an in-memory cache of the repositores to which the
+	// authenticated user has explicit read, wrote or admin access.
+	repoCacheM sync.RWMutex
+	repoCache  map[string]map[string]*github.Repository
 }
 
 // NewSource returns a new source with the given configuration.
@@ -74,9 +80,9 @@ func (s *Source) Description() string {
 		info = append(info, "github enterprise")
 	}
 
-	s.m.RLock()
+	s.userM.RLock()
 	user := s.user
-	s.m.RUnlock()
+	s.userM.RUnlock()
 
 	if user != nil {
 		info = append(info, "@"+user.GetLogin())
@@ -103,11 +109,11 @@ func (s *Source) Init(ctx context.Context) error {
 
 	logging.Log(s.logger, "authenticated as %s", user.GetLogin())
 
-	s.m.Lock()
+	s.userM.Lock()
 	s.user = user
-	s.m.Unlock()
+	s.userM.Unlock()
 
-	if err := s.fetchRepos(ctx); err != nil {
+	if err := s.populateRepoCache(ctx); err != nil {
 		return err
 	}
 
@@ -120,7 +126,9 @@ func (s *Source) Run(ctx context.Context) error {
 	return nil
 }
 
-func (s *Source) fetchRepos(ctx context.Context) error {
+// populateRepoCache populates s.populateRepoCache with the repositories to
+// which the authenticated user has explicit read, write or admin access.
+func (s *Source) populateRepoCache(ctx context.Context) error {
 	opts := &github.RepositoryListOptions{
 		ListOptions: github.ListOptions{
 			Page:    1,
@@ -128,31 +136,33 @@ func (s *Source) fetchRepos(ctx context.Context) error {
 		},
 	}
 
+	repos := map[string]map[string]*github.Repository{}
+
 	for opts.Page != 0 {
-		repos, res, err := s.client.Repositories.List(ctx, "", opts)
+		repoPage, res, err := s.client.Repositories.List(ctx, "", opts)
 		if err != nil {
 			return err
 		}
 
-		for _, repo := range repos {
-			owner := repo.GetOwner()
+		for _, r := range repoPage {
+			owner := r.GetOwner()
 
-			if s.repos == nil {
-				s.repos = map[string]map[string]*github.Repository{}
+			reposByOwner := repos[owner.GetLogin()]
+			if reposByOwner == nil {
+				reposByOwner = map[string]*github.Repository{}
+				repos[owner.GetLogin()] = reposByOwner
 			}
 
-			repoMap := s.repos[owner.GetLogin()]
-			if repoMap == nil {
-				repoMap = map[string]*github.Repository{}
-				s.repos[owner.GetLogin()] = repoMap
-			}
-
-			logging.Log(s.logger, "indexed repository: %s", repo.GetFullName())
-			repoMap[repo.GetName()] = repo
+			logging.Log(s.logger, "cached repository: %s", r.GetFullName())
+			reposByOwner[r.GetName()] = r
 		}
 
 		opts.Page = res.NextPage
 	}
+
+	s.repoCacheM.Lock()
+	s.repoCache = repos
+	s.repoCacheM.Unlock()
 
 	return nil
 }
