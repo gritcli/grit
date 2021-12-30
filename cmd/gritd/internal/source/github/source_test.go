@@ -17,7 +17,7 @@ var _ = Describe("type Source", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
-		source source.Source
+		src    source.Source
 		cfg    config.GitHubConfig
 	)
 
@@ -32,7 +32,7 @@ var _ = Describe("type Source", func() {
 
 	JustBeforeEach(func() {
 		var err error
-		source, err = NewSource(
+		src, err = NewSource(
 			"github-source",
 			cfg,
 			logging.SilentLogger,
@@ -46,14 +46,14 @@ var _ = Describe("type Source", func() {
 
 	Describe("func Name()", func() {
 		It("returns the source name", func() {
-			Expect(source.Name()).To(Equal("github-source"))
+			Expect(src.Name()).To(Equal("github-source"))
 		})
 	})
 
 	When("the source has not been initialized", func() {
 		Describe("func Description()", func() {
 			It("returns the server's domain name", func() {
-				Expect(source.Description()).To(Equal("github.com"))
+				Expect(src.Description()).To(Equal("github.com"))
 			})
 
 			When("using GitHub Enterprise server", func() {
@@ -62,7 +62,7 @@ var _ = Describe("type Source", func() {
 				})
 
 				It("explicitly states that GitHub Enterprise is being used", func() {
-					Expect(source.Description()).To(Equal("code.example.com (github enterprise)"))
+					Expect(src.Description()).To(Equal("code.example.com (github enterprise)"))
 				})
 			})
 		})
@@ -70,8 +70,51 @@ var _ = Describe("type Source", func() {
 
 	When("the source has been initialized", func() {
 		JustBeforeEach(func() {
-			err := source.Init(ctx)
+			err := src.Init(ctx)
 			Expect(err).ShouldNot(HaveOccurred())
+		})
+
+		When("unauthenticated (invalid token)", func() {
+			BeforeEach(func() {
+				cfg.Token = "<invalid>"
+			})
+
+			It("works in unauthenticated mode", func() {
+				Expect(src.Description()).To(Equal("github.com"))
+			})
+		})
+
+		When("unauthenticated (no token)", func() {
+			BeforeEach(func() {
+				cfg.Token = ""
+			})
+
+			Describe("func Resolve()", func() {
+				It("does not resolve unqualified names", func() {
+					repos, err := src.Resolve(ctx, "grit")
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(repos).To(BeEmpty())
+				})
+
+				It("resolves an exact match using the API", func() {
+					repos, err := src.Resolve(ctx, "gritcli/grit")
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(repos).To(ConsistOf(
+						source.Repo{
+							ID:          "397822937",
+							Name:        "gritcli/grit",
+							Description: "Manage your local Git clones.",
+							WebURL:      "https://github.com/gritcli/grit",
+						},
+					))
+				})
+
+				It("returns nothing for a qualified name that does not exist", func() {
+					repos, err := src.Resolve(ctx, "gritcli/non-existant")
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(repos).To(BeEmpty())
+				})
+			})
 		})
 
 		When("authenticated", func() {
@@ -83,24 +126,62 @@ var _ = Describe("type Source", func() {
 
 			Describe("func Description()", func() {
 				It("includes the user name", func() {
-					Expect(source.Description()).To(Equal("github.com (@jmalloc)"))
+					Expect(src.Description()).To(Equal("github.com (@jmalloc)"))
 				})
 			})
-		})
 
-		When("unauthenticated (no token)", func() {
-			BeforeEach(func() {
-				cfg.Token = ""
-			})
-		})
+			Describe("func Resolve()", func() {
+				It("ignores invalid names", func() {
+					repos, err := src.Resolve(ctx, "has a space")
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(repos).To(BeEmpty())
+				})
 
-		When("unauthenticated (invalid token)", func() {
-			BeforeEach(func() {
-				cfg.Token = "<invalid>"
-			})
+				It("resolves unqualified repo names", func() {
+					repos, err := src.Resolve(ctx, "grit")
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(repos).To(ConsistOf(
+						source.Repo{
+							ID:          "85247932",
+							Name:        "jmalloc/grit",
+							Description: "Keep track of your local Git clones.",
+							WebURL:      "https://github.com/jmalloc/grit",
+						},
+						source.Repo{
+							ID:          "397822937",
+							Name:        "gritcli/grit",
+							Description: "Manage your local Git clones.",
+							WebURL:      "https://github.com/gritcli/grit",
+						},
+					))
+				})
 
-			It("works in unauthenticated mode", func() {
-				Expect(source.Description()).To(Equal("github.com"))
+				It("resolves an exact match using the cache", func() {
+					repos, err := src.Resolve(ctx, "gritcli/grit")
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(repos).To(ConsistOf(
+						source.Repo{
+							ID:          "397822937",
+							Name:        "gritcli/grit",
+							Description: "Manage your local Git clones.",
+							WebURL:      "https://github.com/gritcli/grit",
+						},
+					))
+				})
+
+				It("resolves an exact match using the API", func() {
+					// google/go-github this will never be in the cache for
+					// @jmalloc (who owns the token used under CI)
+					repos, err := src.Resolve(ctx, "google/go-github")
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(repos).To(ConsistOf(
+						source.Repo{
+							ID:          "10270722",
+							Name:        "google/go-github",
+							Description: "Go library for accessing the GitHub API",
+							WebURL:      "https://github.com/google/go-github"},
+					))
+				})
 			})
 		})
 	})

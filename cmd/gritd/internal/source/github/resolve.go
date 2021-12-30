@@ -59,18 +59,18 @@ func (s *Source) Resolve(ctx context.Context, name string) ([]source.Repo, error
 
 	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
+		if res.StatusCode == http.StatusNotFound {
+			logging.Debug(
+				s.logger,
+				"resolve[%s]: no matches found when querying the API",
+				name,
+				len(results),
+			)
+
+			return nil, nil
+		}
+
 		return nil, err
-	}
-
-	if res.StatusCode == http.StatusNotFound {
-		logging.Debug(
-			s.logger,
-			"resolve[%s]: no matches found when querying the API",
-			name,
-			len(results),
-		)
-
-		return nil, nil
 	}
 
 	logging.Debug(
