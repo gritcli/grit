@@ -15,9 +15,9 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Source is an implementation of source.Source that provides repositories from
+// impl is an implementation of source.Source that provides repositories from
 // GitHub.com or a GitHub Enterprise Server installation.
-type Source struct {
+type impl struct {
 	name   string
 	domain string
 	client *github.Client
@@ -39,8 +39,8 @@ func NewSource(
 	name string,
 	cfg config.GitHubConfig,
 	logger logging.Logger,
-) (*Source, error) {
-	src := &Source{
+) (source.Source, error) {
+	src := &impl{
 		name:   name,
 		domain: cfg.Domain,
 		logger: logger,
@@ -70,12 +70,12 @@ func NewSource(
 }
 
 // Name returns a short, human-readable identifier of the repository source.
-func (s *Source) Name() string {
+func (s *impl) Name() string {
 	return s.name
 }
 
 // Description returns a brief description of the repository source.
-func (s *Source) Description() string {
+func (s *impl) Description() string {
 	var info []string
 
 	if !isGitHubDotCom(s.domain) {
@@ -98,7 +98,7 @@ func (s *Source) Description() string {
 }
 
 // Init initializes the source.
-func (s *Source) Init(ctx context.Context) error {
+func (s *impl) Init(ctx context.Context) error {
 	user, res, err := s.client.Users.Get(ctx, "")
 	if err != nil {
 		if res.StatusCode != http.StatusUnauthorized {
@@ -123,13 +123,13 @@ func (s *Source) Init(ctx context.Context) error {
 }
 
 // Run performs any background tasks required by the source.
-func (s *Source) Run(ctx context.Context) error {
+func (s *impl) Run(ctx context.Context) error {
 	return nil
 }
 
 // populateRepoCache populates s.populateRepoCache with the repositories to
 // which the authenticated user has explicit read, write or admin access.
-func (s *Source) populateRepoCache(ctx context.Context) error {
+func (s *impl) populateRepoCache(ctx context.Context) error {
 	opts := &github.RepositoryListOptions{
 		ListOptions: github.ListOptions{
 			Page:    1,

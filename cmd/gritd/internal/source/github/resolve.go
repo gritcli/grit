@@ -9,7 +9,7 @@ import (
 )
 
 // Resolve resolves a repository name to a set of possible repositories.
-func (s *Source) Resolve(ctx context.Context, name string) ([]source.Repo, error) {
+func (s *impl) Resolve(ctx context.Context, name string) ([]source.Repo, error) {
 	ownerName, repoName, err := parseRepoName(name)
 	if err != nil {
 		logging.Debug(
