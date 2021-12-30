@@ -1,4 +1,4 @@
-package githubdriver
+package github
 
 import (
 	"fmt"

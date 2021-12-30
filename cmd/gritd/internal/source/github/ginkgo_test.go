@@ -1,4 +1,4 @@
-package githubdriver_test
+package github_test
 
 import (
 	"reflect"

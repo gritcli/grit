@@ -3,7 +3,7 @@ package deps
 import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
-	"github.com/gritcli/grit/cmd/gritd/internal/source/githubdriver"
+	"github.com/gritcli/grit/cmd/gritd/internal/source/github"
 	"github.com/gritcli/grit/internal/config"
 )
 
@@ -40,7 +40,7 @@ type sourceFactory struct {
 }
 
 func (f *sourceFactory) VisitGitHubSource(s config.Source, cfg config.GitHubConfig) {
-	f.Source, f.Error = githubdriver.NewSource(
+	f.Source, f.Error = github.NewSource(
 		s.Name,
 		cfg,
 		logging.Prefix(f.Logger, "source[%s]: ", s.Name),
