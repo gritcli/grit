@@ -75,8 +75,6 @@ func (s *Source) Name() string {
 }
 
 // Description returns a brief description of the repository source.
-//
-// It may return limited information before Init() has been called.
 func (s *Source) Description() string {
 	var info []string
 
@@ -100,8 +98,6 @@ func (s *Source) Description() string {
 }
 
 // Init initializes the source.
-//
-// It is called before the daemon starts serving API requests.
 func (s *Source) Init(ctx context.Context) error {
 	user, res, err := s.client.Users.Get(ctx, "")
 	if err != nil {
@@ -127,18 +123,11 @@ func (s *Source) Init(ctx context.Context) error {
 }
 
 // Run performs any background tasks required by the source.
-//
-// It is called after the source is initialized.
 func (s *Source) Run(ctx context.Context) error {
 	return nil
 }
 
 // Resolve resolves a repository name to a set of possible repositories.
-//
-// It does not perform partial-matching of the name, but may treat the name
-// as ambiguous by returning multiple repositories.
-//
-// l is a target for log messages to display to the user.
 func (s *Source) Resolve(ctx context.Context, name string) ([]source.Repo, error) {
 	ownerName, repoName, err := parseRepoName(name)
 	if err != nil {
