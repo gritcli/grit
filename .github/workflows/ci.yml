@@ -21,6 +21,7 @@ jobs:
       - name: Make
         run: make ci
         env:
+          GRIT_TEST_GITHUB: "true"
           GRIT_TEST_GITHUB_TOKEN: ${{ secrets.GRIT_TEST_GITHUB_TOKEN }}
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v2
