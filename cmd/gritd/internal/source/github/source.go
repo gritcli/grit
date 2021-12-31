@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/dogmatiq/dodeca/logging"
@@ -18,7 +17,7 @@ import (
 // GitHub.com or a GitHub Enterprise Server installation.
 type impl struct {
 	name   string
-	domain string
+	cfg    config.GitHubConfig
 	client *github.Client
 	logger logging.Logger
 
@@ -33,7 +32,7 @@ func NewSource(
 ) (source.Source, error) {
 	src := &impl{
 		name:   name,
-		domain: cfg.Domain,
+		cfg:    cfg,
 		logger: logger,
 	}
 
@@ -47,7 +46,7 @@ func NewSource(
 		)
 	}
 
-	if isGitHubDotCom(cfg.Domain) {
+	if isGitHubDotCom(cfg) {
 		src.client = github.NewClient(httpClient)
 	} else {
 		var err error
@@ -69,7 +68,7 @@ func (s *impl) Name() string {
 func (s *impl) Description() string {
 	var info []string
 
-	if !isGitHubDotCom(s.domain) {
+	if !isGitHubDotCom(s.cfg) {
 		info = append(info, "github enterprise")
 	}
 
@@ -78,10 +77,10 @@ func (s *impl) Description() string {
 	}
 
 	if len(info) > 0 {
-		return fmt.Sprintf("%s (%s)", s.domain, strings.Join(info, ", "))
+		return fmt.Sprintf("%s (%s)", s.cfg.Domain, strings.Join(info, ", "))
 	}
 
-	return s.domain
+	return s.cfg.Domain
 }
 
 // Init initializes the source.
@@ -149,16 +148,6 @@ func (s *impl) populateRepoCache(ctx context.Context) error {
 }
 
 // isGitHubDotCom returns true if domain is the domain for github.com.
-func isGitHubDotCom(domain string) bool {
-	return strings.EqualFold(domain, "github.com")
-}
-
-// convertRepo converts a github.Repository to a source.Repo.
-func convertRepo(r *github.Repository) source.Repo {
-	return source.Repo{
-		ID:          strconv.FormatInt(r.GetID(), 10),
-		Name:        r.GetFullName(),
-		Description: r.GetDescription(),
-		WebURL:      r.GetHTMLURL(),
-	}
+func isGitHubDotCom(cfg config.GitHubConfig) bool {
+	return strings.EqualFold(cfg.Domain, "github.com")
 }

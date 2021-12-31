@@ -1,10 +1,40 @@
 package github
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
+
+	"github.com/google/go-github/github"
+	"github.com/gritcli/grit/cmd/gritd/internal/source"
 )
+
+// convertRepo converts a github.Repository to a source.Repo.
+func convertRepo(r *github.Repository) source.Repo {
+	return source.Repo{
+		ID:          strconv.FormatInt(r.GetID(), 10),
+		Name:        r.GetFullName(),
+		Description: r.GetDescription(),
+		WebURL:      r.GetHTMLURL(),
+	}
+}
+
+// parseRepoID parses a repo ID from its string form (as used by the source
+// package) to the numeric form used by the GitHub API.
+func parseRepoID(id string) (int64, error) {
+	n, err := strconv.ParseInt(id, 64, 10)
+	if err != nil {
+		return 0, fmt.Errorf("invalid repo ID: %w", err)
+	}
+
+	if n <= 0 {
+		return 0, errors.New("invalid repo ID: expected positive integer")
+	}
+
+	return n, nil
+}
 
 var (
 	// ownerNamePattern is a regex that matches valid GitHub "owner" names (such

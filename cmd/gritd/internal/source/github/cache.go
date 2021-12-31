@@ -12,6 +12,9 @@ import (
 // allows cache consumers to use the values after they have been obtained while
 // only requiring the mutex to be held long enough to return the value from the
 // cache.
+//
+// Note that it does not cache all repositories, only those to which the
+// authenticated user has been granted explicit access.
 type cache struct {
 	m            sync.RWMutex
 	user         *github.User
