@@ -28,15 +28,15 @@ func (s *impl) Resolve(
 	}
 
 	s.repoCacheM.RLock()
-	repoCache := s.repoCache
+	reposByOwner := s.reposByOwner
 	s.repoCacheM.RUnlock()
 
 	var results []source.Repo
 
 	if ownerName == "" {
-		for _, reposByOwner := range repoCache {
-			if r, ok := reposByOwner[repoName]; ok {
-				results = append(results, r)
+		for _, reposByName := range reposByOwner {
+			if r, ok := reposByName[repoName]; ok {
+				results = append(results, convertRepo(r))
 			}
 		}
 
@@ -51,7 +51,7 @@ func (s *impl) Resolve(
 		return results, nil
 	}
 
-	if r, ok := repoCache[ownerName][repoName]; ok {
+	if r, ok := reposByOwner[ownerName][repoName]; ok {
 		logging.Debug(
 			s.logger,
 			"resolve[%s]: found an exact match in the user's repo cache",
@@ -59,7 +59,7 @@ func (s *impl) Resolve(
 			len(results),
 		)
 
-		return []source.Repo{r}, nil
+		return []source.Repo{convertRepo(r)}, nil
 	}
 
 	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)

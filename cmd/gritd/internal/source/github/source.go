@@ -30,8 +30,9 @@ type impl struct {
 
 	// repoCache is an in-memory cache of the repositores to which the
 	// authenticated user has explicit read, wrote or admin access.
-	repoCacheM sync.RWMutex
-	repoCache  map[string]map[string]source.Repo
+	repoCacheM   sync.RWMutex
+	reposByOwner map[string]map[string]*github.Repository
+	reposByID    map[int64]*github.Repository
 }
 
 // NewSource returns a new source with the given configuration.
@@ -137,8 +138,8 @@ func (s *impl) populateRepoCache(ctx context.Context) error {
 		},
 	}
 
-	repos := map[string]map[string]source.Repo{}
-	count := 0
+	reposByOwner := map[string]map[string]*github.Repository{}
+	reposByID := map[int64]*github.Repository{}
 
 	for opts.Page != 0 {
 		repoPage, res, err := s.client.Repositories.List(ctx, "", opts)
@@ -149,26 +150,32 @@ func (s *impl) populateRepoCache(ctx context.Context) error {
 		for _, r := range repoPage {
 			owner := r.GetOwner()
 
-			reposByOwner := repos[owner.GetLogin()]
-			if reposByOwner == nil {
-				reposByOwner = map[string]source.Repo{}
-				repos[owner.GetLogin()] = reposByOwner
+			reposByName := reposByOwner[owner.GetLogin()]
+			if reposByName == nil {
+				reposByName = map[string]*github.Repository{}
+				reposByOwner[owner.GetLogin()] = reposByName
 			}
 
 			logging.Debug(s.logger, "cached repository: %s", r.GetFullName())
-			count++
 
-			reposByOwner[r.GetName()] = convertRepo(r)
+			reposByName[r.GetName()] = r
+			reposByID[r.GetID()] = r
 		}
 
 		opts.Page = res.NextPage
 	}
 
 	s.repoCacheM.Lock()
-	s.repoCache = repos
+	s.reposByOwner = reposByOwner
+	s.reposByID = reposByID
 	s.repoCacheM.Unlock()
 
-	logging.Log(s.logger, "cached %d repositories across %d owner(s)", count, len(repos))
+	logging.Log(
+		s.logger,
+		"cached %d repositories across %d owner(s)",
+		len(reposByID),
+		len(reposByOwner),
+	)
 
 	return nil
 }
