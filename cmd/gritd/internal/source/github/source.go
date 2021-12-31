@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
@@ -23,16 +22,7 @@ type impl struct {
 	client *github.Client
 	logger logging.Logger
 
-	// user is the authenticated user, based on the token in the source
-	// configuration. If no token is provided, or it is invalid, user is nil.
-	userM sync.RWMutex
-	user  *github.User
-
-	// repoCache is an in-memory cache of the repositores to which the
-	// authenticated user has explicit read, wrote or admin access.
-	repoCacheM   sync.RWMutex
-	reposByOwner map[string]map[string]*github.Repository
-	reposByID    map[int64]*github.Repository
+	cache cache
 }
 
 // NewSource returns a new source with the given configuration.
@@ -83,12 +73,8 @@ func (s *impl) Description() string {
 		info = append(info, "github enterprise")
 	}
 
-	s.userM.RLock()
-	user := s.user
-	s.userM.RUnlock()
-
-	if user != nil {
-		info = append(info, "@"+user.GetLogin())
+	if u := s.cache.CurrentUser(); u != nil {
+		info = append(info, "@"+u.GetLogin())
 	}
 
 	if len(info) > 0 {
@@ -111,10 +97,7 @@ func (s *impl) Init(ctx context.Context) error {
 	}
 
 	logging.Log(s.logger, "authenticated as %s", user.GetLogin())
-
-	s.userM.Lock()
-	s.user = user
-	s.userM.Unlock()
+	s.cache.SetCurrentUser(user)
 
 	if err := s.populateRepoCache(ctx); err != nil {
 		return err
@@ -138,8 +121,7 @@ func (s *impl) populateRepoCache(ctx context.Context) error {
 		},
 	}
 
-	reposByOwner := map[string]map[string]*github.Repository{}
-	reposByID := map[int64]*github.Repository{}
+	var repos []*github.Repository
 
 	for opts.Page != 0 {
 		repoPage, res, err := s.client.Repositories.List(ctx, "", opts)
@@ -148,34 +130,20 @@ func (s *impl) populateRepoCache(ctx context.Context) error {
 		}
 
 		for _, r := range repoPage {
-			owner := r.GetOwner()
-
-			reposByName := reposByOwner[owner.GetLogin()]
-			if reposByName == nil {
-				reposByName = map[string]*github.Repository{}
-				reposByOwner[owner.GetLogin()] = reposByName
-			}
-
 			logging.Debug(s.logger, "cached repository: %s", r.GetFullName())
-
-			reposByName[r.GetName()] = r
-			reposByID[r.GetID()] = r
+			repos = append(repos, r)
 		}
 
 		opts.Page = res.NextPage
 	}
 
-	s.repoCacheM.Lock()
-	s.reposByOwner = reposByOwner
-	s.reposByID = reposByID
-	s.repoCacheM.Unlock()
-
 	logging.Log(
 		s.logger,
-		"cached %d repositories across %d owner(s)",
-		len(reposByID),
-		len(reposByOwner),
+		"cached %d repositories",
+		len(repos),
 	)
+
+	s.cache.SetRepos(repos)
 
 	return nil
 }

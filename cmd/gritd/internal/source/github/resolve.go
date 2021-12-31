@@ -27,10 +27,7 @@ func (s *impl) Resolve(
 		return nil, nil
 	}
 
-	s.repoCacheM.RLock()
-	reposByOwner := s.reposByOwner
-	s.repoCacheM.RUnlock()
-
+	reposByOwner := s.cache.ReposByOwner()
 	var results []source.Repo
 
 	if ownerName == "" {
