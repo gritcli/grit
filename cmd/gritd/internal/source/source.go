@@ -2,7 +2,8 @@ package source
 
 import (
 	"context"
-	"io"
+
+	"github.com/dogmatiq/dodeca/logging"
 )
 
 // Source is an interface for a "repository source" that makes repositories
@@ -43,8 +44,8 @@ type Source interface {
 	// not been sanitized. The implementation must not return an error if the
 	// query is invalid; an invalid query may be valid for other sources.
 	//
-	// out is a target for any output that should be displayed to the user
-	Resolve(ctx context.Context, query string, out io.Writer) ([]Repo, error)
+	// out is a target for any log output that should be displayed to the user.
+	Resolve(ctx context.Context, query string, out logging.Logger) ([]Repo, error)
 }
 
 // Repo is a reference to a remote repository provided by a source.

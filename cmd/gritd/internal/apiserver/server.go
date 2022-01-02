@@ -7,7 +7,6 @@ import (
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/internal/api"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -45,22 +44,23 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 	ctx := stream.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
-	out := streamWriter{
-		Stream: stream,
-		ToMessage: func(data string) proto.Message {
+	log := newStreamLogger(
+		stream,
+		func(out *api.LogOutput) proto.Message {
 			return &api.ResolveResponse{
 				Response: &api.ResolveResponse_Output{
-					Output: data,
+					Output: out,
 				},
 			}
 		},
-	}
+		req.Verbose,
+	)
 
 	for _, src := range s.sources {
 		src := src // capture loop variable
 
 		g.Go(func() error {
-			repos, err := src.Resolve(ctx, req.Query, out)
+			repos, err := src.Resolve(ctx, req.Query, log)
 			if err != nil {
 				return err
 			}
@@ -86,16 +86,4 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 	}
 
 	return g.Wait()
-}
-
-// streamWriter is an io.Writer that sends data over a gRPC stream.
-type streamWriter struct {
-	Stream    grpc.ServerStream
-	ToMessage func(string) proto.Message
-}
-
-func (w streamWriter) Write(data []byte) (int, error) {
-	n := len(data)
-	m := w.ToMessage(string(data))
-	return n, w.Stream.SendMsg(m)
 }

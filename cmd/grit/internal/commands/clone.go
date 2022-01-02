@@ -8,6 +8,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
+	"github.com/gritcli/grit/cmd/grit/internal/flags"
 	"github.com/gritcli/grit/internal/api"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,8 @@ func newCloneCommand() *cobra.Command {
 			}
 
 			req := &api.ResolveRequest{
-				Query: args[0],
+				Query:   args[0],
+				Verbose: flags.IsVerbose(cmd),
 			}
 
 			stream, err := client.Resolve(ctx, req)

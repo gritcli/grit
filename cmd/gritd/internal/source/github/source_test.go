@@ -3,7 +3,6 @@ package github_test
 import (
 	"context"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/dogmatiq/dodeca/logging"
@@ -21,7 +20,7 @@ var _ = Describe("type Source", func() {
 		cancel context.CancelFunc
 		src    source.Source
 		cfg    config.GitHubConfig
-		out    strings.Builder
+		out    logging.BufferedLogger
 	)
 
 	BeforeEach(func() {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gritcli/grit/cmd/grit/internal/commands/source"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
+	"github.com/gritcli/grit/cmd/grit/internal/flags"
 	"github.com/gritcli/grit/cmd/grit/internal/shell"
 	"github.com/gritcli/grit/internal/config"
 	"github.com/gritcli/grit/internal/di"
@@ -36,6 +37,8 @@ func NewRoot(v string) *cobra.Command {
 			})
 		},
 	}
+
+	flags.SetupVerbose(root)
 
 	provideConfig(&deps.Container, root)
 	provideShellExecutor(&deps.Container, root)

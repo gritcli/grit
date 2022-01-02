@@ -32,13 +32,19 @@ message Repo {
     string web_url = 5;
 }
 
+message LogOutput {
+    string message = 1;
+    bool is_debug = 2;
+}
+
 message ResolveRequest {
     string query = 1;
+    bool verbose = 2;
 }
 
 message ResolveResponse {
     oneof response {
-        string output = 1;
+        LogOutput output = 1;
         Repo repo = 2;
     }
 }

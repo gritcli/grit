@@ -2,7 +2,6 @@ package github
 
 import (
 	"context"
-	"io"
 	"net/http"
 
 	"github.com/dogmatiq/dodeca/logging"
@@ -14,7 +13,7 @@ import (
 func (s *impl) Resolve(
 	ctx context.Context,
 	name string,
-	out io.Writer,
+	out logging.Logger,
 ) ([]source.Repo, error) {
 	ownerName, repoName, err := parseRepoName(name)
 	if err != nil {
