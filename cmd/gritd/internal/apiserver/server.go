@@ -2,7 +2,6 @@ package apiserver
 
 import (
 	"context"
-	"errors"
 	"sort"
 
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
@@ -72,9 +71,4 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 	}
 
 	return g.Wait()
-}
-
-// CloneRepository clones a remote repository.
-func (s *server) CloneRepository(ctx context.Context, req *api.CloneRepositoryRequest) (*api.CloneRepositoryResponse, error) {
-	return nil, errors.New("not implemented")
 }

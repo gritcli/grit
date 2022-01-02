@@ -10,9 +10,6 @@ service API {
     // Resolve resolves repository name, URL or other identifier to a list of
     // candidate repositories.
     rpc Resolve(ResolveRequest) returns (stream ResolveResponse);
-
-    // CloneRepository clones a remote repository.
-    rpc CloneRepository(CloneRepositoryRequest) returns (CloneRepositoryResponse);
 }
 
 message SourcesRequest {
@@ -41,13 +38,4 @@ message ResolveRequest {
 
 message ResolveResponse {
     Repo repo = 1;
-}
-
-message CloneRepositoryRequest {
-    string source_name = 1;
-    string repo_id = 2;
-}
-
-message CloneRepositoryResponse {
-    string directory = 1;
 }
