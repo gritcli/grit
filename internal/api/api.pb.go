@@ -165,9 +165,9 @@ type Repo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	SourceName  string `protobuf:"bytes,1,opt,name=source_name,json=sourceName,proto3" json:"source_name,omitempty"`
-	RepoId      string `protobuf:"bytes,2,opt,name=repo_id,json=repoId,proto3" json:"repo_id,omitempty"`
-	RepoName    string `protobuf:"bytes,3,opt,name=repo_name,json=repoName,proto3" json:"repo_name,omitempty"`
+	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Source      string `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
+	Name        string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	WebUrl      string `protobuf:"bytes,5,opt,name=web_url,json=webUrl,proto3" json:"web_url,omitempty"`
 }
@@ -204,23 +204,23 @@ func (*Repo) Descriptor() ([]byte, []int) {
 	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Repo) GetSourceName() string {
+func (x *Repo) GetId() string {
 	if x != nil {
-		return x.SourceName
+		return x.Id
 	}
 	return ""
 }
 
-func (x *Repo) GetRepoId() string {
+func (x *Repo) GetSource() string {
 	if x != nil {
-		return x.RepoId
+		return x.Source
 	}
 	return ""
 }
 
-func (x *Repo) GetRepoName() string {
+func (x *Repo) GetName() string {
 	if x != nil {
-		return x.RepoName
+		return x.Name
 	}
 	return ""
 }
@@ -239,17 +239,16 @@ func (x *Repo) GetWebUrl() string {
 	return ""
 }
 
-type LogOutput struct {
+type ClientOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	IsDebug bool   `protobuf:"varint,2,opt,name=is_debug,json=isDebug,proto3" json:"is_debug,omitempty"`
+	CaptureDebugLog bool `protobuf:"varint,1,opt,name=capture_debug_log,json=captureDebugLog,proto3" json:"capture_debug_log,omitempty"`
 }
 
-func (x *LogOutput) Reset() {
-	*x = LogOutput{}
+func (x *ClientOptions) Reset() {
+	*x = ClientOptions{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -257,13 +256,13 @@ func (x *LogOutput) Reset() {
 	}
 }
 
-func (x *LogOutput) String() string {
+func (x *ClientOptions) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogOutput) ProtoMessage() {}
+func (*ClientOptions) ProtoMessage() {}
 
-func (x *LogOutput) ProtoReflect() protoreflect.Message {
+func (x *ClientOptions) ProtoReflect() protoreflect.Message {
 	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -275,19 +274,67 @@ func (x *LogOutput) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogOutput.ProtoReflect.Descriptor instead.
-func (*LogOutput) Descriptor() ([]byte, []int) {
+// Deprecated: Use ClientOptions.ProtoReflect.Descriptor instead.
+func (*ClientOptions) Descriptor() ([]byte, []int) {
 	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *LogOutput) GetMessage() string {
+func (x *ClientOptions) GetCaptureDebugLog() bool {
+	if x != nil {
+		return x.CaptureDebugLog
+	}
+	return false
+}
+
+type ClientOutput struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	IsDebug bool   `protobuf:"varint,2,opt,name=is_debug,json=isDebug,proto3" json:"is_debug,omitempty"`
+}
+
+func (x *ClientOutput) Reset() {
+	*x = ClientOutput{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ClientOutput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClientOutput) ProtoMessage() {}
+
+func (x *ClientOutput) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClientOutput.ProtoReflect.Descriptor instead.
+func (*ClientOutput) Descriptor() ([]byte, []int) {
+	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ClientOutput) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *LogOutput) GetIsDebug() bool {
+func (x *ClientOutput) GetIsDebug() bool {
 	if x != nil {
 		return x.IsDebug
 	}
@@ -299,14 +346,14 @@ type ResolveRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Query   string `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
-	Verbose bool   `protobuf:"varint,2,opt,name=verbose,proto3" json:"verbose,omitempty"`
+	ClientOptions *ClientOptions `protobuf:"bytes,1,opt,name=client_options,json=clientOptions,proto3" json:"client_options,omitempty"`
+	Query         string         `protobuf:"bytes,2,opt,name=query,proto3" json:"query,omitempty"`
 }
 
 func (x *ResolveRequest) Reset() {
 	*x = ResolveRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[5]
+		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -319,7 +366,7 @@ func (x *ResolveRequest) String() string {
 func (*ResolveRequest) ProtoMessage() {}
 
 func (x *ResolveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[5]
+	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -332,7 +379,14 @@ func (x *ResolveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveRequest.ProtoReflect.Descriptor instead.
 func (*ResolveRequest) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{5}
+	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ResolveRequest) GetClientOptions() *ClientOptions {
+	if x != nil {
+		return x.ClientOptions
+	}
+	return nil
 }
 
 func (x *ResolveRequest) GetQuery() string {
@@ -340,13 +394,6 @@ func (x *ResolveRequest) GetQuery() string {
 		return x.Query
 	}
 	return ""
-}
-
-func (x *ResolveRequest) GetVerbose() bool {
-	if x != nil {
-		return x.Verbose
-	}
-	return false
 }
 
 type ResolveResponse struct {
@@ -363,7 +410,7 @@ type ResolveResponse struct {
 func (x *ResolveResponse) Reset() {
 	*x = ResolveResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[6]
+		mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -376,7 +423,7 @@ func (x *ResolveResponse) String() string {
 func (*ResolveResponse) ProtoMessage() {}
 
 func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[6]
+	mi := &file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -389,7 +436,7 @@ func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveResponse.ProtoReflect.Descriptor instead.
 func (*ResolveResponse) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{6}
+	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP(), []int{7}
 }
 
 func (m *ResolveResponse) GetResponse() isResolveResponse_Response {
@@ -399,7 +446,7 @@ func (m *ResolveResponse) GetResponse() isResolveResponse_Response {
 	return nil
 }
 
-func (x *ResolveResponse) GetOutput() *LogOutput {
+func (x *ResolveResponse) GetOutput() *ClientOutput {
 	if x, ok := x.GetResponse().(*ResolveResponse_Output); ok {
 		return x.Output
 	}
@@ -418,7 +465,7 @@ type isResolveResponse_Response interface {
 }
 
 type ResolveResponse_Output struct {
-	Output *LogOutput `protobuf:"bytes,1,opt,name=output,proto3,oneof"`
+	Output *ClientOutput `protobuf:"bytes,1,opt,name=output,proto3,oneof"`
 }
 
 type ResolveResponse_Repo struct {
@@ -445,28 +492,33 @@ var file_github_com_gritcli_grit_internal_api_api_proto_rawDesc = []byte{
 	0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12,
 	0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f,
-	0x6e, 0x22, 0x98, 0x01, 0x0a, 0x04, 0x52, 0x65, 0x70, 0x6f, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x6f,
-	0x75, 0x72, 0x63, 0x65, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x0a, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x72,
-	0x65, 0x70, 0x6f, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x65,
-	0x70, 0x6f, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x72, 0x65, 0x70, 0x6f, 0x5f, 0x6e, 0x61, 0x6d,
-	0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x72, 0x65, 0x70, 0x6f, 0x4e, 0x61, 0x6d,
-	0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e,
-	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74,
-	0x69, 0x6f, 0x6e, 0x12, 0x17, 0x0a, 0x07, 0x77, 0x65, 0x62, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x05,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x77, 0x65, 0x62, 0x55, 0x72, 0x6c, 0x22, 0x40, 0x0a, 0x09,
-	0x4c, 0x6f, 0x67, 0x4f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73,
-	0x61, 0x67, 0x65, 0x12, 0x19, 0x0a, 0x08, 0x69, 0x73, 0x5f, 0x64, 0x65, 0x62, 0x75, 0x67, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x69, 0x73, 0x44, 0x65, 0x62, 0x75, 0x67, 0x22, 0x40,
-	0x0a, 0x0e, 0x52, 0x65, 0x73, 0x6f, 0x6c, 0x76, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x12, 0x14, 0x0a, 0x05, 0x71, 0x75, 0x65, 0x72, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x05, 0x71, 0x75, 0x65, 0x72, 0x79, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x62, 0x6f, 0x73,
-	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x76, 0x65, 0x72, 0x62, 0x6f, 0x73, 0x65,
-	0x22, 0x78, 0x0a, 0x0f, 0x52, 0x65, 0x73, 0x6f, 0x6c, 0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x12, 0x30, 0x0a, 0x06, 0x6f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70,
-	0x69, 0x2e, 0x4c, 0x6f, 0x67, 0x4f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x48, 0x00, 0x52, 0x06, 0x6f,
+	0x6e, 0x22, 0x7d, 0x0a, 0x04, 0x52, 0x65, 0x70, 0x6f, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x6f, 0x75,
+	0x72, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x6f, 0x75, 0x72, 0x63,
+	0x65, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70,
+	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63,
+	0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x17, 0x0a, 0x07, 0x77, 0x65, 0x62, 0x5f, 0x75,
+	0x72, 0x6c, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x77, 0x65, 0x62, 0x55, 0x72, 0x6c,
+	0x22, 0x3b, 0x0a, 0x0d, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e,
+	0x73, 0x12, 0x2a, 0x0a, 0x11, 0x63, 0x61, 0x70, 0x74, 0x75, 0x72, 0x65, 0x5f, 0x64, 0x65, 0x62,
+	0x75, 0x67, 0x5f, 0x6c, 0x6f, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0f, 0x63, 0x61,
+	0x70, 0x74, 0x75, 0x72, 0x65, 0x44, 0x65, 0x62, 0x75, 0x67, 0x4c, 0x6f, 0x67, 0x22, 0x43, 0x0a,
+	0x0c, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x4f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x12, 0x18, 0x0a,
+	0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
+	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x19, 0x0a, 0x08, 0x69, 0x73, 0x5f, 0x64, 0x65,
+	0x62, 0x75, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x69, 0x73, 0x44, 0x65, 0x62,
+	0x75, 0x67, 0x22, 0x69, 0x0a, 0x0e, 0x52, 0x65, 0x73, 0x6f, 0x6c, 0x76, 0x65, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x41, 0x0a, 0x0e, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x6f,
+	0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67,
+	0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6c, 0x69, 0x65, 0x6e,
+	0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x0d, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74,
+	0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x71, 0x75, 0x65, 0x72, 0x79,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x71, 0x75, 0x65, 0x72, 0x79, 0x22, 0x7b, 0x0a,
+	0x0f, 0x52, 0x65, 0x73, 0x6f, 0x6c, 0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x33, 0x0a, 0x06, 0x6f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x19, 0x2e, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x43,
+	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x4f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x48, 0x00, 0x52, 0x06, 0x6f,
 	0x75, 0x74, 0x70, 0x75, 0x74, 0x12, 0x27, 0x0a, 0x04, 0x72, 0x65, 0x70, 0x6f, 0x18, 0x02, 0x20,
 	0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70,
 	0x69, 0x2e, 0x52, 0x65, 0x70, 0x6f, 0x48, 0x00, 0x52, 0x04, 0x72, 0x65, 0x70, 0x6f, 0x42, 0x0a,
@@ -497,29 +549,31 @@ func file_github_com_gritcli_grit_internal_api_api_proto_rawDescGZIP() []byte {
 	return file_github_com_gritcli_grit_internal_api_api_proto_rawDescData
 }
 
-var file_github_com_gritcli_grit_internal_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_github_com_gritcli_grit_internal_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_github_com_gritcli_grit_internal_api_api_proto_goTypes = []interface{}{
 	(*SourcesRequest)(nil),  // 0: grit.v2.api.SourcesRequest
 	(*SourcesResponse)(nil), // 1: grit.v2.api.SourcesResponse
 	(*Source)(nil),          // 2: grit.v2.api.Source
 	(*Repo)(nil),            // 3: grit.v2.api.Repo
-	(*LogOutput)(nil),       // 4: grit.v2.api.LogOutput
-	(*ResolveRequest)(nil),  // 5: grit.v2.api.ResolveRequest
-	(*ResolveResponse)(nil), // 6: grit.v2.api.ResolveResponse
+	(*ClientOptions)(nil),   // 4: grit.v2.api.ClientOptions
+	(*ClientOutput)(nil),    // 5: grit.v2.api.ClientOutput
+	(*ResolveRequest)(nil),  // 6: grit.v2.api.ResolveRequest
+	(*ResolveResponse)(nil), // 7: grit.v2.api.ResolveResponse
 }
 var file_github_com_gritcli_grit_internal_api_api_proto_depIdxs = []int32{
 	2, // 0: grit.v2.api.SourcesResponse.sources:type_name -> grit.v2.api.Source
-	4, // 1: grit.v2.api.ResolveResponse.output:type_name -> grit.v2.api.LogOutput
-	3, // 2: grit.v2.api.ResolveResponse.repo:type_name -> grit.v2.api.Repo
-	0, // 3: grit.v2.api.API.Sources:input_type -> grit.v2.api.SourcesRequest
-	5, // 4: grit.v2.api.API.Resolve:input_type -> grit.v2.api.ResolveRequest
-	1, // 5: grit.v2.api.API.Sources:output_type -> grit.v2.api.SourcesResponse
-	6, // 6: grit.v2.api.API.Resolve:output_type -> grit.v2.api.ResolveResponse
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	4, // 1: grit.v2.api.ResolveRequest.client_options:type_name -> grit.v2.api.ClientOptions
+	5, // 2: grit.v2.api.ResolveResponse.output:type_name -> grit.v2.api.ClientOutput
+	3, // 3: grit.v2.api.ResolveResponse.repo:type_name -> grit.v2.api.Repo
+	0, // 4: grit.v2.api.API.Sources:input_type -> grit.v2.api.SourcesRequest
+	6, // 5: grit.v2.api.API.Resolve:input_type -> grit.v2.api.ResolveRequest
+	1, // 6: grit.v2.api.API.Sources:output_type -> grit.v2.api.SourcesResponse
+	7, // 7: grit.v2.api.API.Resolve:output_type -> grit.v2.api.ResolveResponse
+	6, // [6:8] is the sub-list for method output_type
+	4, // [4:6] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_github_com_gritcli_grit_internal_api_api_proto_init() }
@@ -577,7 +631,7 @@ func file_github_com_gritcli_grit_internal_api_api_proto_init() {
 			}
 		}
 		file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LogOutput); i {
+			switch v := v.(*ClientOptions); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -589,7 +643,7 @@ func file_github_com_gritcli_grit_internal_api_api_proto_init() {
 			}
 		}
 		file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResolveRequest); i {
+			switch v := v.(*ClientOutput); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -601,6 +655,18 @@ func file_github_com_gritcli_grit_internal_api_api_proto_init() {
 			}
 		}
 		file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ResolveRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ResolveResponse); i {
 			case 0:
 				return &v.state
@@ -613,7 +679,7 @@ func file_github_com_gritcli_grit_internal_api_api_proto_init() {
 			}
 		}
 	}
-	file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[6].OneofWrappers = []interface{}{
+	file_github_com_gritcli_grit_internal_api_api_proto_msgTypes[7].OneofWrappers = []interface{}{
 		(*ResolveResponse_Output)(nil),
 		(*ResolveResponse_Repo)(nil),
 	}
@@ -623,7 +689,7 @@ func file_github_com_gritcli_grit_internal_api_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_github_com_gritcli_grit_internal_api_api_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

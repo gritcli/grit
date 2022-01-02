@@ -8,7 +8,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
-	"github.com/gritcli/grit/cmd/grit/internal/flags"
 	"github.com/gritcli/grit/internal/api"
 	"github.com/spf13/cobra"
 )
@@ -38,14 +37,15 @@ func newCloneCommand() *cobra.Command {
 			cmd *cobra.Command,
 			args []string,
 			client api.APIClient,
+			clientOptions *api.ClientOptions,
 		) error {
 			if args[0] == "" {
 				return errors.New("<repo> argument must not be empty")
 			}
 
 			req := &api.ResolveRequest{
-				Query:   args[0],
-				Verbose: flags.IsVerbose(cmd),
+				ClientOptions: clientOptions,
+				Query:         args[0],
 			}
 
 			stream, err := client.Resolve(ctx, req)

@@ -13,11 +13,11 @@ import (
 // stream.
 func newStreamLogger(
 	stream grpc.ServerStream,
-	wrap func(*api.LogOutput) proto.Message,
-	verbose bool,
+	options *api.ClientOptions,
+	wrap func(*api.ClientOutput) proto.Message,
 ) logging.Logger {
 	send := func(message string, debug bool) {
-		m := wrap(&api.LogOutput{
+		m := wrap(&api.ClientOutput{
 			Message: message,
 			IsDebug: false,
 		})
@@ -27,7 +27,7 @@ func newStreamLogger(
 
 	var debugTarget logging.Callback
 
-	if verbose {
+	if options.CaptureDebugLog {
 		debugTarget = func(f string, v ...interface{}) {
 			send(fmt.Sprintf(f, v...), true)
 		}

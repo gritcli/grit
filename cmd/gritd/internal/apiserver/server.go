@@ -46,14 +46,14 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 
 	log := newStreamLogger(
 		stream,
-		func(out *api.LogOutput) proto.Message {
+		req.ClientOptions,
+		func(out *api.ClientOutput) proto.Message {
 			return &api.ResolveResponse{
 				Response: &api.ResolveResponse_Output{
 					Output: out,
 				},
 			}
 		},
-		req.Verbose,
 	)
 
 	for _, src := range s.sources {
@@ -69,9 +69,9 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 				if err := stream.Send(&api.ResolveResponse{
 					Response: &api.ResolveResponse_Repo{
 						Repo: &api.Repo{
-							SourceName:  src.Name(),
-							RepoId:      r.ID,
-							RepoName:    r.Name,
+							Id:          r.ID,
+							Source:      src.Name(),
+							Name:        r.Name,
 							Description: r.Description,
 							WebUrl:      r.WebURL,
 						},
