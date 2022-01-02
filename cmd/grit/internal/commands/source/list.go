@@ -26,7 +26,7 @@ func newListCommand() *cobra.Command {
 			args []string,
 			client api.APIClient,
 		) error {
-			res, err := client.ListSources(ctx, &api.ListSourcesRequest{})
+			res, err := client.Sources(ctx, &api.SourcesRequest{})
 			if err != nil {
 				return err
 			}

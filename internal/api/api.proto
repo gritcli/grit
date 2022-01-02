@@ -4,8 +4,8 @@ package grit.v2.api;
 option go_package = "github.com/gritcli/grit/internal/api";
 
 service API {
-    // ListSources lists the configured repository sources.
-    rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse);
+    // Sources lists the configured repository sources.
+    rpc Sources(SourcesRequest) returns (SourcesResponse);
 
     // ResolveRepoName resolves a repository name to a list of candidate
     // repositories.
@@ -15,10 +15,10 @@ service API {
     rpc CloneRepository(CloneRepositoryRequest) returns (CloneRepositoryResponse);
 }
 
-message ListSourcesRequest {
+message SourcesRequest {
 }
 
-message ListSourcesResponse {
+message SourcesResponse {
     repeated Source sources = 1;
 }
 

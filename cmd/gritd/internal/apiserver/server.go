@@ -10,18 +10,21 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// Server is an implementation of api.APIServer
-type Server struct {
-	Sources []source.Source
+// server is an implementation of api.APIServer
+type server struct {
+	sources []source.Source
 }
 
-var _ api.APIServer = (*Server)(nil)
+// New returns a new API server.
+func New(sources []source.Source) api.APIServer {
+	return &server{sources}
+}
 
-// ListSources lists the configured repository sources.
-func (s *Server) ListSources(ctx context.Context, _ *api.ListSourcesRequest) (*api.ListSourcesResponse, error) {
-	res := &api.ListSourcesResponse{}
+// Sources lists the configured repository sources.
+func (s *server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.SourcesResponse, error) {
+	res := &api.SourcesResponse{}
 
-	for _, s := range s.Sources {
+	for _, s := range s.sources {
 		res.Sources = append(res.Sources, &api.Source{
 			Name:        s.Name(),
 			Description: s.Description(),
@@ -37,11 +40,11 @@ func (s *Server) ListSources(ctx context.Context, _ *api.ListSourcesRequest) (*a
 
 // ResolveRepoName resolves a repository name to a list of candidate
 // repositories.
-func (s *Server) ResolveRepoName(req *api.ResolveRepoNameRequest, stream api.API_ResolveRepoNameServer) error {
+func (s *server) ResolveRepoName(req *api.ResolveRepoNameRequest, stream api.API_ResolveRepoNameServer) error {
 	ctx := stream.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
-	for _, src := range s.Sources {
+	for _, src := range s.sources {
 		src := src // capture loop variable
 
 		g.Go(func() error {
@@ -72,6 +75,6 @@ func (s *Server) ResolveRepoName(req *api.ResolveRepoNameRequest, stream api.API
 }
 
 // CloneRepository clones a remote repository.
-func (s *Server) CloneRepository(ctx context.Context, req *api.CloneRepositoryRequest) (*api.CloneRepositoryResponse, error) {
+func (s *server) CloneRepository(ctx context.Context, req *api.CloneRepositoryRequest) (*api.CloneRepositoryResponse, error) {
 	return nil, errors.New("not implemented")
 }

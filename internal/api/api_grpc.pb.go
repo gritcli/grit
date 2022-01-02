@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type APIClient interface {
-	// ListSources lists the configured repository sources.
-	ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error)
+	// Sources lists the configured repository sources.
+	Sources(ctx context.Context, in *SourcesRequest, opts ...grpc.CallOption) (*SourcesResponse, error)
 	// ResolveRepoName resolves a repository name to a list of candidate
 	// repositories.
 	ResolveRepoName(ctx context.Context, in *ResolveRepoNameRequest, opts ...grpc.CallOption) (API_ResolveRepoNameClient, error)
@@ -39,9 +39,9 @@ func NewAPIClient(cc grpc.ClientConnInterface) APIClient {
 	return &aPIClient{cc}
 }
 
-func (c *aPIClient) ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error) {
-	out := new(ListSourcesResponse)
-	err := c.cc.Invoke(ctx, "/grit.v2.api.API/ListSources", in, out, opts...)
+func (c *aPIClient) Sources(ctx context.Context, in *SourcesRequest, opts ...grpc.CallOption) (*SourcesResponse, error) {
+	out := new(SourcesResponse)
+	err := c.cc.Invoke(ctx, "/grit.v2.api.API/Sources", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +93,8 @@ func (c *aPIClient) CloneRepository(ctx context.Context, in *CloneRepositoryRequ
 // All implementations should embed UnimplementedAPIServer
 // for forward compatibility
 type APIServer interface {
-	// ListSources lists the configured repository sources.
-	ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error)
+	// Sources lists the configured repository sources.
+	Sources(context.Context, *SourcesRequest) (*SourcesResponse, error)
 	// ResolveRepoName resolves a repository name to a list of candidate
 	// repositories.
 	ResolveRepoName(*ResolveRepoNameRequest, API_ResolveRepoNameServer) error
@@ -106,8 +106,8 @@ type APIServer interface {
 type UnimplementedAPIServer struct {
 }
 
-func (UnimplementedAPIServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListSources not implemented")
+func (UnimplementedAPIServer) Sources(context.Context, *SourcesRequest) (*SourcesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Sources not implemented")
 }
 func (UnimplementedAPIServer) ResolveRepoName(*ResolveRepoNameRequest, API_ResolveRepoNameServer) error {
 	return status.Errorf(codes.Unimplemented, "method ResolveRepoName not implemented")
@@ -127,20 +127,20 @@ func RegisterAPIServer(s grpc.ServiceRegistrar, srv APIServer) {
 	s.RegisterService(&API_ServiceDesc, srv)
 }
 
-func _API_ListSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListSourcesRequest)
+func _API_Sources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SourcesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(APIServer).ListSources(ctx, in)
+		return srv.(APIServer).Sources(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grit.v2.api.API/ListSources",
+		FullMethod: "/grit.v2.api.API/Sources",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIServer).ListSources(ctx, req.(*ListSourcesRequest))
+		return srv.(APIServer).Sources(ctx, req.(*SourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,8 +192,8 @@ var API_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*APIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListSources",
-			Handler:    _API_ListSources_Handler,
+			MethodName: "Sources",
+			Handler:    _API_Sources_Handler,
 		},
 		{
 			MethodName: "CloneRepository",
