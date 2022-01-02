@@ -6,8 +6,8 @@ import (
 )
 
 // SetupConfig sets up --config flag on the root command.
-func SetupConfig(root *cobra.Command) {
-	root.PersistentFlags().StringP(
+func SetupConfig(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringP(
 		"config", "c",
 		config.DefaultDirectory,
 		"set the path to the Grit configuration directory",
