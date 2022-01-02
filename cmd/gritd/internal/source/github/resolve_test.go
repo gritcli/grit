@@ -9,6 +9,33 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+var (
+	gritRepo = source.Repo{
+		ID:          "397822937",
+		Name:        "gritcli/grit",
+		Description: "Manage your local Git clones.",
+		WebURL:      "https://github.com/gritcli/grit",
+	}
+
+	gritV1Repo = source.Repo{
+		ID:          "85247932",
+		Name:        "jmalloc/grit",
+		Description: "Keep track of your local Git clones.",
+		WebURL:      "https://github.com/jmalloc/grit",
+	}
+
+	// thirdPartyRepo is a repo that the authenticated user does not have access
+	// to. The CI process currently uses a GitHub personal access token
+	// belonging to @jmalloc, who presumably would never be granted access to
+	// anything in the "google" organization ;)
+	thirdPartyRepo = source.Repo{
+		ID:          "10270722",
+		Name:        "google/go-github",
+		Description: "Go library for accessing the GitHub API",
+		WebURL:      "https://github.com/google/go-github",
+	}
+)
+
 var _ = Describe("func source.Resolve()", func() {
 	var (
 		ctx    context.Context
@@ -70,47 +97,19 @@ var _ = Describe("func source.Resolve()", func() {
 		It("resolves unqualified repo names using the cache", func() {
 			repos, err := src.Resolve(ctx, "grit", logger)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(repos).To(ConsistOf(
-				source.Repo{
-					ID:          "85247932",
-					Name:        "jmalloc/grit",
-					Description: "Keep track of your local Git clones.",
-					WebURL:      "https://github.com/jmalloc/grit",
-				},
-				source.Repo{
-					ID:          "397822937",
-					Name:        "gritcli/grit",
-					Description: "Manage your local Git clones.",
-					WebURL:      "https://github.com/gritcli/grit",
-				},
-			))
+			Expect(repos).To(ConsistOf(gritRepo, gritV1Repo))
 		})
 
 		It("resolves an exact match using the cache", func() {
-			repos, err := src.Resolve(ctx, "gritcli/grit", logger)
+			repos, err := src.Resolve(ctx, gritRepo.Name, logger)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(repos).To(ConsistOf(
-				source.Repo{
-					ID:          "397822937",
-					Name:        "gritcli/grit",
-					Description: "Manage your local Git clones.",
-					WebURL:      "https://github.com/gritcli/grit",
-				},
-			))
+			Expect(repos).To(ConsistOf(gritRepo))
 		})
 
 		It("resolves an exact match using the API", func() {
-			// google/go-github this will never be in the cache for
-			// @jmalloc (who owns the token used under CI)
-			repos, err := src.Resolve(ctx, "google/go-github", logger)
+			repos, err := src.Resolve(ctx, thirdPartyRepo.Name, logger)
 			skipIfRateLimited(err)
-			Expect(repos).To(ConsistOf(
-				source.Repo{
-					ID:          "10270722",
-					Name:        "google/go-github",
-					Description: "Go library for accessing the GitHub API",
-					WebURL:      "https://github.com/google/go-github"},
-			))
+			Expect(repos).To(ConsistOf(thirdPartyRepo))
 		})
 	})
 })
