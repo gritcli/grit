@@ -37,5 +37,8 @@ message ResolveRequest {
 }
 
 message ResolveResponse {
-    Repo repo = 1;
+    oneof response {
+        string output = 1;
+        Repo repo = 2;
+    }
 }

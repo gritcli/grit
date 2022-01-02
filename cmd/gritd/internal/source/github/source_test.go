@@ -3,6 +3,7 @@ package github_test
 import (
 	"context"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dogmatiq/dodeca/logging"
@@ -20,6 +21,7 @@ var _ = Describe("type Source", func() {
 		cancel context.CancelFunc
 		src    source.Source
 		cfg    config.GitHubConfig
+		out    strings.Builder
 	)
 
 	BeforeEach(func() {
@@ -29,6 +31,8 @@ var _ = Describe("type Source", func() {
 			Domain: "github.com",
 			Token:  os.Getenv("GRIT_TEST_GITHUB_TOKEN"),
 		}
+
+		out.Reset()
 	})
 
 	JustBeforeEach(func() {
@@ -92,13 +96,13 @@ var _ = Describe("type Source", func() {
 
 			Describe("func Resolve()", func() {
 				It("does not resolve unqualified names", func() {
-					repos, err := src.Resolve(ctx, "grit")
+					repos, err := src.Resolve(ctx, "grit", &out)
 					skipIfRateLimited(err)
 					Expect(repos).To(BeEmpty())
 				})
 
 				It("resolves an exact match using the API", func() {
-					repos, err := src.Resolve(ctx, "gritcli/grit")
+					repos, err := src.Resolve(ctx, "gritcli/grit", &out)
 					skipIfRateLimited(err)
 					Expect(repos).To(ConsistOf(
 						source.Repo{
@@ -111,7 +115,7 @@ var _ = Describe("type Source", func() {
 				})
 
 				It("returns nothing for a qualified name that does not exist", func() {
-					repos, err := src.Resolve(ctx, "gritcli/non-existant")
+					repos, err := src.Resolve(ctx, "gritcli/non-existant", &out)
 					skipIfRateLimited(err)
 					Expect(repos).To(BeEmpty())
 				})
@@ -133,13 +137,13 @@ var _ = Describe("type Source", func() {
 
 			Describe("func Resolve()", func() {
 				It("ignores invalid names", func() {
-					repos, err := src.Resolve(ctx, "has a space")
+					repos, err := src.Resolve(ctx, "has a space", &out)
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(repos).To(BeEmpty())
 				})
 
 				It("resolves unqualified repo names using the cache", func() {
-					repos, err := src.Resolve(ctx, "grit")
+					repos, err := src.Resolve(ctx, "grit", &out)
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(repos).To(ConsistOf(
 						source.Repo{
@@ -158,7 +162,7 @@ var _ = Describe("type Source", func() {
 				})
 
 				It("resolves an exact match using the cache", func() {
-					repos, err := src.Resolve(ctx, "gritcli/grit")
+					repos, err := src.Resolve(ctx, "gritcli/grit", &out)
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(repos).To(ConsistOf(
 						source.Repo{
@@ -173,7 +177,7 @@ var _ = Describe("type Source", func() {
 				It("resolves an exact match using the API", func() {
 					// google/go-github this will never be in the cache for
 					// @jmalloc (who owns the token used under CI)
-					repos, err := src.Resolve(ctx, "google/go-github")
+					repos, err := src.Resolve(ctx, "google/go-github", &out)
 					skipIfRateLimited(err)
 					Expect(repos).To(ConsistOf(
 						source.Repo{

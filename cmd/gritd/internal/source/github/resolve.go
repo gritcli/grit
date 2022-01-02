@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"io"
 	"net/http"
 
 	"github.com/dogmatiq/dodeca/logging"
@@ -10,7 +11,11 @@ import (
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
 // possible repositories.
-func (s *impl) Resolve(ctx context.Context, name string) ([]source.Repo, error) {
+func (s *impl) Resolve(
+	ctx context.Context,
+	name string,
+	out io.Writer,
+) ([]source.Repo, error) {
 	ownerName, repoName, err := parseRepoName(name)
 	if err != nil {
 		logging.Debug(
