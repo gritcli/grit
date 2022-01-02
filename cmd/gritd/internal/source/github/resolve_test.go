@@ -14,7 +14,7 @@ var _ = Describe("func source.Resolve()", func() {
 		ctx    context.Context
 		cancel context.CancelFunc
 		src    source.Source
-		out    logging.DiscardLogger
+		logger logging.DiscardLogger
 	)
 
 	When("unauthenticated", func() {
@@ -27,13 +27,13 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("does not resolve unqualified names", func() {
-			repos, err := src.Resolve(ctx, "grit", &out)
+			repos, err := src.Resolve(ctx, "grit", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
 
 		It("resolves an exact match using the API", func() {
-			repos, err := src.Resolve(ctx, "gritcli/grit", &out)
+			repos, err := src.Resolve(ctx, "gritcli/grit", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(ConsistOf(
 				source.Repo{
@@ -46,7 +46,7 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("returns nothing for a qualified name that does not exist", func() {
-			repos, err := src.Resolve(ctx, "gritcli/non-existant", &out)
+			repos, err := src.Resolve(ctx, "gritcli/non-existant", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
@@ -62,13 +62,13 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("ignores invalid names", func() {
-			repos, err := src.Resolve(ctx, "has a space", &out)
+			repos, err := src.Resolve(ctx, "has a space", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(BeEmpty())
 		})
 
 		It("resolves unqualified repo names using the cache", func() {
-			repos, err := src.Resolve(ctx, "grit", &out)
+			repos, err := src.Resolve(ctx, "grit", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(
 				source.Repo{
@@ -87,7 +87,7 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("resolves an exact match using the cache", func() {
-			repos, err := src.Resolve(ctx, "gritcli/grit", &out)
+			repos, err := src.Resolve(ctx, "gritcli/grit", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(
 				source.Repo{
@@ -102,7 +102,7 @@ var _ = Describe("func source.Resolve()", func() {
 		It("resolves an exact match using the API", func() {
 			// google/go-github this will never be in the cache for
 			// @jmalloc (who owns the token used under CI)
-			repos, err := src.Resolve(ctx, "google/go-github", &out)
+			repos, err := src.Resolve(ctx, "google/go-github", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(ConsistOf(
 				source.Repo{
