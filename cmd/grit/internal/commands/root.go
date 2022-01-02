@@ -9,7 +9,6 @@ import (
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
 	"github.com/gritcli/grit/cmd/grit/internal/flags"
 	"github.com/gritcli/grit/cmd/grit/internal/shell"
-	"github.com/gritcli/grit/internal/config"
 	"github.com/gritcli/grit/internal/di"
 	"github.com/spf13/cobra"
 )
@@ -39,8 +38,8 @@ func NewRoot(v string) *cobra.Command {
 	}
 
 	flags.SetupVerbose(root)
+	flags.SetupConfig(root)
 
-	provideConfig(&deps.Container, root)
 	provideShellExecutor(&deps.Container, root)
 
 	root.AddCommand(
@@ -50,34 +49,6 @@ func NewRoot(v string) *cobra.Command {
 	)
 
 	return root
-}
-
-// provideConfig sets up the DI container to supply config.Config values based
-// on the path specified by the --config flag.
-func provideConfig(c *di.Container, root *cobra.Command) {
-	// Add --config as a "persistent" flag so that it's available on all
-	// commands.
-	root.PersistentFlags().StringP(
-		"config", "c",
-		config.DefaultDirectory,
-		"set the path to the Grit configuration directory",
-	)
-
-	// Setup a DI provider that provides config.Config value using the --config
-	// flag to determine where to load the config from.
-	c.Provide(func(cmd *cobra.Command) (config.Config, error) {
-		dir, err := cmd.Flags().GetString("config")
-		if err != nil {
-			return config.Config{}, err
-		}
-
-		cfg, err := config.Load(dir)
-		if err != nil {
-			return config.Config{}, err
-		}
-
-		return cfg, nil
-	})
 }
 
 // provideShellExecutor sets up the DI container to supply a shell.Executor that
