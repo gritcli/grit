@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
+	github.com/mattn/go-isatty v0.0.14
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.17.0
 	github.com/spf13/cobra v1.3.0

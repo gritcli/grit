@@ -7,7 +7,7 @@ func SetupVerbose(cmd *cobra.Command) {
 	cmd.PersistentFlags().Bool("verbose", false, "enable verbose output")
 }
 
-// IsVerbose checks if --verbose was provided.
+// IsVerbose returns true if the --verbose flag was set.
 func IsVerbose(cmd *cobra.Command) bool {
 	verbose, err := cmd.Flags().GetBool("verbose")
 	if err != nil {
