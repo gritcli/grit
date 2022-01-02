@@ -3,6 +3,7 @@ package apiserver
 import (
 	"context"
 	"errors"
+	"os"
 	"sort"
 
 	"github.com/dogmatiq/dodeca/logging"
@@ -96,5 +97,50 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 
 // Clone makes a local clone of a repository from a source.
 func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error {
-	return errors.New("not implemented")
+	ctx := stream.Context()
+
+	src, ok := s.sourceByName(req.Source)
+	if !ok {
+		return errors.New("unrecognized source name")
+	}
+
+	dir, err := os.MkdirTemp("", "grit-clone-")
+	if err != nil {
+		return err
+	}
+
+	if err := src.Clone(
+		ctx,
+		req.RepoId,
+		dir,
+		newStreamLogger(
+			stream,
+			req.ClientOptions,
+			func(out *api.ClientOutput) proto.Message {
+				return &api.CloneResponse{
+					Response: &api.CloneResponse_Output{
+						Output: out,
+					},
+				}
+			},
+		),
+	); err != nil {
+		return err
+	}
+
+	return stream.Send(&api.CloneResponse{
+		Response: &api.CloneResponse_Directory{
+			Directory: dir,
+		},
+	})
+}
+
+func (s *server) sourceByName(n string) (source.Source, bool) {
+	for _, src := range s.sources {
+		if src.Name() == n {
+			return src, true
+		}
+	}
+
+	return nil, false
 }

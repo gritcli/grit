@@ -1,6 +1,7 @@
 package github
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -18,6 +19,21 @@ func convertRepo(r *github.Repository) source.Repo {
 		Description: r.GetDescription(),
 		WebURL:      r.GetHTMLURL(),
 	}
+}
+
+// parseRepoID parses a repo ID from its string form (as used by the source
+// package) to the numeric form used by the GitHub API.
+func parseRepoID(id string) (int64, error) {
+	n, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid repo ID: %w", err)
+	}
+
+	if n <= 0 {
+		return 0, errors.New("invalid repo ID: expected positive integer")
+	}
+
+	return n, nil
 }
 
 var (
