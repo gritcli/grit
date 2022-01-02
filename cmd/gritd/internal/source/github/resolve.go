@@ -8,7 +8,8 @@ import (
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
 )
 
-// Resolve resolves a repository name to a set of possible repositories.
+// Resolve resolves a repository name, URL, or other identifier to a set of
+// possible repositories.
 func (s *impl) Resolve(ctx context.Context, name string) ([]source.Repo, error) {
 	ownerName, repoName, err := parseRepoName(name)
 	if err != nil {

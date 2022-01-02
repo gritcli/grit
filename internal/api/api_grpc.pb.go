@@ -24,9 +24,9 @@ const _ = grpc.SupportPackageIsVersion7
 type APIClient interface {
 	// Sources lists the configured repository sources.
 	Sources(ctx context.Context, in *SourcesRequest, opts ...grpc.CallOption) (*SourcesResponse, error)
-	// ResolveRepoName resolves a repository name to a list of candidate
-	// repositories.
-	ResolveRepoName(ctx context.Context, in *ResolveRepoNameRequest, opts ...grpc.CallOption) (API_ResolveRepoNameClient, error)
+	// Resolve resolves repository name, URL or other identifier to a list of
+	// candidate repositories.
+	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (API_ResolveClient, error)
 	// CloneRepository clones a remote repository.
 	CloneRepository(ctx context.Context, in *CloneRepositoryRequest, opts ...grpc.CallOption) (*CloneRepositoryResponse, error)
 }
@@ -48,12 +48,12 @@ func (c *aPIClient) Sources(ctx context.Context, in *SourcesRequest, opts ...grp
 	return out, nil
 }
 
-func (c *aPIClient) ResolveRepoName(ctx context.Context, in *ResolveRepoNameRequest, opts ...grpc.CallOption) (API_ResolveRepoNameClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], "/grit.v2.api.API/ResolveRepoName", opts...)
+func (c *aPIClient) Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (API_ResolveClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], "/grit.v2.api.API/Resolve", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &aPIResolveRepoNameClient{stream}
+	x := &aPIResolveClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -63,17 +63,17 @@ func (c *aPIClient) ResolveRepoName(ctx context.Context, in *ResolveRepoNameRequ
 	return x, nil
 }
 
-type API_ResolveRepoNameClient interface {
-	Recv() (*ResolveRepoNameResponse, error)
+type API_ResolveClient interface {
+	Recv() (*ResolveResponse, error)
 	grpc.ClientStream
 }
 
-type aPIResolveRepoNameClient struct {
+type aPIResolveClient struct {
 	grpc.ClientStream
 }
 
-func (x *aPIResolveRepoNameClient) Recv() (*ResolveRepoNameResponse, error) {
-	m := new(ResolveRepoNameResponse)
+func (x *aPIResolveClient) Recv() (*ResolveResponse, error) {
+	m := new(ResolveResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -95,9 +95,9 @@ func (c *aPIClient) CloneRepository(ctx context.Context, in *CloneRepositoryRequ
 type APIServer interface {
 	// Sources lists the configured repository sources.
 	Sources(context.Context, *SourcesRequest) (*SourcesResponse, error)
-	// ResolveRepoName resolves a repository name to a list of candidate
-	// repositories.
-	ResolveRepoName(*ResolveRepoNameRequest, API_ResolveRepoNameServer) error
+	// Resolve resolves repository name, URL or other identifier to a list of
+	// candidate repositories.
+	Resolve(*ResolveRequest, API_ResolveServer) error
 	// CloneRepository clones a remote repository.
 	CloneRepository(context.Context, *CloneRepositoryRequest) (*CloneRepositoryResponse, error)
 }
@@ -109,8 +109,8 @@ type UnimplementedAPIServer struct {
 func (UnimplementedAPIServer) Sources(context.Context, *SourcesRequest) (*SourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sources not implemented")
 }
-func (UnimplementedAPIServer) ResolveRepoName(*ResolveRepoNameRequest, API_ResolveRepoNameServer) error {
-	return status.Errorf(codes.Unimplemented, "method ResolveRepoName not implemented")
+func (UnimplementedAPIServer) Resolve(*ResolveRequest, API_ResolveServer) error {
+	return status.Errorf(codes.Unimplemented, "method Resolve not implemented")
 }
 func (UnimplementedAPIServer) CloneRepository(context.Context, *CloneRepositoryRequest) (*CloneRepositoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CloneRepository not implemented")
@@ -145,24 +145,24 @@ func _API_Sources_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
-func _API_ResolveRepoName_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ResolveRepoNameRequest)
+func _API_Resolve_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ResolveRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(APIServer).ResolveRepoName(m, &aPIResolveRepoNameServer{stream})
+	return srv.(APIServer).Resolve(m, &aPIResolveServer{stream})
 }
 
-type API_ResolveRepoNameServer interface {
-	Send(*ResolveRepoNameResponse) error
+type API_ResolveServer interface {
+	Send(*ResolveResponse) error
 	grpc.ServerStream
 }
 
-type aPIResolveRepoNameServer struct {
+type aPIResolveServer struct {
 	grpc.ServerStream
 }
 
-func (x *aPIResolveRepoNameServer) Send(m *ResolveRepoNameResponse) error {
+func (x *aPIResolveServer) Send(m *ResolveResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -202,8 +202,8 @@ var API_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "ResolveRepoName",
-			Handler:       _API_ResolveRepoName_Handler,
+			StreamName:    "Resolve",
+			Handler:       _API_Resolve_Handler,
 			ServerStreams: true,
 		},
 	},

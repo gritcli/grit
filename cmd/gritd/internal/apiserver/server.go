@@ -38,9 +38,9 @@ func (s *server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.Sourc
 	return res, nil
 }
 
-// ResolveRepoName resolves a repository name to a list of candidate
-// repositories.
-func (s *server) ResolveRepoName(req *api.ResolveRepoNameRequest, stream api.API_ResolveRepoNameServer) error {
+// Resolve resolves repository name, URL or other identifier to a list of
+// candidate repositories.
+func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) error {
 	ctx := stream.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -48,13 +48,13 @@ func (s *server) ResolveRepoName(req *api.ResolveRepoNameRequest, stream api.API
 		src := src // capture loop variable
 
 		g.Go(func() error {
-			repos, err := src.Resolve(ctx, req.Name)
+			repos, err := src.Resolve(ctx, req.Query)
 			if err != nil {
 				return err
 			}
 
 			for _, r := range repos {
-				if err := stream.Send(&api.ResolveRepoNameResponse{
+				if err := stream.Send(&api.ResolveResponse{
 					Repo: &api.Repo{
 						SourceName:  src.Name(),
 						RepoId:      r.ID,

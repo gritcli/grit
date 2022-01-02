@@ -29,18 +29,19 @@ type Source interface {
 	// daemon shuts down.
 	Run(ctx context.Context) error
 
-	// Resolve resolves a repository name to a set of possible repositories.
+	// Resolve resolves a repository name, URL, or other identifier to a set of
+	// possible repositories.
 	//
-	// The exact name-matching logic is implementation defined. Implementations
-	// should be as generous as possible in what they accept but should avoid
-	// returning repositories with names that only partially match the input.
-	// Multiple repositories may be returned to indicate that the name is
+	// The details of the resolution logic is implementation defined.
+	// Implementations should be as generous as possible in what they accept but
+	// should avoid returning repositories that only partially match the input.
+	// Multiple repositories may be returned to indicate that the query is
 	// ambiguous.
 	//
-	// The name is typically captured directly from user input and has not been
-	// sanitized. The implementation must not return an error if the name is
-	// invalid; an invalid name may be valid for other sources.
-	Resolve(ctx context.Context, name string) ([]Repo, error)
+	// The query string is typically captured directly from user input and has
+	// not been sanitized. The implementation must not return an error if the
+	// query is invalid; an invalid query may be valid for other sources.
+	Resolve(ctx context.Context, query string) ([]Repo, error)
 }
 
 // Repo is a reference to a remote repository provided by a source.

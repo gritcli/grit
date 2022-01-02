@@ -23,9 +23,9 @@ func newCloneCommand() *cobra.Command {
 		changes the shell's current working directory to the clone's working
 		tree.
 
-		The <repo> argument is a repository name or a part thereof. For example,
-		the Grit repository itself may be referred to as "gritcli/grit" or just
-		"grit".
+		The <repo> argument is a repository name (or a part thereof), URL, or
+		other identifier. For example, the Grit repository itself may be
+		referred to as "gritcli/grit", just "grit".
 
 		Each of the repository sources defined in the Grit configuration file is
 		searched for matches to the provided repository name. If there are
@@ -42,11 +42,11 @@ func newCloneCommand() *cobra.Command {
 				return errors.New("<repo> argument must not be empty")
 			}
 
-			req := &api.ResolveRepoNameRequest{
-				Name: args[0],
+			req := &api.ResolveRequest{
+				Query: args[0],
 			}
 
-			stream, err := client.ResolveRepoName(ctx, req)
+			stream, err := client.Resolve(ctx, req)
 			if err != nil {
 				return err
 			}
