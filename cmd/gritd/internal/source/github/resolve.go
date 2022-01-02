@@ -13,16 +13,14 @@ import (
 func (s *impl) Resolve(
 	ctx context.Context,
 	query string,
-	out logging.Logger,
+	clientLog logging.Logger,
 ) ([]source.Repo, error) {
-	out = logging.Tee(
-		logging.Prefix(s.logger, "resolve[%s]: ", query),
-		out,
-	)
+	serverLog := logging.Prefix(s.logger, "resolve[%s]: ", query)
+	clientLog = logging.Tee(serverLog, clientLog) // log everything sent to the client on the server as well
 
 	ownerName, repoName, err := parseRepoName(query)
 	if err != nil {
-		logging.Debug(out, err.Error())
+		logging.Debug(clientLog, err.Error())
 		return nil, nil
 	}
 
@@ -37,7 +35,7 @@ func (s *impl) Resolve(
 		}
 
 		logging.Debug(
-			out,
+			clientLog,
 			"found %d repo(s) named '%s' by scanning the user's repo cache",
 			len(repos),
 			repoName,
@@ -47,7 +45,7 @@ func (s *impl) Resolve(
 	}
 
 	if r, ok := reposByOwner[ownerName][repoName]; ok {
-		logging.Debug(out, "found an exact match in the user's repo cache")
+		logging.Debug(clientLog, "found an exact match in the user's repo cache")
 
 		return []source.Repo{
 			convertRepo(r),
@@ -57,10 +55,11 @@ func (s *impl) Resolve(
 	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
 		if res.StatusCode == http.StatusNotFound {
-			logging.Debug(out, "no matches found when querying the API")
+			logging.Debug(clientLog, "no matches found when querying the API")
 			return nil, nil
 		}
 
+		logging.Log(serverLog, "unable to query API: %s", err)
 		return nil, err
 	}
 

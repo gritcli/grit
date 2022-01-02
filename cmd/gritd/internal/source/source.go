@@ -44,8 +44,9 @@ type Source interface {
 	// not been sanitized. The implementation must not return an error if the
 	// query is invalid; an invalid query may be valid for other sources.
 	//
-	// out is a target for any log output that should be displayed to the user.
-	Resolve(ctx context.Context, query string, out logging.Logger) ([]Repo, error)
+	// clientLog is a target for any log output that should be sent to the
+	// client and displayed to the user.
+	Resolve(ctx context.Context, query string, clientLog logging.Logger) ([]Repo, error)
 }
 
 // Repo is a reference to a remote repository provided by a source.
