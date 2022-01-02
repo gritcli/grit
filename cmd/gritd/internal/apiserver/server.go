@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"errors"
 	"sort"
 
 	"github.com/dogmatiq/dodeca/logging"
@@ -91,4 +92,9 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 	}
 
 	return g.Wait()
+}
+
+// Clone makes a local clone of a repository from a source.
+func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error {
+	return errors.New("not implemented")
 }
