@@ -24,15 +24,15 @@ var _ = Describe("type Source", func() {
 	)
 
 	BeforeEach(func() {
-		if os.Getenv("GRIT_TEST_GITHUB") == "" {
-			Skip("set GRIT_TEST_GITHUB to enable tests that use the GitHub API")
+		if os.Getenv("GRIT_INTEGRATION_TEST_GITHUB") == "" {
+			Skip("set GRIT_INTEGRATION_TEST_GITHUB to enable tests that use the GitHub API")
 		}
 
 		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 
 		cfg = config.GitHubConfig{
 			Domain: "github.com",
-			Token:  os.Getenv("GRIT_TEST_GITHUB_TOKEN"),
+			Token:  os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN"),
 		}
 
 		out.Reset()
@@ -128,7 +128,7 @@ var _ = Describe("type Source", func() {
 		When("authenticated", func() {
 			BeforeEach(func() {
 				if cfg.Token == "" {
-					Skip("set GRIT_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
+					Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
 				}
 			})
 
