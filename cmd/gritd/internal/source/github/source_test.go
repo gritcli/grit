@@ -14,51 +14,25 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("type Source", func() {
+var _ = Describe("type source", func() {
 	var (
-		ctx    context.Context
-		cancel context.CancelFunc
 		src    source.Source
-		cfg    config.GitHubConfig
-		out    logging.BufferedLogger
+		logger logging.DiscardLogger
 	)
 
-	BeforeEach(func() {
-		if os.Getenv("GRIT_INTEGRATION_TEST_GITHUB") == "" {
-			Skip("set GRIT_INTEGRATION_TEST_GITHUB to enable tests that use the GitHub API")
-		}
-
-		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-
-		cfg = config.GitHubConfig{
-			Domain: "github.com",
-			Token:  os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN"),
-		}
-
-		out.Reset()
-	})
-
-	JustBeforeEach(func() {
-		var err error
-		src, err = NewSource(
-			"github-source",
-			cfg,
-			logging.SilentLogger,
-		)
-		Expect(err).ShouldNot(HaveOccurred())
-	})
-
-	AfterEach(func() {
-		cancel()
-	})
-
-	Describe("func Name()", func() {
-		It("returns the source name", func() {
-			Expect(src.Name()).To(Equal("github-source"))
-		})
-	})
-
 	When("the source has not been initialized", func() {
+		BeforeEach(func() {
+			var err error
+			src, err = NewSource("github-source", config.GitHubConfig{Domain: "github.com"}, logger)
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+
+		Describe("func Name()", func() {
+			It("returns the source name", func() {
+				Expect(src.Name()).To(Equal("github-source"))
+			})
+		})
+
 		Describe("func Description()", func() {
 			It("returns the server's domain name", func() {
 				Expect(src.Description()).To(Equal("github.com"))
@@ -66,7 +40,9 @@ var _ = Describe("type Source", func() {
 
 			When("using GitHub Enterprise server", func() {
 				BeforeEach(func() {
-					cfg.Domain = "code.example.com"
+					var err error
+					src, err = NewSource("github-source", config.GitHubConfig{Domain: "code.example.com"}, logger)
+					Expect(err).ShouldNot(HaveOccurred())
 				})
 
 				It("explicitly states that GitHub Enterprise is being used", func() {
@@ -77,59 +53,33 @@ var _ = Describe("type Source", func() {
 	})
 
 	When("the source has been initialized", func() {
-		JustBeforeEach(func() {
-			err := src.Init(ctx)
-			skipIfRateLimited(err)
-		})
+		var cancel context.CancelFunc
 
-		When("unauthenticated (invalid token)", func() {
+		When("unauthenticated due to invalid token", func() {
+			var originalToken = os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
+
 			BeforeEach(func() {
-				cfg.Token = "<invalid>"
+				os.Setenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN", "<invalid-token>")
+				_, cancel, src = beforeEachUnauthenticated()
 			})
 
-			It("works in unauthenticated mode", func() {
-				Expect(src.Description()).To(Equal("github.com"))
-			})
-		})
-
-		When("unauthenticated (no token)", func() {
-			BeforeEach(func() {
-				cfg.Token = ""
+			AfterEach(func() {
+				cancel()
+				os.Setenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN", originalToken)
 			})
 
-			Describe("func Resolve()", func() {
-				It("does not resolve unqualified names", func() {
-					repos, err := src.Resolve(ctx, "grit", &out)
-					skipIfRateLimited(err)
-					Expect(repos).To(BeEmpty())
-				})
-
-				It("resolves an exact match using the API", func() {
-					repos, err := src.Resolve(ctx, "gritcli/grit", &out)
-					skipIfRateLimited(err)
-					Expect(repos).To(ConsistOf(
-						source.Repo{
-							ID:          "397822937",
-							Name:        "gritcli/grit",
-							Description: "Manage your local Git clones.",
-							WebURL:      "https://github.com/gritcli/grit",
-						},
-					))
-				})
-
-				It("returns nothing for a qualified name that does not exist", func() {
-					repos, err := src.Resolve(ctx, "gritcli/non-existant", &out)
-					skipIfRateLimited(err)
-					Expect(repos).To(BeEmpty())
-				})
+			It("works as in unauthenticated mode", func() {
+				Expect(src.Description()).To(Equal("github.com")) // no username
 			})
 		})
 
 		When("authenticated", func() {
 			BeforeEach(func() {
-				if cfg.Token == "" {
-					Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
-				}
+				_, cancel, src = beforeEachAuthenticated()
+			})
+
+			AfterEach(func() {
+				cancel()
 			})
 
 			Describe("func Description()", func() {
@@ -137,63 +87,76 @@ var _ = Describe("type Source", func() {
 					Expect(src.Description()).To(Equal("github.com (@jmalloc)"))
 				})
 			})
-
-			Describe("func Resolve()", func() {
-				It("ignores invalid names", func() {
-					repos, err := src.Resolve(ctx, "has a space", &out)
-					Expect(err).ShouldNot(HaveOccurred())
-					Expect(repos).To(BeEmpty())
-				})
-
-				It("resolves unqualified repo names using the cache", func() {
-					repos, err := src.Resolve(ctx, "grit", &out)
-					Expect(err).ShouldNot(HaveOccurred())
-					Expect(repos).To(ConsistOf(
-						source.Repo{
-							ID:          "85247932",
-							Name:        "jmalloc/grit",
-							Description: "Keep track of your local Git clones.",
-							WebURL:      "https://github.com/jmalloc/grit",
-						},
-						source.Repo{
-							ID:          "397822937",
-							Name:        "gritcli/grit",
-							Description: "Manage your local Git clones.",
-							WebURL:      "https://github.com/gritcli/grit",
-						},
-					))
-				})
-
-				It("resolves an exact match using the cache", func() {
-					repos, err := src.Resolve(ctx, "gritcli/grit", &out)
-					Expect(err).ShouldNot(HaveOccurred())
-					Expect(repos).To(ConsistOf(
-						source.Repo{
-							ID:          "397822937",
-							Name:        "gritcli/grit",
-							Description: "Manage your local Git clones.",
-							WebURL:      "https://github.com/gritcli/grit",
-						},
-					))
-				})
-
-				It("resolves an exact match using the API", func() {
-					// google/go-github this will never be in the cache for
-					// @jmalloc (who owns the token used under CI)
-					repos, err := src.Resolve(ctx, "google/go-github", &out)
-					skipIfRateLimited(err)
-					Expect(repos).To(ConsistOf(
-						source.Repo{
-							ID:          "10270722",
-							Name:        "google/go-github",
-							Description: "Go library for accessing the GitHub API",
-							WebURL:      "https://github.com/google/go-github"},
-					))
-				})
-			})
 		})
 	})
 })
+
+// beforeEachAuthenticated returns the context and source used for running
+// integration tests with an authenticated user.
+func beforeEachAuthenticated() (context.Context, context.CancelFunc, source.Source) {
+	return initSource(func() config.GitHubConfig {
+		token := os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
+
+		if token == "" {
+			Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
+		}
+
+		return config.GitHubConfig{
+			Domain: "github.com",
+			Token:  token,
+		}
+	})
+}
+
+// beforeEachAuthenticated returns the context and source used for running
+// integration tests without an authenticated user.
+func beforeEachUnauthenticated() (context.Context, context.CancelFunc, source.Source) {
+	return initSource(func() config.GitHubConfig {
+		return config.GitHubConfig{
+			Domain: "github.com",
+		}
+	})
+}
+
+// initSource creates and initializes a source using the config returned by
+// cfg(). It is intended for use in the beforeEachXXX() helper functions.
+func initSource(cfg func() config.GitHubConfig) (context.Context, context.CancelFunc, source.Source) {
+	if os.Getenv("GRIT_INTEGRATION_TEST_GITHUB") == "" {
+		Skip("set GRIT_INTEGRATION_TEST_GITHUB to enable tests that use the GitHub API")
+	}
+
+	src, err := NewSource("github", cfg(), logging.SilentLogger)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	err = src.Init(ctx)
+	if err != nil {
+		cancel()
+		skipIfRateLimited(err)
+	}
+
+	done := make(chan struct{})
+
+	go func() {
+		defer GinkgoRecover()
+		defer close(done)
+
+		err := src.Run(ctx)
+		if err != context.Canceled {
+			Expect(err).ShouldNot(HaveOccurred())
+		}
+	}()
+
+	return ctx, func() {
+		cancel()
+		select {
+		case <-done:
+		case <-time.After(3 * time.Second):
+			Fail("timed out waiting for Run() goroutine to finish")
+		}
+	}, src
+}
 
 // skipIfRateLimited asserts that err is nil, or skips the test if err is a
 // GitHub rate limit error.
