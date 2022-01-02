@@ -49,6 +49,15 @@ func (c *cache) ReposByOwner() map[string]map[string]*github.Repository {
 	return c.reposByOwner
 }
 
+// RepoByID returns the repository with the given ID.
+func (c *cache) RepoByID(id int64) (*github.Repository, bool) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	r, ok := c.reposByID[id]
+	return r, ok
+}
+
 // SetRepos updates the cache to include the given repository.
 func (c *cache) SetRepos(repos []*github.Repository) {
 	reposByOwner := map[string]map[string]*github.Repository{}
