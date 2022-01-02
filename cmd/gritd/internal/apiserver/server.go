@@ -4,6 +4,7 @@ import (
 	"context"
 	"sort"
 
+	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/internal/api"
 	"golang.org/x/sync/errgroup"
@@ -60,7 +61,11 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 		src := src // capture loop variable
 
 		g.Go(func() error {
-			repos, err := src.Resolve(ctx, req.Query, log)
+			repos, err := src.Resolve(
+				ctx,
+				req.Query,
+				logging.Prefix(log, "%s: ", src.Name()),
+			)
 			if err != nil {
 				return err
 			}

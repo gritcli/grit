@@ -12,75 +12,59 @@ import (
 // possible repositories.
 func (s *impl) Resolve(
 	ctx context.Context,
-	name string,
+	query string,
 	out logging.Logger,
 ) ([]source.Repo, error) {
-	ownerName, repoName, err := parseRepoName(name)
-	if err != nil {
-		logging.Debug(
-			s.logger,
-			"resolve[%s]: repository name is not valid: %s",
-			name,
-			err,
-		)
+	out = logging.Tee(
+		logging.Prefix(s.logger, "resolve[%s]: ", query),
+		out,
+	)
 
+	ownerName, repoName, err := parseRepoName(query)
+	if err != nil {
+		logging.Debug(out, err.Error())
 		return nil, nil
 	}
 
 	reposByOwner := s.cache.ReposByOwner()
-	var results []source.Repo
+	var repos []source.Repo
 
 	if ownerName == "" {
 		for _, reposByName := range reposByOwner {
 			if r, ok := reposByName[repoName]; ok {
-				results = append(results, convertRepo(r))
+				repos = append(repos, convertRepo(r))
 			}
 		}
 
 		logging.Debug(
-			s.logger,
-			"resolve[%s]: owner not known, found %d repo(s) named '%s' by scanning the user's repo cache",
-			name,
-			len(results),
+			out,
+			"found %d repo(s) named '%s' by scanning the user's repo cache",
+			len(repos),
 			repoName,
 		)
 
-		return results, nil
+		return repos, nil
 	}
 
 	if r, ok := reposByOwner[ownerName][repoName]; ok {
-		logging.Debug(
-			s.logger,
-			"resolve[%s]: found an exact match in the user's repo cache",
-			name,
-			len(results),
-		)
+		logging.Debug(out, "found an exact match in the user's repo cache")
 
-		return []source.Repo{convertRepo(r)}, nil
+		return []source.Repo{
+			convertRepo(r),
+		}, nil
 	}
 
 	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
 		if res.StatusCode == http.StatusNotFound {
-			logging.Debug(
-				s.logger,
-				"resolve[%s]: no matches found when querying the API",
-				name,
-				len(results),
-			)
-
+			logging.Debug(out, "no matches found when querying the API")
 			return nil, nil
 		}
 
 		return nil, err
 	}
 
-	logging.Debug(
-		s.logger,
-		"resolve[%s]: found an exact match by querying the API",
-		name,
-		len(results),
-	)
+	logging.Debug(s.logger, "found an exact match by querying the API")
 
 	return []source.Repo{
 		convertRepo(r),
