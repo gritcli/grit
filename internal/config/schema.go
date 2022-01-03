@@ -9,12 +9,19 @@ import (
 // configFile is HCL schema for a configuration file.
 type configFile struct {
 	DaemonBlock  *daemonBlock  `hcl:"daemon,block"`
+	GitBlock     *gitBlock     `hcl:"git,block"`
 	SourceBlocks []sourceBlock `hcl:"source,block"`
 }
 
 // daemonBlock is the HCL schema for a "daemon" block.
 type daemonBlock struct {
 	Socket string `hcl:"socket,optional"`
+}
+
+// gitBlock is the HCL schema for a "git" block
+type gitBlock struct {
+	PrivateKey string `hcl:"private_key,optional"`
+	PreferHTTP bool   `hcl:"prefer_http,optional"`
 }
 
 // sourceBlock is the HCL schema for a "source" block.

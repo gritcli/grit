@@ -30,6 +30,11 @@ type Config struct {
 	// Daemon is the configuration of the Grit daemon.
 	Daemon Daemon
 
+	// GlobalGit is the configuration that controls how Grit uses Git across all
+	// sources. Repository sources that use Git may allow these settings to be
+	// overridden.
+	GlobalGit Git
+
 	// Sources is the set of repository sources from which repositories can be
 	// cloned.
 	Sources map[string]Source
@@ -40,6 +45,18 @@ type Daemon struct {
 	// Socket is the path of the Unix socket used for communication between
 	// the Grit CLI and the Grit daemon.
 	Socket string
+}
+
+// Git is the configuration that controls how Grit uses Git.
+type Git struct {
+	// PrivateKey is the path to the private SSH key used to authenticate when
+	// using the SSH transport. If it is empty, the system's SSH agent is
+	// queried to determine which identity to use.
+	PrivateKey string
+
+	// PreferHTTP indicates that Grit should prefer the HTTP transport. By
+	// default SSH is preferred.
+	PreferHTTP bool
 }
 
 // Source represents a repository source defined in the configuration.

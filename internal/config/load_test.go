@@ -99,23 +99,3 @@ func makeConfigDir(configs ...string) (dir string, cleanup func()) {
 		os.RemoveAll(dir)
 	}
 }
-
-// withDaemon returns a copy of cfg with a different daemon configuration.
-func withDaemon(cfg Config, d Daemon) Config {
-	cfg.Daemon = d
-	return cfg
-}
-
-// withSource returns a copy of cfg with an additional repository source.
-func withSource(cfg Config, src Source) Config {
-	prev := cfg.Sources
-	cfg.Sources = map[string]Source{}
-
-	for n, s := range prev {
-		cfg.Sources[n] = s
-	}
-
-	cfg.Sources[src.Name] = src
-
-	return cfg
-}

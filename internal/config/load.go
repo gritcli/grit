@@ -29,9 +29,10 @@ func Load(dir string) (Config, error) {
 
 // loader loads and assembles a configuration from several configuration files.
 type loader struct {
-	config           Config
-	daemonBlockFile  string
-	sourceBlockFiles map[string]string
+	config             Config
+	daemonBlockFile    string
+	globalGitBlockFile string
+	sourceBlockFiles   map[string]string
 }
 
 // Get returns the loaded configuration.
@@ -90,6 +91,12 @@ func (l *loader) LoadFile(filename string) error {
 		}
 	}
 
+	if c.GitBlock != nil {
+		if err := l.mergeGlobalGitBlock(filename, *c.GitBlock); err != nil {
+			return fmt.Errorf("%s: %w", filename, err)
+		}
+	}
+
 	for _, b := range c.SourceBlocks {
 		if err := l.mergeSourceBlock(filename, b); err != nil {
 			return fmt.Errorf("%s: %w", filename, err)
@@ -104,6 +111,10 @@ func (l *loader) LoadFile(filename string) error {
 func (l *loader) mergeDefaults() {
 	if l.config.Daemon == (Daemon{}) {
 		l.config.Daemon = DefaultConfig.Daemon
+	}
+
+	if l.config.GlobalGit == (Git{}) {
+		l.config.GlobalGit = DefaultConfig.GlobalGit
 	}
 
 	if l.config.Sources == nil {

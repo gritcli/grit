@@ -76,3 +76,17 @@ var _ = Describe("func Load() (source blocks)", func() {
 		),
 	)
 })
+
+// withSource returns a copy of cfg with an additional repository source.
+func withSource(cfg Config, src Source) Config {
+	prev := cfg.Sources
+	cfg.Sources = map[string]Source{}
+
+	for n, s := range prev {
+		cfg.Sources[n] = s
+	}
+
+	cfg.Sources[src.Name] = src
+
+	return cfg
+}

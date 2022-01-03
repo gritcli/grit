@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func Load() (daemon block)", func() {
+var _ = Describe("func Load() (global git block)", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		func(configs []string, expect Config) {
@@ -19,14 +19,34 @@ var _ = Describe("func Load() (daemon block)", func() {
 			Expect(cfg).To(Equal(expect))
 		},
 		Entry(
-			"non-standard daemon socket",
+			"explicit private key",
 			[]string{
-				`daemon {
-					socket = "/path/to/socket"
+				`git {
+					private_key = "/path/to/key"
 				}`,
 			},
-			withDaemon(DefaultConfig, Daemon{
-				Socket: "/path/to/socket",
+			withGlobalGit(DefaultConfig, Git{
+				PrivateKey: "/path/to/key",
+			}),
+		),
+		Entry(
+			"explicitly prefer SSH",
+			[]string{
+				`git {
+					prefer_http = false
+				}`,
+			},
+			DefaultConfig,
+		),
+		Entry(
+			"explicitly prefer HTTP",
+			[]string{
+				`git {
+					prefer_http = true
+				}`,
+			},
+			withGlobalGit(DefaultConfig, Git{
+				PreferHTTP: true,
 			}),
 		),
 	)
@@ -42,15 +62,15 @@ var _ = Describe("func Load() (daemon block)", func() {
 			Expect(err).To(MatchError(ContainSubstring(expect)), err.Error())
 		},
 		Entry(
-			`multiple files with daemon blocks`,
-			[]string{`daemon {}`, `daemon {}`},
-			`the daemon configuration has already been defined in`,
+			`multiple files with git blocks`,
+			[]string{`git {}`, `git {}`},
+			`the global git configuration has already been defined in`,
 		),
 	)
 })
 
-// withDaemon returns a copy of cfg with a different daemon configuration.
-func withDaemon(cfg Config, d Daemon) Config {
-	cfg.Daemon = d
+// withGlobalGit returns a copy of cfg with a different git configuration.
+func withGlobalGit(cfg Config, g Git) Config {
+	cfg.GlobalGit = g
 	return cfg
 }
