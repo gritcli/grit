@@ -23,17 +23,6 @@ var _ = Describe("func Load()", func() {
 			Expect(cfg).To(Equal(expect))
 		},
 		Entry(
-			"non-standard daemon socket",
-			[]string{
-				`daemon {
-					socket = "/path/to/socket"
-				}`,
-			},
-			withDaemon(DefaultConfig, Daemon{
-				Socket: "/path/to/socket",
-			}),
-		),
-		Entry(
 			"empty directory is equivalent to the default",
 			[]string{},
 			DefaultConfig,
@@ -83,11 +72,6 @@ var _ = Describe("func Load()", func() {
 			`syntax error`,
 			[]string{`<invalid>`},
 			`Argument or block definition required; An argument or block definition is required here.`,
-		),
-		Entry(
-			`multiple files with daemon blocks`,
-			[]string{`daemon {}`, `daemon {}`},
-			`the daemon configuration has already been defined in`,
 		),
 		Entry(
 			`duplicate source names`,
