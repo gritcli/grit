@@ -26,7 +26,7 @@ func Load(dir string) (Config, error) {
 		return Config{}, err
 	}
 
-	return l.Get(), nil
+	return l.Get()
 }
 
 // loader loads and assembles a configuration from several configuration files.
@@ -37,9 +37,9 @@ type loader struct {
 }
 
 // Get returns the loaded configuration.
-func (l *loader) Get() Config {
+func (l *loader) Get() (Config, error) {
 	l.applyDefaults()
-	return l.config
+	return l.config, l.config.validate()
 }
 
 // LoadFile loads the configuration from a single file.

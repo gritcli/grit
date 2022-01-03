@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"reflect"
 
 	"github.com/mitchellh/go-homedir"
@@ -29,11 +30,37 @@ type Config struct {
 	Sources map[string]Source
 }
 
+// validate returns an error if the configuration is invalid, it is intended to
+// be called after any default values have been populated.
+func (c Config) validate() error {
+	if err := c.Daemon.validate(); err != nil {
+		return err
+	}
+
+	for _, src := range c.Sources {
+		if err := src.validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Daemon holds the configuration for the Grit daemon.
 type Daemon struct {
 	// Socket is the path of the Unix socket used for communication between
 	// the Grit CLI and the Grit daemon.
 	Socket string `hcl:"socket,optional"`
+}
+
+// validate returns an error if the configuration is invalid, it is intended to
+// be called after any default values have been populated.
+func (d Daemon) validate() error {
+	if d.Socket == "" {
+		return errors.New("daemon socket must not be empty")
+	}
+
+	return nil
 }
 
 // Source represents a repository source defined in the configuration.
@@ -51,6 +78,16 @@ func (s Source) AcceptVisitor(v SourceVisitor) {
 	s.Config.acceptVisitor(s, v)
 }
 
+// validate returns an error if the configuration is invalid, it is intended to
+// be called after any default values have been populated.
+func (s Source) validate() error {
+	if s.Name == "" {
+		return errors.New("source name must not be empty")
+	}
+
+	return s.Config.validate()
+}
+
 // SourceVisitor dispatches Source values to implementation-specific logic.
 type SourceVisitor interface {
 	VisitGitHubSource(s Source, cfg GitHubConfig)
@@ -65,6 +102,10 @@ type SourceConfig interface {
 	// withDefaults returns a copy of the configuration with any missing values
 	// replaced by their defaults.
 	withDefaults() SourceConfig
+
+	// validate returns an error if the configuration is invalid, it is intended
+	// to be called after any default values have been populated.
+	validate() error
 }
 
 // sourceConfigTypes is a map of a source implementation name to the type of its
