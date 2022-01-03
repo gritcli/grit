@@ -3,11 +3,11 @@ package config
 // GitHubConfig contains configuration specific to a GitHub repository source.
 type GitHubConfig struct {
 	// Domain is the base domain name of the GitHub installation.
-	Domain string `hcl:"domain,optional"`
+	Domain string
 
 	// Token is a personal access token used to authenticate with the GitHub
 	// API.
-	Token string `hcl:"token,optional"`
+	Token string
 }
 
 // acceptVisitor calls v.VisitGitHubSource(s, c).
@@ -15,22 +15,30 @@ func (c GitHubConfig) acceptVisitor(s Source, v SourceVisitor) {
 	v.VisitGitHubSource(s, c)
 }
 
-// normalize validates the configuration and returns a copy with any missing
-// values replaced by their defaults.
-func (c GitHubConfig) normalize(filename string) (SourceConfig, error) {
-	if c.Domain == "" {
-		c.Domain = "github.com"
+// gitHubBlock is the HCL schema for a "source" block that uses the "github"
+// source implementation.
+type gitHubBlock struct {
+	Domain string `hcl:"domain,optional"`
+	Token  string `hcl:"token,optional"`
+}
+
+func (b gitHubBlock) resolve(filename string) (SourceConfig, error) {
+	cfg := GitHubConfig(b)
+
+	if cfg.Domain == "" {
+		cfg.Domain = "github.com"
 	}
 
-	return c, nil
+	return cfg, nil
 }
 
 func init() {
-	registerSourceType(
+	registerSourceSchema(
 		"github",
-		GitHubConfig{},
+		gitHubBlock{},
 		Source{
-			Name: "github",
+			Name:    "github",
+			Enabled: true,
 			Config: GitHubConfig{
 				Domain: "github.com",
 			},

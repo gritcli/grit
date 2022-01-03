@@ -4,17 +4,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 
-	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
 // Load loads the configuration from all files in the given directory.
 //
-// If the directory doesn't exist DefaultConfig is returned.
+// If the directory doesn't exist or does not contain any configuration files,
+// then DefaultConfig is returned.
 func Load(dir string) (Config, error) {
 	var l loader
 
@@ -38,38 +36,9 @@ type loader struct {
 
 // Get returns the loaded configuration.
 func (l *loader) Get() Config {
-	l.applyDefaults()
+	l.mergeDefaults()
+
 	return l.config
-}
-
-// LoadFile loads the configuration from a single file.
-func (l *loader) LoadFile(filename string) error {
-	var c configFile
-	if err := hclsimple.DecodeFile(filename, nil, &c); err != nil {
-		return err
-	}
-
-	if c.Daemon != nil {
-		if l.daemonFile != "" {
-			return fmt.Errorf("%s: the daemon configuration has already been defined in %s", filename, l.daemonFile)
-		}
-
-		d, err := c.Daemon.normalize(filename)
-		if err != nil {
-			return fmt.Errorf("%s: the daemon configuration is invalid: %w", filename, err)
-		}
-
-		l.daemonFile = filename
-		l.config.Daemon = d
-	}
-
-	for _, s := range c.Sources {
-		if err := l.loadSource(filename, s); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // LoadDir loads the configuration from all .hcl files in the given directory.
@@ -108,83 +77,78 @@ func (l *loader) LoadDir(dir string) error {
 	return nil
 }
 
-// loadSource loads a source that was parsed in a configuration file.
-func (l *loader) loadSource(filename string, s anySource) error {
-	src := Source{
-		Name: s.Name,
-	}
-
-	src, err := src.normalize(filename)
-	if err != nil {
-		return fmt.Errorf(
-			"%s: the '%s' repository source is invalid: %w",
-			filename,
-			s.Name,
-			err,
-		)
-	}
-
-	if l.config.Sources == nil {
-		l.config.Sources = map[string]Source{}
-		l.sourceFiles = map[string]string{}
-	} else if _, ok := l.config.Sources[s.Name]; ok {
-		return fmt.Errorf(
-			"%s: the '%s' repository source has already been defined in %s",
-			filename,
-			s.Name,
-			l.sourceFiles[s.Name],
-		)
-	}
-
-	cfg, err := l.decodeSourceConfig(filename, s)
-	if err != nil {
+// LoadFile loads the configuration from a single file.
+func (l *loader) LoadFile(filename string) error {
+	var c configFile
+	if err := hclsimple.DecodeFile(filename, nil, &c); err != nil {
 		return err
 	}
 
-	src.Config = cfg
+	if c.DaemonBlock != nil {
+		if err := l.mergeDaemonBlock(filename, *c.DaemonBlock); err != nil {
+			return err
+		}
+	}
 
-	l.sourceFiles[s.Name] = filename
-	l.config.Sources[s.Name] = src
+	for _, sb := range c.SourceBlocks {
+		if err := l.mergeSourceBlock(filename, sb); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
 
-// decodeSourceConfig decodes a source's configuration using the appropriate
-// configuration structure.
-func (l *loader) decodeSourceConfig(filename string, s anySource) (SourceConfig, error) {
-	rt, ok := sourceConfigTypes[s.Implementation]
-	if !ok {
-		return nil, fmt.Errorf(
-			"%s: the '%s' repository source uses an unrecognized implementation: %s",
+// mergeDaemonBlock merges db into the configuration.
+func (l *loader) mergeDaemonBlock(filename string, db daemonBlock) error {
+	if l.daemonFile != "" {
+		return fmt.Errorf("%s: the daemon configuration has already been defined in %s", filename, l.daemonFile)
+	}
+
+	d, err := db.resolve(filename)
+	if err != nil {
+		return fmt.Errorf("%s: the daemon configuration is invalid: %w", filename, err)
+	}
+
+	l.daemonFile = filename
+	l.config.Daemon = d
+
+	return nil
+}
+
+// mergeDaemonBlock merges sb into the configuration.
+func (l *loader) mergeSourceBlock(filename string, sb sourceBlock) error {
+	if l.config.Sources == nil {
+		l.config.Sources = map[string]Source{}
+		l.sourceFiles = map[string]string{}
+	} else if _, ok := l.config.Sources[sb.Name]; ok {
+		return fmt.Errorf(
+			"%s: the '%s' repository source has already been defined in %s",
 			filename,
-			s.Name,
-			s.Implementation,
+			sb.Name,
+			l.sourceFiles[sb.Name],
 		)
 	}
 
-	ptr := reflect.New(rt)
-
-	diag := gohcl.DecodeBody(s.Body, nil, ptr.Interface())
-	if diag.HasErrors() {
-		return nil, fmt.Errorf("%s: %w", filename, diag)
-	}
-
-	cfg, err := ptr.Elem().Interface().(SourceConfig).normalize(filename)
+	src, err := sb.resolve(filename)
 	if err != nil {
-		return nil, fmt.Errorf(
+		return fmt.Errorf(
 			"%s: the '%s' repository source is invalid: %w",
 			filename,
-			s.Name,
+			sb.Name,
 			err,
 		)
 	}
 
-	return cfg, nil
+	l.sourceFiles[src.Name] = filename
+	l.config.Sources[src.Name] = src
+
+	return nil
 }
 
-// applyDefaults merges blocks from DefaultConfig that were not explicitly
+// mergeDefaults merges blocks from DefaultConfig that were not explicitly
 // defined in the configuration files.
-func (l *loader) applyDefaults() {
+func (l *loader) mergeDefaults() {
 	if l.daemonFile == "" {
 		l.config.Daemon = DefaultConfig.Daemon
 	}
@@ -198,20 +162,6 @@ func (l *loader) applyDefaults() {
 			l.config.Sources[n] = s
 		}
 	}
-}
-
-// configFile is the structure of a configuration file as parsed by the HCL
-// library.
-type configFile struct {
-	Daemon  *Daemon     `hcl:"daemon,block"`
-	Sources []anySource `hcl:"source,block"`
-}
-
-// anySource is a source block that has not been fully parsed.
-type anySource struct {
-	Name           string   `hcl:",label"`
-	Implementation string   `hcl:",label"`
-	Body           hcl.Body `hcl:",remain"`
 }
 
 // normalizePath expands references to ~ in filesystem names, and resolves

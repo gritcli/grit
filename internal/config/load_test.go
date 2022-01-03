@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func Load() (github source)", func() {
+var _ = Describe("func Load()", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		func(configs []string, expect Config) {
@@ -42,6 +42,30 @@ var _ = Describe("func Load() (github source)", func() {
 			"empty file is equivalent to the default",
 			[]string{``},
 			DefaultConfig,
+		),
+		Entry(
+			"explicitly enabled source",
+			[]string{
+				`source "github" "github" {
+					enabled = true
+				}`,
+			},
+			DefaultConfig,
+		),
+		Entry(
+			"explicitly disabled source",
+			[]string{
+				`source "github" "github" {
+					enabled = false
+				}`,
+			},
+			withSource(DefaultConfig, Source{
+				Name:    "github",
+				Enabled: false,
+				Config: GitHubConfig{
+					Domain: "github.com",
+				},
+			}),
 		),
 	)
 
@@ -80,9 +104,14 @@ var _ = Describe("func Load() (github source)", func() {
 			[]string{`source "<invalid>" "github" {}`},
 			`the '<invalid>' repository source is invalid: source name must contain only alpha-numeric characters and underscores`,
 		),
+		Entry(
+			`unrecognized source implementation`,
+			[]string{`source "my_source" "<unrecognized>" {}`},
+			`the 'my_source' repository source is invalid: '<unrecognized>' is not recognized source implementation, expected 'github'`,
+		),
 	)
 
-	It("returns the default configuration when passed a non-existant directory", func() {
+	It("returns the default configuration when passed a non-existent directory", func() {
 		cfg, err := Load("./does-not-exist")
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg).To(Equal(DefaultConfig))

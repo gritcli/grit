@@ -24,7 +24,8 @@ var _ = Describe("func Load() (github source)", func() {
 				token = "<token>"
 			}`,
 			withSource(DefaultConfig, Source{
-				Name: "github",
+				Name:    "github",
+				Enabled: true,
 				Config: GitHubConfig{
 					Domain: "github.com",
 					Token:  "<token>",
@@ -37,7 +38,8 @@ var _ = Describe("func Load() (github source)", func() {
 				domain = "github.example.com"
 			}`,
 			withSource(DefaultConfig, Source{
-				Name: "my_company",
+				Name:    "my_company",
+				Enabled: true,
 				Config: GitHubConfig{
 					Domain: "github.example.com",
 				},

@@ -1,10 +1,6 @@
 package config
 
 import (
-	"errors"
-	"reflect"
-	"regexp"
-
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -31,7 +27,11 @@ func init() {
 
 // Config contains an entire Grit configuration.
 type Config struct {
-	Daemon  Daemon
+	// Daemon is the configuration of the Grit daemon.
+	Daemon Daemon
+
+	// Sources is the set of repository sources from which repositories can be
+	// cloned.
 	Sources map[string]Source
 }
 
@@ -39,17 +39,7 @@ type Config struct {
 type Daemon struct {
 	// Socket is the path of the Unix socket used for communication between
 	// the Grit CLI and the Grit daemon.
-	Socket string `hcl:"socket,optional"`
-}
-
-// normalize validates the configuration and returns a copy with any missing
-// values replaced by their defaults.
-func (d Daemon) normalize(filename string) (Daemon, error) {
-	if d.Socket == "" {
-		d.Socket = DefaultConfig.Daemon.Socket
-	}
-
-	return d, normalizePath(filename, &d.Socket)
+	Socket string
 }
 
 // Source represents a repository source defined in the configuration.
@@ -57,6 +47,10 @@ type Source struct {
 	// Name is a short identifier for the source. Each source in the
 	// configuration has a unique name.
 	Name string
+
+	// Enabled is true if the source is enabled. Disabled sources are not used
+	// when searching for repositories to be cloned.
+	Enabled bool
 
 	// Config contains implementation-specific configuration for this source.
 	Config SourceConfig
@@ -67,56 +61,14 @@ func (s Source) AcceptVisitor(v SourceVisitor) {
 	s.Config.acceptVisitor(s, v)
 }
 
-var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
-
-// normalize validates the configuration and returns a copy with any missing
-// values replaced by their defaults.
-func (s Source) normalize(filename string) (Source, error) {
-	if s.Name == "" {
-		return Source{}, errors.New("source name must not be empty")
-	}
-
-	if !sourceNameRegexp.MatchString(s.Name) {
-		return Source{}, errors.New("source name must contain only alpha-numeric characters and underscores")
-	}
-
-	return s, nil
+// SourceConfig is an interface for implementation-specific configuration
+// options for a repository source.
+type SourceConfig interface {
+	// acceptVisitor calls the appropriate method on v.
+	acceptVisitor(s Source, v SourceVisitor)
 }
 
 // SourceVisitor dispatches Source values to implementation-specific logic.
 type SourceVisitor interface {
 	VisitGitHubSource(s Source, cfg GitHubConfig)
-}
-
-// SourceConfig is an interface for implementation-specific source
-// configuration.
-type SourceConfig interface {
-	// acceptVisitor calls the appropriate method on v.
-	acceptVisitor(s Source, v SourceVisitor)
-
-	// normalize validates the configuration and returns a copy with any missing
-	// values replaced by their defaults.
-	normalize(filename string) (SourceConfig, error)
-}
-
-// sourceConfigTypes is a map of a source implementation name to the type of its
-// SourceConfig implementation.
-var sourceConfigTypes = map[string]reflect.Type{}
-
-// registerSourceImpl registers a source implementation, allowing its
-// configuration to be parsed.
-func registerSourceType(
-	name string,
-	configType SourceConfig,
-	defaultSources ...Source,
-) {
-	if _, ok := sourceConfigTypes[name]; ok {
-		panic("source name already registered")
-	}
-
-	sourceConfigTypes[name] = reflect.TypeOf(configType)
-
-	for _, s := range defaultSources {
-		DefaultConfig.Sources[s.Name] = s
-	}
 }
