@@ -8,7 +8,15 @@ func (l *loader) mergeGlobalGitBlock(filename string, b gitBlock) error {
 		return fmt.Errorf("the global git configuration has already been defined in %s", l.globalGitBlockFile)
 	}
 
-	g := Git(b)
+	g := Git{}
+
+	if b.PrivateKey != nil {
+		g.PrivateKey = *b.PrivateKey
+	}
+
+	if b.PreferHTTP != nil {
+		g.PreferHTTP = *b.PreferHTTP
+	}
 
 	if g.PrivateKey != "" {
 		if err := normalizePath(filename, &g.PrivateKey); err != nil {

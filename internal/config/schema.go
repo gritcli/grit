@@ -20,8 +20,8 @@ type daemonBlock struct {
 
 // gitBlock is the HCL schema for a "git" block
 type gitBlock struct {
-	PrivateKey string `hcl:"private_key,optional"`
-	PreferHTTP bool   `hcl:"prefer_http,optional"`
+	PrivateKey *string `hcl:"private_key"`
+	PreferHTTP *bool   `hcl:"prefer_http"`
 }
 
 // sourceBlock is the HCL schema for a "source" block.
