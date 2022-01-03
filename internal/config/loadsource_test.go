@@ -55,24 +55,24 @@ var _ = Describe("func Load() (source blocks)", func() {
 			Expect(err).To(MatchError(ContainSubstring(expect)), err.Error())
 		},
 		Entry(
-			`duplicate source names`,
-			[]string{`source "my_company" "github" {}`, `source "my_company" "github" {}`},
-			`the 'my_company' repository source has already been defined in`,
-		),
-		Entry(
 			`empty source name`,
 			[]string{`source "" "github" {}`},
-			`the '' repository source is invalid: source name must not be empty`,
+			`repository sources must not have empty names`,
 		),
 		Entry(
 			`invalid source name`,
 			[]string{`source "<invalid>" "github" {}`},
-			`the '<invalid>' repository source is invalid: source name must contain only alpha-numeric characters and underscores`,
+			`the '<invalid>' repository source has an invalid name, names must contain only alpha-numeric characters and underscores`,
 		),
 		Entry(
 			`unrecognized source implementation`,
 			[]string{`source "my_source" "<unrecognized>" {}`},
-			`the 'my_source' repository source is invalid: '<unrecognized>' is not recognized source implementation, expected 'github'`,
+			`'<unrecognized>' is not a recognized repository source implementation, expected 'github'`,
+		),
+		Entry(
+			`duplicate source names`,
+			[]string{`source "my_company" "github" {}`, `source "my_company" "github" {}`},
+			`a repository source named 'my_company' has already been defined in`,
 		),
 	)
 })

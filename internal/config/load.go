@@ -29,9 +29,9 @@ func Load(dir string) (Config, error) {
 
 // loader loads and assembles a configuration from several configuration files.
 type loader struct {
-	config      Config
-	daemonFile  string
-	sourceFiles map[string]string
+	config           Config
+	daemonBlockFile  string
+	sourceBlockFiles map[string]string
 }
 
 // Get returns the loaded configuration.
@@ -86,62 +86,15 @@ func (l *loader) LoadFile(filename string) error {
 
 	if c.DaemonBlock != nil {
 		if err := l.mergeDaemonBlock(filename, *c.DaemonBlock); err != nil {
-			return err
+			return fmt.Errorf("%s: %w", filename, err)
 		}
 	}
 
-	for _, sb := range c.SourceBlocks {
-		if err := l.mergeSourceBlock(filename, sb); err != nil {
-			return err
+	for _, b := range c.SourceBlocks {
+		if err := l.mergeSourceBlock(filename, b); err != nil {
+			return fmt.Errorf("%s: %w", filename, err)
 		}
 	}
-
-	return nil
-}
-
-// mergeDaemonBlock merges db into the configuration.
-func (l *loader) mergeDaemonBlock(filename string, db daemonBlock) error {
-	if l.daemonFile != "" {
-		return fmt.Errorf("%s: the daemon configuration has already been defined in %s", filename, l.daemonFile)
-	}
-
-	d, err := db.resolve(filename)
-	if err != nil {
-		return fmt.Errorf("%s: the daemon configuration is invalid: %w", filename, err)
-	}
-
-	l.daemonFile = filename
-	l.config.Daemon = d
-
-	return nil
-}
-
-// mergeDaemonBlock merges sb into the configuration.
-func (l *loader) mergeSourceBlock(filename string, sb sourceBlock) error {
-	if l.config.Sources == nil {
-		l.config.Sources = map[string]Source{}
-		l.sourceFiles = map[string]string{}
-	} else if _, ok := l.config.Sources[sb.Name]; ok {
-		return fmt.Errorf(
-			"%s: the '%s' repository source has already been defined in %s",
-			filename,
-			sb.Name,
-			l.sourceFiles[sb.Name],
-		)
-	}
-
-	src, err := sb.resolve(filename)
-	if err != nil {
-		return fmt.Errorf(
-			"%s: the '%s' repository source is invalid: %w",
-			filename,
-			sb.Name,
-			err,
-		)
-	}
-
-	l.sourceFiles[src.Name] = filename
-	l.config.Sources[src.Name] = src
 
 	return nil
 }
@@ -149,7 +102,7 @@ func (l *loader) mergeSourceBlock(filename string, sb sourceBlock) error {
 // mergeDefaults merges blocks from DefaultConfig that were not explicitly
 // defined in the configuration files.
 func (l *loader) mergeDefaults() {
-	if l.daemonFile == "" {
+	if l.config.Daemon == (Daemon{}) {
 		l.config.Daemon = DefaultConfig.Daemon
 	}
 

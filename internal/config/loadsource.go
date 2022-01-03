@@ -14,36 +14,57 @@ import (
 // sourceNameRegexp is a regular expression used to validate source names.
 var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
 
-// resolve returns the configuration that is produced by this block.
-func (b sourceBlock) resolve(filename string) (Source, error) {
+// mergeDaemonBlock merges b into the configuration.
+func (l *loader) mergeSourceBlock(filename string, b sourceBlock) error {
 	if b.Name == "" {
-		return Source{}, errors.New("source name must not be empty")
+		return errors.New("repository sources must not have empty names")
 	}
 
 	if !sourceNameRegexp.MatchString(b.Name) {
-		return Source{}, errors.New("source name must contain only alpha-numeric characters and underscores")
+		return fmt.Errorf(
+			"the '%s' repository source has an invalid name, names must contain only alpha-numeric characters and underscores",
+			b.Name,
+		)
 	}
 
-	enabled := true
+	if l.config.Sources == nil {
+		l.config.Sources = map[string]Source{}
+		l.sourceBlockFiles = map[string]string{}
+	} else if _, ok := l.config.Sources[b.Name]; ok {
+		return fmt.Errorf(
+			"a repository source named '%s' has already been defined in %s",
+			b.Name,
+			l.sourceBlockFiles[b.Name],
+		)
+	}
+
+	src := Source{
+		Name:    b.Name,
+		Enabled: true,
+	}
+
 	if b.Enabled != nil {
-		enabled = *b.Enabled
+		src.Enabled = *b.Enabled
 	}
 
 	body, err := decodeSourceBody(b.Impl, b.Body)
 	if err != nil {
-		return Source{}, err
+		return err
 	}
 
-	cfg, err := body.resolve(filename)
+	src.Config, err = body.resolve(filename)
 	if err != nil {
-		return Source{}, err
+		return fmt.Errorf(
+			"the '%s' repository source contains invalid configuration: %w",
+			b.Name,
+			err,
+		)
 	}
 
-	return Source{
-		Name:    b.Name,
-		Enabled: enabled,
-		Config:  cfg,
-	}, nil
+	l.sourceBlockFiles[src.Name] = filename
+	l.config.Sources[src.Name] = src
+
+	return nil
 }
 
 // decodeSourceBody decodes the body of a source block using an
@@ -69,7 +90,7 @@ func decodeSourceBody(impl string, body hcl.Body) (sourceBlockBody, error) {
 		}
 
 		return nil, fmt.Errorf(
-			"'%s' is not recognized source implementation, expected %s",
+			"'%s' is not a recognized repository source implementation, expected %s",
 			impl,
 			list,
 		)
