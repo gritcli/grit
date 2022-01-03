@@ -15,20 +15,14 @@ func (c GitHubConfig) acceptVisitor(s Source, v SourceVisitor) {
 	v.VisitGitHubSource(s, c)
 }
 
-// withDefaults returns a copy of the configuration with any missing values
-// replaced by their defaults.
-func (c GitHubConfig) withDefaults() SourceConfig {
+// normalize validates the configuration and returns a copy with any missing
+// values replaced by their defaults.
+func (c GitHubConfig) normalize(filename string) (SourceConfig, error) {
 	if c.Domain == "" {
 		c.Domain = "github.com"
 	}
 
-	return c
-}
-
-// validate returns an error if the configuration is invalid, it is intended
-// to be called after any default values have been populated.
-func (c GitHubConfig) validate() error {
-	return nil
+	return c, nil
 }
 
 func init() {

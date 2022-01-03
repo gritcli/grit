@@ -67,8 +67,18 @@ var _ = Describe("func Load() (github source)", func() {
 		),
 		Entry(
 			`duplicate source names`,
-			[]string{`source "my-company" "github" {}`, `source "my-company" "github" {}`},
-			`the 'my-company' repository source has already been defined in`,
+			[]string{`source "my_company" "github" {}`, `source "my_company" "github" {}`},
+			`the 'my_company' repository source has already been defined in`,
+		),
+		Entry(
+			`empty source name`,
+			[]string{`source "" "github" {}`},
+			`the '' repository source is invalid: source name must not be empty`,
+		),
+		Entry(
+			`invalid source name`,
+			[]string{`source "<invalid>" "github" {}`},
+			`the '<invalid>' repository source is invalid: source name must contain only alpha-numeric characters and underscores`,
 		),
 	)
 

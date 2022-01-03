@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"reflect"
+	"regexp"
 
 	"github.com/mitchellh/go-homedir"
 )
@@ -21,29 +22,17 @@ var DefaultConfig = Config{
 
 // Normalize the paths in the default configuration.
 func init() {
-	DefaultConfig.Daemon.Socket, _ = homedir.Expand(DefaultConfig.Daemon.Socket)
+	var err error
+	DefaultConfig.Daemon.Socket, err = homedir.Expand(DefaultConfig.Daemon.Socket)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // Config contains an entire Grit configuration.
 type Config struct {
 	Daemon  Daemon
 	Sources map[string]Source
-}
-
-// validate returns an error if the configuration is invalid, it is intended to
-// be called after any default values have been populated.
-func (c Config) validate() error {
-	if err := c.Daemon.validate(); err != nil {
-		return err
-	}
-
-	for _, src := range c.Sources {
-		if err := src.validate(); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // Daemon holds the configuration for the Grit daemon.
@@ -53,14 +42,14 @@ type Daemon struct {
 	Socket string `hcl:"socket,optional"`
 }
 
-// validate returns an error if the configuration is invalid, it is intended to
-// be called after any default values have been populated.
-func (d Daemon) validate() error {
+// normalize validates the configuration and returns a copy with any missing
+// values replaced by their defaults.
+func (d Daemon) normalize(filename string) (Daemon, error) {
 	if d.Socket == "" {
-		return errors.New("daemon socket must not be empty")
+		d.Socket = DefaultConfig.Daemon.Socket
 	}
 
-	return nil
+	return d, normalizePath(filename, &d.Socket)
 }
 
 // Source represents a repository source defined in the configuration.
@@ -78,14 +67,20 @@ func (s Source) AcceptVisitor(v SourceVisitor) {
 	s.Config.acceptVisitor(s, v)
 }
 
-// validate returns an error if the configuration is invalid, it is intended to
-// be called after any default values have been populated.
-func (s Source) validate() error {
+var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
+
+// normalize validates the configuration and returns a copy with any missing
+// values replaced by their defaults.
+func (s Source) normalize(filename string) (Source, error) {
 	if s.Name == "" {
-		return errors.New("source name must not be empty")
+		return Source{}, errors.New("source name must not be empty")
 	}
 
-	return s.Config.validate()
+	if !sourceNameRegexp.MatchString(s.Name) {
+		return Source{}, errors.New("source name must contain only alpha-numeric characters and underscores")
+	}
+
+	return s, nil
 }
 
 // SourceVisitor dispatches Source values to implementation-specific logic.
@@ -99,13 +94,9 @@ type SourceConfig interface {
 	// acceptVisitor calls the appropriate method on v.
 	acceptVisitor(s Source, v SourceVisitor)
 
-	// withDefaults returns a copy of the configuration with any missing values
-	// replaced by their defaults.
-	withDefaults() SourceConfig
-
-	// validate returns an error if the configuration is invalid, it is intended
-	// to be called after any default values have been populated.
-	validate() error
+	// normalize validates the configuration and returns a copy with any missing
+	// values replaced by their defaults.
+	normalize(filename string) (SourceConfig, error)
 }
 
 // sourceConfigTypes is a map of a source implementation name to the type of its

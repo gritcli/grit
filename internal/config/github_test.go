@@ -33,11 +33,11 @@ var _ = Describe("func Load() (github source)", func() {
 		),
 		Entry(
 			"github enterprise",
-			`source "my-company" "github" {
+			`source "my_company" "github" {
 				domain = "github.example.com"
 			}`,
 			withSource(DefaultConfig, Source{
-				Name: "my-company",
+				Name: "my_company",
 				Config: GitHubConfig{
 					Domain: "github.example.com",
 				},

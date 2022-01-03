@@ -26,7 +26,7 @@ func Load(dir string) (Config, error) {
 		return Config{}, err
 	}
 
-	return l.Get()
+	return l.Get(), nil
 }
 
 // loader loads and assembles a configuration from several configuration files.
@@ -37,9 +37,9 @@ type loader struct {
 }
 
 // Get returns the loaded configuration.
-func (l *loader) Get() (Config, error) {
+func (l *loader) Get() Config {
 	l.applyDefaults()
-	return l.config, l.config.validate()
+	return l.config
 }
 
 // LoadFile loads the configuration from a single file.
@@ -49,18 +49,18 @@ func (l *loader) LoadFile(filename string) error {
 		return err
 	}
 
-	if err := normalize(filename, &c); err != nil {
-		return err
-	}
-
 	if c.Daemon != nil {
 		if l.daemonFile != "" {
 			return fmt.Errorf("%s: the daemon configuration has already been defined in %s", filename, l.daemonFile)
 		}
 
-		l.daemonFile = filename
-		l.config.Daemon = *c.Daemon
+		d, err := c.Daemon.normalize(filename)
+		if err != nil {
+			return fmt.Errorf("%s: the daemon configuration is invalid: %w", filename, err)
+		}
 
+		l.daemonFile = filename
+		l.config.Daemon = d
 	}
 
 	for _, s := range c.Sources {
@@ -110,23 +110,41 @@ func (l *loader) LoadDir(dir string) error {
 
 // loadSource loads a source that was parsed in a configuration file.
 func (l *loader) loadSource(filename string, s anySource) error {
-	cfg, err := l.decodeSourceConfig(filename, s)
+	src := Source{
+		Name: s.Name,
+	}
+
+	src, err := src.normalize(filename)
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"%s: the '%s' repository source is invalid: %w",
+			filename,
+			s.Name,
+			err,
+		)
 	}
 
 	if l.config.Sources == nil {
 		l.config.Sources = map[string]Source{}
 		l.sourceFiles = map[string]string{}
 	} else if _, ok := l.config.Sources[s.Name]; ok {
-		return fmt.Errorf("%s: the '%s' repository source has already been defined in %s", filename, s.Name, l.sourceFiles[s.Name])
+		return fmt.Errorf(
+			"%s: the '%s' repository source has already been defined in %s",
+			filename,
+			s.Name,
+			l.sourceFiles[s.Name],
+		)
 	}
 
-	l.sourceFiles[s.Name] = filename
-	l.config.Sources[s.Name] = Source{
-		Name:   s.Name,
-		Config: cfg.withDefaults(),
+	cfg, err := l.decodeSourceConfig(filename, s)
+	if err != nil {
+		return err
 	}
+
+	src.Config = cfg
+
+	l.sourceFiles[s.Name] = filename
+	l.config.Sources[s.Name] = src
 
 	return nil
 }
@@ -136,7 +154,12 @@ func (l *loader) loadSource(filename string, s anySource) error {
 func (l *loader) decodeSourceConfig(filename string, s anySource) (SourceConfig, error) {
 	rt, ok := sourceConfigTypes[s.Implementation]
 	if !ok {
-		return nil, fmt.Errorf("%s: unrecognized source implementation: %s", filename, s.Implementation)
+		return nil, fmt.Errorf(
+			"%s: the '%s' repository source uses an unrecognized implementation: %s",
+			filename,
+			s.Name,
+			s.Implementation,
+		)
 	}
 
 	ptr := reflect.New(rt)
@@ -146,13 +169,24 @@ func (l *loader) decodeSourceConfig(filename string, s anySource) (SourceConfig,
 		return nil, fmt.Errorf("%s: %w", filename, diag)
 	}
 
-	return ptr.Elem().Interface().(SourceConfig), nil
+	cfg, err := ptr.Elem().Interface().(SourceConfig).normalize(filename)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"%s: the '%s' repository source is invalid: %w",
+			filename,
+			s.Name,
+			err,
+		)
+	}
+
+	return cfg, nil
 }
 
-// applyDefaults merges missing values from DefaultConfig into cfg.
+// applyDefaults merges blocks from DefaultConfig that were not explicitly
+// defined in the configuration files.
 func (l *loader) applyDefaults() {
-	if l.config.Daemon.Socket == "" {
-		l.config.Daemon.Socket = DefaultConfig.Daemon.Socket
+	if l.daemonFile == "" {
+		l.config.Daemon = DefaultConfig.Daemon
 	}
 
 	if l.config.Sources == nil {
@@ -180,15 +214,8 @@ type anySource struct {
 	Body           hcl.Body `hcl:",remain"`
 }
 
-func normalize(filename string, cfg *configFile) error {
-	if cfg.Daemon != nil {
-		return normalizePath(filename, &cfg.Daemon.Socket)
-	}
-
-	return nil
-}
-
-// normalizePath expands references to ~ in filesystem names.
+// normalizePath expands references to ~ in filesystem names, and resolves
+// relative paths.
 func normalizePath(filename string, p *string) error {
 	n := *p
 
