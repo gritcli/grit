@@ -11,64 +11,94 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func Load()", func() {
+var _ = Describe("func Load() (github source)", func() {
 	DescribeTable(
 		"it returns the expected configuration",
-		func(dir string, expect Config) {
+		func(configs []string, expect Config) {
+			dir, cleanup := makeConfigDir(configs...)
+			defer cleanup()
+
 			cfg, err := Load(dir)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(cfg).To(Equal(expect))
 		},
 		Entry(
-			"default configuration",
-			"testdata/valid/default",
+			"non-standard daemon socket",
+			[]string{
+				`daemon {
+					socket = "/path/to/socket"
+				}`,
+			},
+			withDaemon(DefaultConfig, Daemon{
+				Socket: "/path/to/socket",
+			}),
+		),
+		Entry(
+			"empty directory is equivalent to the default",
+			[]string{},
 			DefaultConfig,
 		),
 		Entry(
-			"empty configuration file (should be the same as the default)",
-			"testdata/valid/empty-file",
-			DefaultConfig,
-		),
-		Entry(
-			"empty configuration directory (should be the same as the default)",
-			"testdata/valid/empty-dir",
-			DefaultConfig,
-		),
-		Entry(
-			`not existent directory (should be the same as the default)`,
-			`testdata/valid/non-existent`,
-			DefaultConfig,
-		),
-		Entry(
-			"ignores non-HCL files, directories and files beginning with underscores",
-			"testdata/valid/ignore",
+			"empty file is equivalent to the default",
+			[]string{``},
 			DefaultConfig,
 		),
 	)
 
 	DescribeTable(
 		"it returns an error if there is a problem with the configuration",
-		func(dir string, expect string) {
+		func(configs []string, expect string) {
+			dir, cleanup := makeConfigDir(configs...)
+			defer cleanup()
+
 			_, err := Load(dir)
 			Expect(err).Should(HaveOccurred())
-			Expect(err).To(MatchError(expect), err.Error())
+			Expect(err).To(MatchError(ContainSubstring(expect)), err.Error())
 		},
 		Entry(
 			`syntax error`,
-			`testdata/invalid/syntax-error`,
-			`testdata/invalid/syntax-error/grit.hcl:1,1-2: Argument or block definition required; An argument or block definition is required here.`,
+			[]string{`<invalid>`},
+			`Argument or block definition required; An argument or block definition is required here.`,
 		),
 		Entry(
 			`multiple files with daemon blocks`,
-			`testdata/invalid/multiple-files-with-daemon-block`,
-			`testdata/invalid/multiple-files-with-daemon-block/b.hcl: the daemon configuration has already been defined in testdata/invalid/multiple-files-with-daemon-block/a.hcl`,
+			[]string{`daemon {}`, `daemon {}`},
+			`the daemon configuration has already been defined in`,
 		),
 		Entry(
 			`duplicate source names`,
-			`testdata/invalid/duplicate-source-names`,
-			`testdata/invalid/duplicate-source-names/b.hcl: the 'my-company' repository source has already been defined in testdata/invalid/duplicate-source-names/a.hcl`,
+			[]string{`source "my-company" "github" {}`, `source "my-company" "github" {}`},
+			`the 'my-company' repository source has already been defined in`,
 		),
 	)
+
+	It("returns the default configuration when passed a non-existant directory", func() {
+		cfg, err := Load("./does-not-exist")
+		Expect(err).ShouldNot(HaveOccurred())
+		Expect(cfg).To(Equal(DefaultConfig))
+	})
+
+	It("ignores non-HCL files, directories and HCL files that begin with an underscore", func() {
+		dir, err := os.MkdirTemp("", "")
+		Expect(err).ShouldNot(HaveOccurred())
+		defer os.RemoveAll(dir)
+
+		err = os.Mkdir(filepath.Join(dir, "subdirectory"), 0700)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		err = os.WriteFile(filepath.Join(dir, "subdirectory", "should-be-ignored.txt"), []byte("<invalid config>"), 0600)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		err = os.WriteFile(filepath.Join(dir, "not-hcl.txt"), []byte("<invalid config>"), 0600)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		err = os.WriteFile(filepath.Join(dir, "_underscore.hcl"), []byte("<invalid config>"), 0600)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		cfg, err := Load(dir)
+		Expect(err).ShouldNot(HaveOccurred())
+		Expect(cfg).To(Equal(DefaultConfig))
+	})
 })
 
 // makeConfigDir makes a temporary config directory containing config files
@@ -89,6 +119,12 @@ func makeConfigDir(configs ...string) (dir string, cleanup func()) {
 	return dir, func() {
 		os.RemoveAll(dir)
 	}
+}
+
+// withDaemon returns a copy of cfg with a different daemon configuration.
+func withDaemon(cfg Config, d Daemon) Config {
+	cfg.Daemon = d
+	return cfg
 }
 
 // withSource returns a copy of cfg with an additional repository source.
