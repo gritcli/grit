@@ -14,8 +14,9 @@ import (
 // sourceNameRegexp is a regular expression used to validate source names.
 var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
 
-// mergeDaemonBlock merges b into the configuration.
-func (l *loader) mergeSourceBlock(filename string, b sourceBlock) error {
+// prepareSourceBlock prepares b for merging into the configuration once the
+// entire configuration has been parsed.
+func (l *loader) prepareSourceBlock(filename string, b sourceBlock) error {
 	if b.Name == "" {
 		return errors.New("repository sources must not have empty names")
 	}
@@ -27,10 +28,9 @@ func (l *loader) mergeSourceBlock(filename string, b sourceBlock) error {
 		)
 	}
 
-	if l.config.Sources == nil {
-		l.config.Sources = map[string]Source{}
+	if l.sourceBlockFiles == nil {
 		l.sourceBlockFiles = map[string]string{}
-	} else if _, ok := l.config.Sources[b.Name]; ok {
+	} else if _, ok := l.sourceBlockFiles[b.Name]; ok {
 		return fmt.Errorf(
 			"a repository source named '%s' has already been defined in %s",
 			b.Name,
@@ -38,6 +38,17 @@ func (l *loader) mergeSourceBlock(filename string, b sourceBlock) error {
 		)
 	}
 
+	l.sourceBlocks = append(l.sourceBlocks, b)
+	l.sourceBlockFiles[b.Name] = filename
+
+	return nil
+}
+
+// mergeSourceBlock merges b into the configuration.
+//
+// It must only be called after the global configuration in l.config has been
+// fully parsed, and defaults merged.
+func (l *loader) mergeSourceBlock(filename string, b sourceBlock) error {
 	src := Source{
 		Name:    b.Name,
 		Enabled: true,
@@ -52,7 +63,7 @@ func (l *loader) mergeSourceBlock(filename string, b sourceBlock) error {
 		return err
 	}
 
-	src.Config, err = body.resolve(filename)
+	src.Config, err = body.resolve(filename, l.config)
 	if err != nil {
 		return fmt.Errorf(
 			"the '%s' repository source contains invalid configuration: %w",
@@ -61,7 +72,6 @@ func (l *loader) mergeSourceBlock(filename string, b sourceBlock) error {
 		)
 	}
 
-	l.sourceBlockFiles[src.Name] = filename
 	l.config.Sources[src.Name] = src
 
 	return nil

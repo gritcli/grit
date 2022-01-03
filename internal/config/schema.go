@@ -35,7 +35,7 @@ type sourceBlock struct {
 // sourceBlockBody is an interface for implementation-specific HCL schema within
 // the body of a source block.
 type sourceBlockBody interface {
-	resolve(filename string) (SourceConfig, error)
+	resolve(filename string, cfg Config) (SourceConfig, error)
 }
 
 // sourceSchemaByImpl is a map of a source implementation name to the type of

@@ -22,14 +22,14 @@ type gitHubBlock struct {
 	Token  string `hcl:"token,optional"`
 }
 
-func (b gitHubBlock) resolve(filename string) (SourceConfig, error) {
-	cfg := GitHubConfig(b)
+func (b gitHubBlock) resolve(filename string, cfg Config) (SourceConfig, error) {
+	c := GitHubConfig(b)
 
-	if cfg.Domain == "" {
-		cfg.Domain = "github.com"
+	if c.Domain == "" {
+		c.Domain = "github.com"
 	}
 
-	return cfg, nil
+	return c, nil
 }
 
 func init() {

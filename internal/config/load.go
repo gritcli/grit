@@ -24,7 +24,7 @@ func Load(dir string) (Config, error) {
 		return Config{}, err
 	}
 
-	return l.Get(), nil
+	return l.Finalize()
 }
 
 // loader loads and assembles a configuration from several configuration files.
@@ -32,14 +32,23 @@ type loader struct {
 	config             Config
 	daemonBlockFile    string
 	globalGitBlockFile string
+	sourceBlocks       []sourceBlock
 	sourceBlockFiles   map[string]string
 }
 
-// Get returns the loaded configuration.
-func (l *loader) Get() Config {
+// Finalize returns the loaded configuration.
+func (l *loader) Finalize() (Config, error) {
 	l.mergeDefaults()
 
-	return l.config
+	for _, b := range l.sourceBlocks {
+		filename := l.sourceBlockFiles[b.Name]
+
+		if err := l.mergeSourceBlock(filename, b); err != nil {
+			return Config{}, fmt.Errorf("%s: %w", filename, err)
+		}
+	}
+
+	return l.config, nil
 }
 
 // LoadDir loads the configuration from all .hcl files in the given directory.
@@ -98,7 +107,13 @@ func (l *loader) LoadFile(filename string) error {
 	}
 
 	for _, b := range c.SourceBlocks {
-		if err := l.mergeSourceBlock(filename, b); err != nil {
+		// Note that source blocks are not merged immediately, instead we
+		// perform some cursory validation, and delay merging the final source
+		// configuration until after the global defaults have been populated.
+		//
+		// This is necessary to allow source-specific configuration to fall-back
+		// to global configuration options.
+		if err := l.prepareSourceBlock(filename, b); err != nil {
 			return fmt.Errorf("%s: %w", filename, err)
 		}
 	}
