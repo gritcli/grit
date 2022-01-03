@@ -32,30 +32,6 @@ var _ = Describe("func Load()", func() {
 			[]string{``},
 			DefaultConfig,
 		),
-		Entry(
-			"explicitly enabled source",
-			[]string{
-				`source "github" "github" {
-					enabled = true
-				}`,
-			},
-			DefaultConfig,
-		),
-		Entry(
-			"explicitly disabled source",
-			[]string{
-				`source "github" "github" {
-					enabled = false
-				}`,
-			},
-			withSource(DefaultConfig, Source{
-				Name:    "github",
-				Enabled: false,
-				Config: GitHubConfig{
-					Domain: "github.com",
-				},
-			}),
-		),
 	)
 
 	DescribeTable(
@@ -72,26 +48,6 @@ var _ = Describe("func Load()", func() {
 			`syntax error`,
 			[]string{`<invalid>`},
 			`Argument or block definition required; An argument or block definition is required here.`,
-		),
-		Entry(
-			`duplicate source names`,
-			[]string{`source "my_company" "github" {}`, `source "my_company" "github" {}`},
-			`the 'my_company' repository source has already been defined in`,
-		),
-		Entry(
-			`empty source name`,
-			[]string{`source "" "github" {}`},
-			`the '' repository source is invalid: source name must not be empty`,
-		),
-		Entry(
-			`invalid source name`,
-			[]string{`source "<invalid>" "github" {}`},
-			`the '<invalid>' repository source is invalid: source name must contain only alpha-numeric characters and underscores`,
-		),
-		Entry(
-			`unrecognized source implementation`,
-			[]string{`source "my_source" "<unrecognized>" {}`},
-			`the 'my_source' repository source is invalid: '<unrecognized>' is not recognized source implementation, expected 'github'`,
 		),
 	)
 
