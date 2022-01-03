@@ -1,6 +1,10 @@
 package config_test
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	. "github.com/gritcli/grit/internal/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -40,27 +44,6 @@ var _ = Describe("func Load()", func() {
 			"testdata/valid/ignore",
 			DefaultConfig,
 		),
-		Entry(
-			"github token",
-			"testdata/valid/github/token",
-			withSource(DefaultConfig, Source{
-				Name: "github",
-				Config: GitHubConfig{
-					Domain: "github.com",
-					Token:  "<token>",
-				},
-			}),
-		),
-		Entry(
-			"github enterprise",
-			"testdata/valid/github/enterprise",
-			withSource(DefaultConfig, Source{
-				Name: "my-company",
-				Config: GitHubConfig{
-					Domain: "github.example.com",
-				},
-			}),
-		),
 	)
 
 	DescribeTable(
@@ -87,6 +70,26 @@ var _ = Describe("func Load()", func() {
 		),
 	)
 })
+
+// makeConfigDir makes a temporary config directory containing config files
+// containing the given configuration content.
+func makeConfigDir(configs ...string) (dir string, cleanup func()) {
+	dir, err := os.MkdirTemp("", "")
+	Expect(err).ShouldNot(HaveOccurred())
+
+	for i, cfg := range configs {
+		err := os.WriteFile(
+			filepath.Join(dir, fmt.Sprintf("config-%d.hcl", i)),
+			[]byte(cfg),
+			0600,
+		)
+		Expect(err).ShouldNot(HaveOccurred())
+	}
+
+	return dir, func() {
+		os.RemoveAll(dir)
+	}
+}
 
 // withSource returns a copy of cfg with an additional repository source.
 func withSource(cfg Config, src Source) Config {

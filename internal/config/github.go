@@ -1,7 +1,5 @@
 package config
 
-import "errors"
-
 // GitHubConfig contains configuration specific to a GitHub repository source.
 type GitHubConfig struct {
 	// Domain is the base domain name of the GitHub installation.
@@ -30,10 +28,6 @@ func (c GitHubConfig) withDefaults() SourceConfig {
 // validate returns an error if the configuration is invalid, it is intended
 // to be called after any default values have been populated.
 func (c GitHubConfig) validate() error {
-	if c.Domain == "" {
-		return errors.New("github domain must not be empty")
-	}
-
 	return nil
 }
 
