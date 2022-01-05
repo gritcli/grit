@@ -20,9 +20,21 @@ var _ = Describe("func Load() (global git block)", func() {
 					private_key = "/path/to/key"
 				}`,
 			},
-			withGlobalGit(defaultConfig, Git{
-				PrivateKey: "/path/to/key",
-			}),
+			withSource(
+				withGlobalGit(defaultConfig, Git{
+					PrivateKey: "/path/to/key",
+				}),
+				Source{
+					Name:    "github",
+					Enabled: true,
+					Config: GitHubConfig{
+						Domain: "github.com",
+						Git: Git{
+							PrivateKey: "/path/to/key", // affected by global git block
+						},
+					},
+				},
+			),
 		),
 		Entry(
 			"explicitly prefer SSH",
@@ -40,9 +52,21 @@ var _ = Describe("func Load() (global git block)", func() {
 					prefer_http = true
 				}`,
 			},
-			withGlobalGit(defaultConfig, Git{
-				PreferHTTP: true,
-			}),
+			withSource(
+				withGlobalGit(defaultConfig, Git{
+					PreferHTTP: true,
+				}),
+				Source{
+					Name:    "github",
+					Enabled: true,
+					Config: GitHubConfig{
+						Domain: "github.com",
+						Git: Git{
+							PreferHTTP: true, // affected by global git block
+						},
+					},
+				},
+			),
 		),
 	)
 

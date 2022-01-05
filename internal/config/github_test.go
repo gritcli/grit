@@ -41,5 +41,62 @@ var _ = Describe("func Load() (github source)", func() {
 				},
 			}),
 		),
+		Entry(
+			"explicit private key",
+			[]string{
+				`source "github" "github" {
+					git {
+						private_key = "/path/to/key"
+					}
+				}`,
+			},
+			withSource(
+				defaultConfig,
+				Source{
+					Name:    "github",
+					Enabled: true,
+					Config: GitHubConfig{
+						Domain: "github.com",
+						Git: Git{
+							PrivateKey: "/path/to/key",
+						},
+					},
+				},
+			),
+		),
+		Entry(
+			"explicitly prefer SSH",
+			[]string{
+				`source "github" "github" {
+					git {
+						prefer_http = false
+					}
+				}`,
+			},
+			defaultConfig,
+		),
+		Entry(
+			"explicitly prefer HTTP",
+			[]string{
+				`source "github" "github" {
+					git {
+						prefer_http = true
+					}
+				}`,
+			},
+			withSource(
+				defaultConfig,
+				Source{
+					Name:    "github",
+					Enabled: true,
+					Config: GitHubConfig{
+						Domain: "github.com",
+						Git: Git{
+							PreferHTTP: true,
+						},
+					},
+				},
+			),
+		),
 	)
 })

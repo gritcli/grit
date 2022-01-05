@@ -16,8 +16,8 @@ type Git struct {
 
 // gitBlock is the HCL schema for a "git" block
 type gitBlock struct {
-	PrivateKey *string `hcl:"private_key"`
-	PreferHTTP *bool   `hcl:"prefer_http"`
+	PrivateKey string `hcl:"private_key,optional"`
+	PreferHTTP *bool  `hcl:"prefer_http"` // pointer allows detection of absence vs explicit false
 }
 
 // mergeGlobalGitBlock merges b into cfg.
@@ -39,15 +39,13 @@ func mergeGlobalGitBlock(cfg *unresolvedConfig, filename string, b gitBlock) err
 // normalizeGlobalGitBlock normalizes cfg.GlobalGit.Block and populates it with
 // default values.
 func normalizeGlobalGitBlock(cfg *unresolvedConfig) error {
-	return normalizePath(cfg.GlobalGit.File, cfg.GlobalGit.Block.PrivateKey)
+	return normalizePath(cfg.GlobalGit.File, &cfg.GlobalGit.Block.PrivateKey)
 }
 
-// assembleGlobalGitBlock converts b into its configuration representation.
-func assembleGlobalGitBlock(b gitBlock) Git {
-	cfg := Git{}
-
-	if b.PrivateKey != nil {
-		cfg.PrivateKey = *b.PrivateKey
+// assembleGitBlock converts b into its configuration representation.
+func assembleGitBlock(b gitBlock) Git {
+	cfg := Git{
+		PrivateKey: b.PrivateKey,
 	}
 
 	if b.PreferHTTP != nil {

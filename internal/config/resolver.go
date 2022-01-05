@@ -80,7 +80,7 @@ func (r *resolver) Normalize() error {
 func (r *resolver) Assemble() Config {
 	cfg := Config{
 		Daemon:    assembleDaemonBlock(r.cfg.Daemon.Block),
-		GlobalGit: assembleGlobalGitBlock(r.cfg.GlobalGit.Block),
+		GlobalGit: assembleGitBlock(r.cfg.GlobalGit.Block),
 		Sources:   map[string]Source{},
 	}
 
@@ -131,9 +131,9 @@ type unresolvedSource struct {
 // If *p is a relative path, it is resolved to an absolute path relative to the
 // directory of the given filename.
 //
-// It does nothing if p is nil.
+// It does nothing if p is nil or *p is empty.
 func normalizePath(filename string, p *string) error {
-	if p == nil {
+	if p == nil || *p == "" {
 		return nil
 	}
 
