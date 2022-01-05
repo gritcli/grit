@@ -18,7 +18,7 @@ var defaultConfig = Config{
 		"github": {
 			Name:    "github",
 			Enabled: true,
-			Config: GitHubConfig{
+			Config: GitHub{
 				Domain: "github.com",
 			},
 		},

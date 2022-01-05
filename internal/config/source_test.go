@@ -29,7 +29,7 @@ var _ = Describe("func Load() (source blocks)", func() {
 			withSource(defaultConfig, Source{
 				Name:    "github",
 				Enabled: false,
-				Config: GitHubConfig{
+				Config: GitHub{
 					Domain: "github.com",
 				},
 			}),

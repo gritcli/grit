@@ -27,7 +27,7 @@ var _ = Describe("func Load() (global git block)", func() {
 				Source{
 					Name:    "github",
 					Enabled: true,
-					Config: GitHubConfig{
+					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							PrivateKey: "/path/to/key", // affected by global git block
@@ -59,7 +59,7 @@ var _ = Describe("func Load() (global git block)", func() {
 				Source{
 					Name:    "github",
 					Enabled: true,
-					Config: GitHubConfig{
+					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							PreferHTTP: true, // affected by global git block

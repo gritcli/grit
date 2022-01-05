@@ -23,7 +23,7 @@ var _ = Describe("type source", func() {
 	When("the source has not been initialized", func() {
 		BeforeEach(func() {
 			var err error
-			src, err = NewSource("github-source", config.GitHubConfig{Domain: "github.com"}, logger)
+			src, err = NewSource("github-source", config.GitHub{Domain: "github.com"}, logger)
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 
@@ -41,7 +41,7 @@ var _ = Describe("type source", func() {
 			When("using GitHub Enterprise server", func() {
 				BeforeEach(func() {
 					var err error
-					src, err = NewSource("github-source", config.GitHubConfig{Domain: "code.example.com"}, logger)
+					src, err = NewSource("github-source", config.GitHub{Domain: "code.example.com"}, logger)
 					Expect(err).ShouldNot(HaveOccurred())
 				})
 
@@ -94,14 +94,14 @@ var _ = Describe("type source", func() {
 // beforeEachAuthenticated returns the context and source used for running
 // integration tests with an authenticated user.
 func beforeEachAuthenticated() (context.Context, context.CancelFunc, source.Source) {
-	return initSource(func() config.GitHubConfig {
+	return initSource(func() config.GitHub {
 		token := os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
 
 		if token == "" {
 			Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
 		}
 
-		return config.GitHubConfig{
+		return config.GitHub{
 			Domain: "github.com",
 			Token:  token,
 		}
@@ -111,8 +111,8 @@ func beforeEachAuthenticated() (context.Context, context.CancelFunc, source.Sour
 // beforeEachAuthenticated returns the context and source used for running
 // integration tests without an authenticated user.
 func beforeEachUnauthenticated() (context.Context, context.CancelFunc, source.Source) {
-	return initSource(func() config.GitHubConfig {
-		return config.GitHubConfig{
+	return initSource(func() config.GitHub {
+		return config.GitHub{
 			Domain: "github.com",
 		}
 	})
@@ -120,7 +120,7 @@ func beforeEachUnauthenticated() (context.Context, context.CancelFunc, source.So
 
 // initSource creates and initializes a source using the config returned by
 // cfg(). It is intended for use in the beforeEachXXX() helper functions.
-func initSource(cfg func() config.GitHubConfig) (context.Context, context.CancelFunc, source.Source) {
+func initSource(cfg func() config.GitHub) (context.Context, context.CancelFunc, source.Source) {
 	if os.Getenv("GRIT_INTEGRATION_TEST_GITHUB") == "" {
 		Skip("set GRIT_INTEGRATION_TEST_GITHUB to enable tests that use the GitHub API")
 	}

@@ -17,7 +17,7 @@ import (
 // GitHub.com or a GitHub Enterprise Server installation.
 type impl struct {
 	name   string
-	cfg    config.GitHubConfig
+	cfg    config.GitHub
 	client *github.Client
 	logger logging.Logger
 
@@ -27,7 +27,7 @@ type impl struct {
 // NewSource returns a new source with the given configuration.
 func NewSource(
 	name string,
-	cfg config.GitHubConfig,
+	cfg config.GitHub,
 	logger logging.Logger,
 ) (source.Source, error) {
 	src := &impl{
@@ -148,6 +148,6 @@ func (s *impl) populateRepoCache(ctx context.Context) error {
 }
 
 // isGitHubDotCom returns true if domain is the domain for github.com.
-func isGitHubDotCom(cfg config.GitHubConfig) bool {
+func isGitHubDotCom(cfg config.GitHub) bool {
 	return strings.EqualFold(cfg.Domain, "github.com")
 }

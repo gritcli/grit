@@ -1,7 +1,7 @@
 package config
 
-// GitHubConfig contains configuration specific to a GitHub repository source.
-type GitHubConfig struct {
+// GitHub contains configuration specific to a GitHub repository source.
+type GitHub struct {
 	// Domain is the base domain name of the GitHub installation.
 	Domain string
 
@@ -14,7 +14,7 @@ type GitHubConfig struct {
 }
 
 // acceptVisitor calls v.VisitGitHubSource(s, c).
-func (c GitHubConfig) acceptVisitor(s Source, v SourceVisitor) {
+func (c GitHub) acceptVisitor(s Source, v SourceVisitor) {
 	v.VisitGitHubSource(s, c)
 }
 
@@ -47,7 +47,7 @@ func (b *gitHubBlock) Normalize(cfg unresolvedConfig) error {
 }
 
 func (b *gitHubBlock) Assemble() SourceConfig {
-	return GitHubConfig{
+	return GitHub{
 		Domain: b.Domain,
 		Token:  b.Token,
 		Git:    assembleGitBlock(*b.Git),

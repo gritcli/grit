@@ -38,7 +38,7 @@ type SourceConfig interface {
 
 // SourceVisitor dispatches Source values to implementation-specific logic.
 type SourceVisitor interface {
-	VisitGitHubSource(s Source, cfg GitHubConfig)
+	VisitGitHubSource(s Source, cfg GitHub)
 }
 
 // sourceBlock is the HCL schema for a "source" block.

@@ -39,7 +39,7 @@ type sourceFactory struct {
 	Error  error
 }
 
-func (f *sourceFactory) VisitGitHubSource(s config.Source, cfg config.GitHubConfig) {
+func (f *sourceFactory) VisitGitHubSource(s config.Source, cfg config.GitHub) {
 	f.Source, f.Error = github.NewSource(
 		s.Name,
 		cfg,

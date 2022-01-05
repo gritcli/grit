@@ -20,7 +20,7 @@ var _ = Describe("func Load() (github source)", func() {
 			withSource(defaultConfig, Source{
 				Name:    "github",
 				Enabled: true,
-				Config: GitHubConfig{
+				Config: GitHub{
 					Domain: "github.com",
 					Token:  "<token>",
 				},
@@ -36,7 +36,7 @@ var _ = Describe("func Load() (github source)", func() {
 			withSource(defaultConfig, Source{
 				Name:    "my_company",
 				Enabled: true,
-				Config: GitHubConfig{
+				Config: GitHub{
 					Domain: "github.example.com",
 				},
 			}),
@@ -55,7 +55,7 @@ var _ = Describe("func Load() (github source)", func() {
 				Source{
 					Name:    "github",
 					Enabled: true,
-					Config: GitHubConfig{
+					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							PrivateKey: "/path/to/key",
@@ -89,7 +89,7 @@ var _ = Describe("func Load() (github source)", func() {
 				Source{
 					Name:    "github",
 					Enabled: true,
-					Config: GitHubConfig{
+					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							PreferHTTP: true,
