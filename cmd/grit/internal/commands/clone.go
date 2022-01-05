@@ -3,11 +3,12 @@ package commands
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
+	"github.com/gritcli/grit/cmd/grit/internal/interactive"
+	"github.com/gritcli/grit/cmd/grit/internal/shell"
 	"github.com/gritcli/grit/internal/api"
 	"github.com/spf13/cobra"
 )
@@ -38,35 +39,128 @@ func newCloneCommand() *cobra.Command {
 			args []string,
 			client api.APIClient,
 			clientOptions *api.ClientOptions,
+			executor shell.Executor,
 		) error {
 			if args[0] == "" {
 				return errors.New("<repo> argument must not be empty")
 			}
 
-			req := &api.ResolveRequest{
-				ClientOptions: clientOptions,
-				Query:         args[0],
-			}
-
-			stream, err := client.Resolve(ctx, req)
+			repo, err := resolveRepo(
+				ctx,
+				cmd,
+				client,
+				clientOptions,
+				args[0],
+			)
 			if err != nil {
 				return err
 			}
 
-			for {
-				res, err := stream.Recv()
-				if err != nil {
-					if err == io.EOF {
-						break
-					}
-
-					return err
-				}
-
-				fmt.Println(res)
+			dir, err := cloneRepo(
+				ctx,
+				cmd,
+				client,
+				clientOptions,
+				repo,
+			)
+			if err != nil {
+				return err
 			}
 
-			return nil
+			return executor("cd", dir)
 		}),
 	}
+}
+
+// resolveRepo resolves a repo query string to a specific repo.
+func resolveRepo(
+	ctx context.Context,
+	cmd *cobra.Command,
+	client api.APIClient,
+	clientOptions *api.ClientOptions,
+	query string,
+) (*api.Repo, error) {
+	req := &api.ResolveRequest{
+		ClientOptions: clientOptions,
+		Query:         query,
+	}
+
+	stream, err := client.Resolve(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var repos []*api.Repo
+
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if out := res.GetOutput(); out != nil {
+			cmd.Println(out.Message)
+		} else if r := res.GetRepo(); r != nil {
+			repos = append(repos, r)
+		}
+	}
+
+	if len(repos) == 0 {
+		return nil, errors.New("no matching repositories found")
+	}
+
+	return interactive.SelectRepos(
+		cmd,
+		"Which repository would you like to clone?",
+		repos,
+	)
+}
+
+// cloneRepo clones a repository.
+func cloneRepo(
+	ctx context.Context,
+	cmd *cobra.Command,
+	client api.APIClient,
+	clientOptions *api.ClientOptions,
+	repo *api.Repo,
+) (string, error) {
+	req := &api.CloneRequest{
+		ClientOptions: clientOptions,
+		Source:        repo.Source,
+		RepoId:        repo.Id,
+	}
+
+	stream, err := client.Clone(ctx, req)
+	if err != nil {
+		return "", err
+	}
+
+	dir := ""
+
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return "", err
+		}
+
+		if out := res.GetOutput(); out != nil {
+			cmd.Println(out.Message)
+		} else if d := res.GetDirectory(); d != "" {
+			dir = d
+		}
+	}
+
+	if dir == "" {
+		return "", errors.New("server did not provide the directory of the clone")
+	}
+
+	return dir, nil
 }

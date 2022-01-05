@@ -27,6 +27,8 @@ type APIClient interface {
 	// Resolve resolves repository name, URL or other identifier to a list of
 	// candidate repositories.
 	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (API_ResolveClient, error)
+	// Clone makes a local clone of a repository from a source.
+	Clone(ctx context.Context, in *CloneRequest, opts ...grpc.CallOption) (API_CloneClient, error)
 }
 
 type aPIClient struct {
@@ -78,6 +80,38 @@ func (x *aPIResolveClient) Recv() (*ResolveResponse, error) {
 	return m, nil
 }
 
+func (c *aPIClient) Clone(ctx context.Context, in *CloneRequest, opts ...grpc.CallOption) (API_CloneClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[1], "/grit.v2.api.API/Clone", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &aPICloneClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type API_CloneClient interface {
+	Recv() (*CloneResponse, error)
+	grpc.ClientStream
+}
+
+type aPICloneClient struct {
+	grpc.ClientStream
+}
+
+func (x *aPICloneClient) Recv() (*CloneResponse, error) {
+	m := new(CloneResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // APIServer is the server API for API service.
 // All implementations should embed UnimplementedAPIServer
 // for forward compatibility
@@ -87,6 +121,8 @@ type APIServer interface {
 	// Resolve resolves repository name, URL or other identifier to a list of
 	// candidate repositories.
 	Resolve(*ResolveRequest, API_ResolveServer) error
+	// Clone makes a local clone of a repository from a source.
+	Clone(*CloneRequest, API_CloneServer) error
 }
 
 // UnimplementedAPIServer should be embedded to have forward compatible implementations.
@@ -98,6 +134,9 @@ func (UnimplementedAPIServer) Sources(context.Context, *SourcesRequest) (*Source
 }
 func (UnimplementedAPIServer) Resolve(*ResolveRequest, API_ResolveServer) error {
 	return status.Errorf(codes.Unimplemented, "method Resolve not implemented")
+}
+func (UnimplementedAPIServer) Clone(*CloneRequest, API_CloneServer) error {
+	return status.Errorf(codes.Unimplemented, "method Clone not implemented")
 }
 
 // UnsafeAPIServer may be embedded to opt out of forward compatibility for this service.
@@ -150,6 +189,27 @@ func (x *aPIResolveServer) Send(m *ResolveResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _API_Clone_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(CloneRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(APIServer).Clone(m, &aPICloneServer{stream})
+}
+
+type API_CloneServer interface {
+	Send(*CloneResponse) error
+	grpc.ServerStream
+}
+
+type aPICloneServer struct {
+	grpc.ServerStream
+}
+
+func (x *aPICloneServer) Send(m *CloneResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // API_ServiceDesc is the grpc.ServiceDesc for API service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -166,6 +226,11 @@ var API_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "Resolve",
 			Handler:       _API_Resolve_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Clone",
+			Handler:       _API_Clone_Handler,
 			ServerStreams: true,
 		},
 	},

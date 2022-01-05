@@ -10,6 +10,9 @@ service API {
     // Resolve resolves repository name, URL or other identifier to a list of
     // candidate repositories.
     rpc Resolve(ResolveRequest) returns (stream ResolveResponse);
+
+    // Clone makes a local clone of a repository from a source.
+    rpc Clone(CloneRequest) returns (stream CloneResponse);
 }
 
 message SourcesRequest {
@@ -50,5 +53,18 @@ message ResolveResponse {
     oneof response {
         ClientOutput output = 1;
         Repo repo = 2;
+    }
+}
+
+message CloneRequest {
+    ClientOptions client_options = 1;
+    string source = 2;
+    string repo_id = 3;
+}
+
+message CloneResponse {
+    oneof response {
+        ClientOutput output = 1;
+        string directory = 2;
     }
 }

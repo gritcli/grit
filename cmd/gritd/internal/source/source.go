@@ -47,6 +47,17 @@ type Source interface {
 	// clientLog is a target for any log output that should be sent to the
 	// client and displayed to the user.
 	Resolve(ctx context.Context, query string, clientLog logging.Logger) ([]Repo, error)
+
+	// Clone makes a repository available at the specified directory.
+	//
+	// The term "clone" is intended in the manner used by Git and similar
+	// distributed source control systems. The implementation should take
+	// whatever action best matches this intent. For example, for Subversion
+	// repositories an equivalent operation would be "checkout".
+	//
+	// clientLog is a target for any log output that should be sent to the
+	// client and displayed to the user.
+	Clone(ctx context.Context, repoID, dir string, clientLog logging.Logger) error
 }
 
 // Repo is a reference to a remote repository provided by a source.
