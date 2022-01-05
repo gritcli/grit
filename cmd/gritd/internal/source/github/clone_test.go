@@ -36,10 +36,6 @@ var _ = Describe("func source.Clone()", func() {
 	})
 
 	When("unauthenticated", func() {
-		// Note that there is no separate test for "authenticated mode", because
-		// Grit itself is not currently responsible for authenticating Git
-		// access. It assumes you have a working SSH key setup.
-
 		BeforeEach(func() {
 			ctx, cancel, src = beforeEachUnauthenticated()
 		})

@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"os"
 
 	"github.com/dogmatiq/dodeca/logging"
 	git "github.com/go-git/go-git/v5"
@@ -74,28 +75,46 @@ func newCloneOptions(
 	}
 
 	if cfg.Git.PreferHTTP {
-		opts.URL = r.GetCloneURL()
-
-		if cfg.Token != "" {
-			opts.Auth = &http.BasicAuth{
-				Username: "token", // ignored
-				Password: cfg.Token,
-			}
+		// The user explicitly prefers HTTP.
+		useHTTP(opts, cfg, r)
+	} else if cfg.Git.SSHKeyFile != "" {
+		// The user prefers SSH and has supplied a specific private key.
+		if err := useSSHKey(opts, cfg); err != nil {
+			return opts, err
 		}
-	}
-
-	if cfg.Git.SSHKeyFile != "" {
-		publicKeys, err := ssh.NewPublicKeysFromFile(
-			"git", // github always uses the "git" username for SSH access
-			cfg.Git.SSHKeyFile,
-			cfg.Git.SSHKeyPassphrase,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		opts.Auth = publicKeys
+	} else if os.Getenv("SSH_AUTH_SOCK") == "" {
+		// The user prefers SSH, but did not provide a private key, and the SSH
+		// agent is unavailable, so fall back to HTTP.
+		useHTTP(opts, cfg, r)
 	}
 
 	return opts, nil
+}
+
+// useHTTP configures opts to clone using the HTTP protocol (instead of SSH).
+func useHTTP(opts *git.CloneOptions, cfg config.GitHub, r *github.Repository) {
+	opts.URL = r.GetCloneURL()
+
+	if cfg.Token != "" {
+		opts.Auth = &http.BasicAuth{
+			Username: "token", // ignored
+			Password: cfg.Token,
+		}
+	}
+}
+
+// useSSHKey configures opts to use the given SSH key for authentication.
+func useSSHKey(opts *git.CloneOptions, cfg config.GitHub) error {
+	publicKeys, err := ssh.NewPublicKeysFromFile(
+		"git", // github always uses the "git" username for SSH access
+		cfg.Git.SSHKeyFile,
+		cfg.Git.SSHKeyPassphrase,
+	)
+	if err != nil {
+		return err
+	}
+
+	opts.Auth = publicKeys
+
+	return nil
 }
