@@ -14,15 +14,17 @@ var _ = Describe("func Load() (global git block)", func() {
 		"it returns the expected configuration",
 		testLoadSuccess,
 		Entry(
-			"explicit private key",
+			"explicit SSH key",
 			[]string{
 				`git {
-					private_key = "/path/to/key"
+					ssh_key {
+						file = "/path/to/key"
+					}
 				}`,
 			},
 			withSource(
 				withGlobalGit(defaultConfig, Git{
-					PrivateKey: "/path/to/key",
+					SSHKeyFile: "/path/to/key",
 				}),
 				Source{
 					Name:    "github",
@@ -30,24 +32,26 @@ var _ = Describe("func Load() (global git block)", func() {
 					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{ // inherited from global git block
-							PrivateKey: "/path/to/key",
+							SSHKeyFile: "/path/to/key",
 						},
 					},
 				},
 			),
 		),
 		Entry(
-			"explicit private key with passphrase",
+			"explicit SSH key with passphrase",
 			[]string{
 				`git {
-					private_key = "/path/to/key"
-					passphrase = "<passphrase>"
+					ssh_key {
+						file = "/path/to/key"
+						passphrase = "<passphrase>"
+					}
 				}`,
 			},
 			withSource(
 				withGlobalGit(defaultConfig, Git{
-					PrivateKey: "/path/to/key",
-					Passphrase: "<passphrase>",
+					SSHKeyFile:       "/path/to/key",
+					SSHKeyPassphrase: "<passphrase>",
 				}),
 				Source{
 					Name:    "github",
@@ -55,8 +59,8 @@ var _ = Describe("func Load() (global git block)", func() {
 					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{ // inherited from global git block
-							PrivateKey: "/path/to/key",
-							Passphrase: "<passphrase>",
+							SSHKeyFile:       "/path/to/key",
+							SSHKeyPassphrase: "<passphrase>",
 						},
 					},
 				},
@@ -108,27 +112,31 @@ var _ = Describe("func Load() (global git block)", func() {
 			`<dir>/config-1.hcl: a global 'git' block is already defined in <dir>/config-0.hcl`,
 		),
 		Entry(
-			`explicit passphrase without private key`,
+			`explicit SSH passphrase without key file`,
 			[]string{
 				`git {
-					passphrase = "<passphrase>"
+					ssh_key {
+						passphrase = "<passphrase>"
+					}
 				}`,
 			},
-			`<dir>/config-0.hcl: the global 'git' block is invalid: passphrase present without specifying a private key file`,
+			`<dir>/config-0.hcl:2,14-14: Missing required argument; The argument "file" is required, but no definition was found.`,
 		),
 	)
 
-	It("resolves the private key path relative to the config directory", func() {
+	It("resolves the SSH key path relative to the config directory", func() {
 		dir, cleanup := makeConfigDir(
 			`git {
-				private_key = "relative/path/to/key"
+				ssh_key {
+					file = "relative/path/to/key"
+				}
 			}`,
 		)
 		defer cleanup()
 
 		cfg, err := Load(dir)
 		Expect(err).ShouldNot(HaveOccurred())
-		Expect(cfg.GlobalGit.PrivateKey).To(Equal(
+		Expect(cfg.GlobalGit.SSHKeyFile).To(Equal(
 			filepath.Join(dir, "relative/path/to/key"),
 		))
 	})

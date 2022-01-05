@@ -10,10 +10,6 @@ var defaultConfig = Config{
 	Daemon: Daemon{
 		Socket: "~/grit/daemon.sock",
 	},
-	GlobalGit: Git{
-		PrivateKey: "",
-		PreferHTTP: false,
-	},
 	Sources: map[string]Source{
 		"github": {
 			Name:    "github",

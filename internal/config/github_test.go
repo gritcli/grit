@@ -42,11 +42,13 @@ var _ = Describe("func Load() (github source)", func() {
 			}),
 		),
 		Entry(
-			"explicit private key",
+			"explicit SSH key",
 			[]string{
 				`source "github" "github" {
 					git {
-						private_key = "/path/to/key"
+						ssh_key {
+							file = "/path/to/key"
+						}
 					}
 				}`,
 			},
@@ -58,19 +60,21 @@ var _ = Describe("func Load() (github source)", func() {
 					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{
-							PrivateKey: "/path/to/key",
+							SSHKeyFile: "/path/to/key",
 						},
 					},
 				},
 			),
 		),
 		Entry(
-			"explicit private key with passphrase",
+			"explicit SSH key with passphrase",
 			[]string{
 				`source "github" "github" {
 					git {
-						private_key = "/path/to/key"
-						passphrase = "<passphrase>"
+						ssh_key {
+							file = "/path/to/key"
+							passphrase = "<passphrase>"
+						}
 					}
 				}`,
 			},
@@ -82,31 +86,35 @@ var _ = Describe("func Load() (github source)", func() {
 					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{
-							PrivateKey: "/path/to/key",
-							Passphrase: "<passphrase>",
+							SSHKeyFile:       "/path/to/key",
+							SSHKeyPassphrase: "<passphrase>",
 						},
 					},
 				},
 			),
 		),
 		Entry(
-			"does not inherit global passphase when private key is specified explicitly",
+			"does not inherit global passphase when SSH key is specified explicitly",
 			[]string{
 				`git {
-					private_key = "/path/to/key"
-					passphrase = "<passphrase>"
+					ssh_key {
+						file = "/path/to/key"
+						passphrase = "<passphrase>"
+					}
 				}
 
 				source "github" "github" {
 					git {
-						private_key = "/path/to/different/key"
+						ssh_key {
+							file = "/path/to/different/key"
+						}
 					}
 				}`,
 			},
 			withSource(
 				withGlobalGit(defaultConfig, Git{
-					PrivateKey: "/path/to/key",
-					Passphrase: "<passphrase>",
+					SSHKeyFile:       "/path/to/key",
+					SSHKeyPassphrase: "<passphrase>",
 				}),
 				Source{
 					Name:    "github",
@@ -114,8 +122,8 @@ var _ = Describe("func Load() (github source)", func() {
 					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{
-							PrivateKey: "/path/to/different/key",
-							Passphrase: "", // note: different to global git config
+							SSHKeyFile:       "/path/to/different/key",
+							SSHKeyPassphrase: "", // note: different to global git config
 						},
 					},
 				},
@@ -161,15 +169,17 @@ var _ = Describe("func Load() (github source)", func() {
 		"it returns an error if there is a problem with the configuration",
 		testLoadFailure,
 		Entry(
-			`explicit passphrase without private key`,
+			`explicit SSH passphrase without key file`,
 			[]string{
 				`source "github" "github" {
 					git {
-						passphrase = "<passphrase>"
+						ssh_key {
+							passphrase = "<passphrase>"
+						}
 					}
 				}`,
 			},
-			`<dir>/config-0.hcl: the 'github' repository source is invalid: the 'git' block is invalid: passphrase present without specifying a private key file`,
+			`<dir>/config-0.hcl:3,15-15: Missing required argument; The argument "file" is required, but no definition was found.`,
 		),
 	)
 })

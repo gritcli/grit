@@ -1,19 +1,21 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 )
 
 // Git is the configuration that controls how Grit uses Git.
 type Git struct {
-	// PrivateKey is the path to the private SSH key used to authenticate when
-	// using the SSH transport. If it is empty, the system's SSH agent is
-	// queried to determine which identity to use.
-	PrivateKey string
+	// SSHKeyFile is the path to the private SSH key used to authenticate when
+	// using the SSH transport.
+	//
+	// If it is empty, the system's SSH agent is queried to determine which
+	// identity to use.
+	SSHKeyFile string
 
-	// Passphrase is the passphrase used to encrypt the private key, if any.
-	Passphrase string
+	// SSHKeyPassphrase is the passphrase used to encrypt the SSH private key,
+	// if any.
+	SSHKeyPassphrase string
 
 	// PreferHTTP indicates that Grit should prefer the HTTP transport. By
 	// default SSH is preferred.
@@ -22,9 +24,15 @@ type Git struct {
 
 // gitBlock is the HCL schema for a "git" block
 type gitBlock struct {
-	PrivateKey string `hcl:"private_key,optional"`
+	SSHKey     *sshKeyBlock `hcl:"ssh_key,block"`
+	PreferHTTP *bool        `hcl:"prefer_http"` // pointer allows detection of absence vs explicit false
+}
+
+// sshKeyBlock is the HCL schema for a "private_key" block within a "git"
+// block.
+type sshKeyBlock struct {
+	File       string `hcl:"file"`
 	Passphrase string `hcl:"passphrase,optional"`
-	PreferHTTP *bool  `hcl:"prefer_http"` // pointer allows detection of absence vs explicit false
 }
 
 // mergeGlobalGitBlock merges b into cfg.
@@ -53,17 +61,17 @@ func mergeGlobalGitBlock(cfg *unresolvedConfig, filename string, b gitBlock) err
 
 // validateGitBlock validates the contents of b.
 func validateGitBlock(b gitBlock) error {
-	if b.PrivateKey == "" && b.Passphrase != "" {
-		return errors.New("passphrase present without specifying a private key file")
-	}
-
 	return nil
 }
 
 // normalizeGlobalGitBlock normalizes cfg.GlobalGit.Block and populates it with
 // default values.
 func normalizeGlobalGitBlock(cfg *unresolvedConfig) error {
-	return normalizePath(cfg.GlobalGit.File, &cfg.GlobalGit.Block.PrivateKey)
+	if cfg.GlobalGit.Block.SSHKey != nil {
+		return normalizePath(cfg.GlobalGit.File, &cfg.GlobalGit.Block.SSHKey.File)
+	}
+
+	return nil
 }
 
 // normalizeSourceSpecificGitBlock normalizes a gitBlock within a source
@@ -75,17 +83,13 @@ func normalizeSourceSpecificGitBlock(cfg unresolvedConfig, s unresolvedSource, p
 
 	b := *p
 
-	if b.PrivateKey == "" {
-		b.PrivateKey = cfg.GlobalGit.Block.PrivateKey
-
-		if b.Passphrase == "" {
-			b.Passphrase = cfg.GlobalGit.Block.Passphrase
-		}
+	if b.SSHKey == nil {
+		b.SSHKey = cfg.GlobalGit.Block.SSHKey
 	} else {
 		// We make sure to only normalize the private key path against s.File if
 		// it actually came from the source config (not inherited from the
 		// global git block).
-		if err := normalizePath(s.File, &b.PrivateKey); err != nil {
+		if err := normalizePath(s.File, &b.SSHKey.File); err != nil {
 			return err
 		}
 	}
@@ -106,9 +110,11 @@ func normalizeSourceSpecificGitBlock(cfg unresolvedConfig, s unresolvedSource, p
 
 // assembleGitBlock converts b into its configuration representation.
 func assembleGitBlock(b gitBlock) Git {
-	cfg := Git{
-		PrivateKey: b.PrivateKey,
-		Passphrase: b.Passphrase,
+	cfg := Git{}
+
+	if b.SSHKey != nil {
+		cfg.SSHKeyFile = b.SSHKey.File
+		cfg.SSHKeyPassphrase = b.SSHKey.Passphrase
 	}
 
 	if b.PreferHTTP != nil {
