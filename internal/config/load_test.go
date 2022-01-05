@@ -4,57 +4,49 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	. "github.com/gritcli/grit/internal/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/format"
 )
 
 var _ = Describe("func Load()", func() {
 	DescribeTable(
 		"it returns the expected configuration",
-		func(configs []string, expect Config) {
-			dir, cleanup := makeConfigDir(configs...)
-			defer cleanup()
-
-			cfg, err := Load(dir)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(cfg).To(Equal(expect))
-		},
+		testLoadSuccess,
 		Entry(
 			"empty directory is equivalent to the default",
 			[]string{},
-			DefaultConfig,
+			defaultConfig,
 		),
 		Entry(
 			"empty file is equivalent to the default",
-			[]string{``},
-			DefaultConfig,
+			[]string{
+				``,
+			},
+			defaultConfig,
 		),
 	)
 
 	DescribeTable(
 		"it returns an error if there is a problem with the configuration",
-		func(configs []string, expect string) {
-			dir, cleanup := makeConfigDir(configs...)
-			defer cleanup()
-
-			_, err := Load(dir)
-			Expect(err).Should(HaveOccurred())
-			Expect(err).To(MatchError(ContainSubstring(expect)), err.Error())
-		},
+		testLoadFailure,
 		Entry(
 			`syntax error`,
-			[]string{`<invalid>`},
-			`Argument or block definition required; An argument or block definition is required here.`,
+			[]string{
+				`<invalid>`,
+			},
+			`<dir>/config-0.hcl:1,1-2: Argument or block definition required; An argument or block definition is required here.`,
 		),
 	)
 
 	It("returns the default configuration when passed a non-existent directory", func() {
 		cfg, err := Load("./does-not-exist")
 		Expect(err).ShouldNot(HaveOccurred())
-		Expect(cfg).To(Equal(DefaultConfig))
+		Expect(cfg).To(Equal(defaultConfig))
 	})
 
 	It("ignores non-HCL files, directories and HCL files that begin with an underscore", func() {
@@ -76,7 +68,7 @@ var _ = Describe("func Load()", func() {
 
 		cfg, err := Load(dir)
 		Expect(err).ShouldNot(HaveOccurred())
-		Expect(cfg).To(Equal(DefaultConfig))
+		Expect(cfg).To(Equal(defaultConfig))
 	})
 })
 
@@ -98,4 +90,37 @@ func makeConfigDir(configs ...string) (dir string, cleanup func()) {
 	return dir, func() {
 		os.RemoveAll(dir)
 	}
+}
+
+// testLoadSuccess is a function for use in DescribeTable that tests for success
+// cases when loading configuration files.
+func testLoadSuccess(configs []string, expect Config) {
+	dir, cleanup := makeConfigDir(configs...)
+	defer cleanup()
+
+	cfg, err := Load(dir)
+	Expect(err).ShouldNot(HaveOccurred())
+	Expect(cfg).To(Equal(expect))
+}
+
+// testLoadFailure is a function for use in DescribeTable that tests for failure
+// cases when loading configuration files.
+//
+// The text "<dir>" can be used in the expected message as a placeholder for the
+// actual temporary directory used during the test.
+func testLoadFailure(configs []string, expect string) {
+	orig := format.TruncatedDiff
+	format.TruncatedDiff = false
+	defer func() {
+		format.TruncatedDiff = orig
+	}()
+
+	dir, cleanup := makeConfigDir(configs...)
+	defer cleanup()
+
+	_, err := Load(dir)
+	Expect(err).Should(HaveOccurred())
+
+	message := strings.ReplaceAll(err.Error(), dir, "<dir>")
+	Expect(message).To(Equal(expect))
 }

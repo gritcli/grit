@@ -1,6 +1,8 @@
 package config_test
 
 import (
+	"path/filepath"
+
 	. "github.com/gritcli/grit/internal/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -10,14 +12,7 @@ import (
 var _ = Describe("func Load() (global git block)", func() {
 	DescribeTable(
 		"it returns the expected configuration",
-		func(configs []string, expect Config) {
-			dir, cleanup := makeConfigDir(configs...)
-			defer cleanup()
-
-			cfg, err := Load(dir)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(cfg).To(Equal(expect))
-		},
+		testLoadSuccess,
 		Entry(
 			"explicit private key",
 			[]string{
@@ -25,7 +20,7 @@ var _ = Describe("func Load() (global git block)", func() {
 					private_key = "/path/to/key"
 				}`,
 			},
-			withGlobalGit(DefaultConfig, Git{
+			withGlobalGit(defaultConfig, Git{
 				PrivateKey: "/path/to/key",
 			}),
 		),
@@ -36,7 +31,7 @@ var _ = Describe("func Load() (global git block)", func() {
 					prefer_http = false
 				}`,
 			},
-			DefaultConfig,
+			defaultConfig,
 		),
 		Entry(
 			"explicitly prefer HTTP",
@@ -45,7 +40,7 @@ var _ = Describe("func Load() (global git block)", func() {
 					prefer_http = true
 				}`,
 			},
-			withGlobalGit(DefaultConfig, Git{
+			withGlobalGit(defaultConfig, Git{
 				PreferHTTP: true,
 			}),
 		),
@@ -53,24 +48,26 @@ var _ = Describe("func Load() (global git block)", func() {
 
 	DescribeTable(
 		"it returns an error if there is a problem with the configuration",
-		func(configs []string, expect string) {
-			dir, cleanup := makeConfigDir(configs...)
-			defer cleanup()
-
-			_, err := Load(dir)
-			Expect(err).Should(HaveOccurred())
-			Expect(err).To(MatchError(ContainSubstring(expect)), err.Error())
-		},
+		testLoadFailure,
 		Entry(
-			`multiple files with git blocks`,
+			`multiple files with global git blocks`,
 			[]string{`git {}`, `git {}`},
-			`the global git configuration has already been defined in`,
+			`<dir>/config-1.hcl: a global 'git' block is already defined in <dir>/config-0.hcl`,
 		),
 	)
-})
 
-// withGlobalGit returns a copy of cfg with a different git configuration.
-func withGlobalGit(cfg Config, g Git) Config {
-	cfg.GlobalGit = g
-	return cfg
-}
+	It("resolves the private key path relative to the config directory", func() {
+		dir, cleanup := makeConfigDir(
+			`git {
+				private_key = "relative/path/to/key"
+			}`,
+		)
+		defer cleanup()
+
+		cfg, err := Load(dir)
+		Expect(err).ShouldNot(HaveOccurred())
+		Expect(cfg.GlobalGit.PrivateKey).To(Equal(
+			filepath.Join(dir, "relative/path/to/key"),
+		))
+	})
+})

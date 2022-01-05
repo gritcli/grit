@@ -22,26 +22,32 @@ type gitHubBlock struct {
 	Token  string `hcl:"token,optional"`
 }
 
-func (b gitHubBlock) resolve(filename string, cfg Config) (SourceConfig, error) {
-	c := GitHubConfig(b)
-
-	if c.Domain == "" {
-		c.Domain = "github.com"
+func (b *gitHubBlock) Normalize(cfg unresolvedConfig) error {
+	if b.Domain == "" {
+		b.Domain = "github.com"
 	}
 
-	return c, nil
+	return nil
+}
+
+func (b *gitHubBlock) Assemble() SourceConfig {
+	return GitHubConfig(*b)
 }
 
 func init() {
-	registerSourceSchema(
+	registerSourceImpl(
 		"github",
-		gitHubBlock{},
-		Source{
-			Name:    "github",
-			Enabled: true,
-			Config: GitHubConfig{
+		func() sourceBlockBody {
+			return &gitHubBlock{}
+		},
+	)
+
+	registerDefaultSource(
+		"github",
+		func() sourceBlockBody {
+			return &gitHubBlock{
 				Domain: "github.com",
-			},
+			}
 		},
 	)
 }
