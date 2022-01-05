@@ -26,24 +26,12 @@ type gitHubBlock struct {
 	Git    *gitBlock `hcl:"git,block"`
 }
 
-func (b *gitHubBlock) Normalize(cfg unresolvedConfig) error {
+func (b *gitHubBlock) Normalize(cfg unresolvedConfig, s unresolvedSource) error {
 	if b.Domain == "" {
 		b.Domain = "github.com"
 	}
 
-	if b.Git == nil {
-		b.Git = &gitBlock{}
-	}
-
-	if b.Git.PrivateKey == "" {
-		b.Git.PrivateKey = cfg.GlobalGit.Block.PrivateKey
-	}
-
-	if b.Git.PreferHTTP == nil {
-		b.Git.PreferHTTP = cfg.GlobalGit.Block.PreferHTTP
-	}
-
-	return nil
+	return normalizeSourceSpecificGitBlock(cfg, s, &b.Git)
 }
 
 func (b *gitHubBlock) Assemble() SourceConfig {

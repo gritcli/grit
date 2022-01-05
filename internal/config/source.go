@@ -53,7 +53,7 @@ type sourceBlock struct {
 // the body of a source block.
 type sourceBlockBody interface {
 	// Normalize normalizes the body in-place.
-	Normalize(cfg unresolvedConfig) error
+	Normalize(cfg unresolvedConfig, s unresolvedSource) error
 
 	// Assemble converts the body into its configuration representation.
 	Assemble() SourceConfig
@@ -156,7 +156,7 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 		s.Block.Enabled = &enabled
 	}
 
-	if err := s.Body.Normalize(cfg); err != nil {
+	if err := s.Body.Normalize(cfg, *s); err != nil {
 		return fmt.Errorf(
 			"%s: the '%s' repository source is invalid: %w",
 			s.File,

@@ -29,8 +29,34 @@ var _ = Describe("func Load() (global git block)", func() {
 					Enabled: true,
 					Config: GitHub{
 						Domain: "github.com",
-						Git: Git{
-							PrivateKey: "/path/to/key", // affected by global git block
+						Git: Git{ // inherited from global git block
+							PrivateKey: "/path/to/key",
+						},
+					},
+				},
+			),
+		),
+		Entry(
+			"explicit private key with passphrase",
+			[]string{
+				`git {
+					private_key = "/path/to/key"
+					passphrase = "<passphrase>"
+				}`,
+			},
+			withSource(
+				withGlobalGit(defaultConfig, Git{
+					PrivateKey: "/path/to/key",
+					Passphrase: "<passphrase>",
+				}),
+				Source{
+					Name:    "github",
+					Enabled: true,
+					Config: GitHub{
+						Domain: "github.com",
+						Git: Git{ // inherited from global git block
+							PrivateKey: "/path/to/key",
+							Passphrase: "<passphrase>",
 						},
 					},
 				},
@@ -61,8 +87,8 @@ var _ = Describe("func Load() (global git block)", func() {
 					Enabled: true,
 					Config: GitHub{
 						Domain: "github.com",
-						Git: Git{
-							PreferHTTP: true, // affected by global git block
+						Git: Git{ // inherited from global git block
+							PreferHTTP: true,
 						},
 					},
 				},
@@ -75,8 +101,20 @@ var _ = Describe("func Load() (global git block)", func() {
 		testLoadFailure,
 		Entry(
 			`multiple files with global git blocks`,
-			[]string{`git {}`, `git {}`},
+			[]string{
+				`git {}`,
+				`git {}`,
+			},
 			`<dir>/config-1.hcl: a global 'git' block is already defined in <dir>/config-0.hcl`,
+		),
+		Entry(
+			`explicit passphrase without private key`,
+			[]string{
+				`git {
+					passphrase = "<passphrase>"
+				}`,
+			},
+			`<dir>/config-0.hcl: the global 'git' block is invalid: passphrase present without specifying a private key file`,
 		),
 	)
 

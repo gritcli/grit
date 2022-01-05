@@ -65,6 +65,63 @@ var _ = Describe("func Load() (github source)", func() {
 			),
 		),
 		Entry(
+			"explicit private key with passphrase",
+			[]string{
+				`source "github" "github" {
+					git {
+						private_key = "/path/to/key"
+						passphrase = "<passphrase>"
+					}
+				}`,
+			},
+			withSource(
+				defaultConfig,
+				Source{
+					Name:    "github",
+					Enabled: true,
+					Config: GitHub{
+						Domain: "github.com",
+						Git: Git{
+							PrivateKey: "/path/to/key",
+							Passphrase: "<passphrase>",
+						},
+					},
+				},
+			),
+		),
+		Entry(
+			"does not inherit global passphase when private key is specified explicitly",
+			[]string{
+				`git {
+					private_key = "/path/to/key"
+					passphrase = "<passphrase>"
+				}
+
+				source "github" "github" {
+					git {
+						private_key = "/path/to/different/key"
+					}
+				}`,
+			},
+			withSource(
+				withGlobalGit(defaultConfig, Git{
+					PrivateKey: "/path/to/key",
+					Passphrase: "<passphrase>",
+				}),
+				Source{
+					Name:    "github",
+					Enabled: true,
+					Config: GitHub{
+						Domain: "github.com",
+						Git: Git{
+							PrivateKey: "/path/to/different/key",
+							Passphrase: "", // note: different to global git config
+						},
+					},
+				},
+			),
+		),
+		Entry(
 			"explicitly prefer SSH",
 			[]string{
 				`source "github" "github" {
@@ -97,6 +154,22 @@ var _ = Describe("func Load() (github source)", func() {
 					},
 				},
 			),
+		),
+	)
+
+	DescribeTable(
+		"it returns an error if there is a problem with the configuration",
+		testLoadFailure,
+		Entry(
+			`explicit passphrase without private key`,
+			[]string{
+				`source "github" "github" {
+					git {
+						passphrase = "<passphrase>"
+					}
+				}`,
+			},
+			`<dir>/config-0.hcl: the 'github' repository source is invalid: the 'git' block is invalid: passphrase present without specifying a private key file`,
 		),
 	)
 })
