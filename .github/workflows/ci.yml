@@ -22,7 +22,7 @@ jobs:
 
       - name: Read deploy key
         id: deploy_key
-        run: echo "::set-output name=content::$(cat ./cmd/gritd/internal/source/github/testdata/deploy-key-no-passphrase)"
+        run: echo "::set-output name=content::$(echo $(cat ./cmd/gritd/internal/source/github/testdata/deploy-key-no-passphrase))"
 
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.4
