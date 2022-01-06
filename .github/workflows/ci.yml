@@ -20,14 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Read deploy key
-        id: deploy_key
-        run: echo "::set-output name=content::$(echo $(cat ./cmd/gritd/internal/source/github/testdata/deploy-key-no-passphrase))"
-
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ steps.deploy_key.outputs.content }}
+          ssh-private-key: ${{ secrets.GRIT_TEST_DEPLOY_KEY }}
 
       - name: Make
         run: make ci

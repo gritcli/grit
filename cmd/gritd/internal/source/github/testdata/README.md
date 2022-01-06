@@ -8,6 +8,9 @@ cloning repositories.
 It is safe to include the private key in the repo as it only grants read-only
 access, and the `gritcli/grit` repo is already entirely public.
 
+The `GRIT_TEST_DEPLOY_KEY` repository secret also contains the content of the
+`deploy-key-no-passphrase` file.
+
 The passphrase for the `deploy-key-with-passphrase` key is `passphrase`.
 
 The keys were generated with the following commands:
