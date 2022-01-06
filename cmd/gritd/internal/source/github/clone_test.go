@@ -119,15 +119,9 @@ var _ = Describe("func source.Clone()", func() {
 				if os.Getenv("SSH_AUTH_SOCK") == "" {
 					Skip("the SSH agent is not available")
 				}
-
-				// TODO: https://github.com/gritcli/grit/issues/12
-				// Make this test work under CI.
 			})
 
 			It("clones the repository using SSH", func() {
-				// This test asserts that even though _GRIT_ is not
-				// authenticated with GitHub, the user's SSH key can still be
-				// used for cloning.
 				err := src.Clone(ctx, gritRepo.ID, dir, logger)
 				skipIfRateLimited(err)
 
