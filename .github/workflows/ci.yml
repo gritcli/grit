@@ -1,21 +1,22 @@
 name: CI
+
 on:
   push:
-    branches:
-      - "*"
   pull_request:
   schedule:
     - cron: 0 14 * * 0
+
 jobs:
   ci:
     name: Continuous Integration
     runs-on: ubuntu-latest
+
     steps:
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
           go-version: ^1
-        id: go
+
       - name: Checkout
         uses: actions/checkout@v1
       - name: Make
@@ -23,5 +24,6 @@ jobs:
         env:
           GRIT_INTEGRATION_TEST_GITHUB: "true"
           GRIT_INTEGRATION_TEST_GITHUB_TOKEN: ${{ secrets.GRIT_INTEGRATION_TEST_GITHUB_TOKEN }}
+
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v2

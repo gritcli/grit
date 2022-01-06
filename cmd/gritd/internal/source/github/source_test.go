@@ -93,39 +93,54 @@ var _ = Describe("type source", func() {
 
 // beforeEachAuthenticated returns the context and source used for running
 // integration tests with an authenticated user.
-func beforeEachAuthenticated() (context.Context, context.CancelFunc, source.Source) {
-	return initSource(func() config.GitHub {
-		token := os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
+func beforeEachAuthenticated(configure ...func(*config.GitHub)) (context.Context, context.CancelFunc, source.Source) {
+	return initSource(
+		func() config.GitHub {
+			token := os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
 
-		if token == "" {
-			Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
-		}
+			if token == "" {
+				Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
+			}
 
-		return config.GitHub{
-			Domain: "github.com",
-			Token:  token,
-		}
-	})
+			return config.GitHub{
+				Domain: "github.com",
+				Token:  token,
+			}
+		},
+		configure,
+	)
 }
 
 // beforeEachAuthenticated returns the context and source used for running
 // integration tests without an authenticated user.
-func beforeEachUnauthenticated() (context.Context, context.CancelFunc, source.Source) {
-	return initSource(func() config.GitHub {
-		return config.GitHub{
-			Domain: "github.com",
-		}
-	})
+func beforeEachUnauthenticated(configure ...func(*config.GitHub)) (context.Context, context.CancelFunc, source.Source) {
+	return initSource(
+		func() config.GitHub {
+			return config.GitHub{
+				Domain: "github.com",
+			}
+		},
+		configure,
+	)
 }
 
-// initSource creates and initializes a source using the config returned by
-// cfg(). It is intended for use in the beforeEachXXX() helper functions.
-func initSource(cfg func() config.GitHub) (context.Context, context.CancelFunc, source.Source) {
+// initSource creates and initializes a source.
+//
+// The configuration is built starting with the result of cfg(), and then
+// calling each function in configure in order to mutate the config as desired.
+//
+// It is intended for use in the beforeEachXXX() helper functions.
+func initSource(cfg func() config.GitHub, configure []func(*config.GitHub)) (context.Context, context.CancelFunc, source.Source) {
 	if os.Getenv("GRIT_INTEGRATION_TEST_GITHUB") == "" {
 		Skip("set GRIT_INTEGRATION_TEST_GITHUB to enable tests that use the GitHub API")
 	}
 
-	src, err := NewSource("github", cfg(), logging.SilentLogger)
+	c := cfg()
+	for _, fn := range configure {
+		fn(&c)
+	}
+
+	src, err := NewSource("github", c, logging.SilentLogger)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	ctx, cancel := context.WithCancel(context.Background())

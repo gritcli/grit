@@ -9,17 +9,19 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	git "github.com/go-git/go-git/v5"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
+	"github.com/gritcli/grit/internal/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("func source.Clone()", func() {
 	var (
-		ctx    context.Context
-		cancel context.CancelFunc
-		src    source.Source
-		dir    string
-		logger logging.DiscardLogger
+		ctx       context.Context
+		cancel    context.CancelFunc
+		configure func(*config.GitHub)
+		src       source.Source
+		dir       string
+		logger    logging.DiscardLogger
 	)
 
 	BeforeEach(func() {
@@ -36,7 +38,11 @@ var _ = Describe("func source.Clone()", func() {
 
 	When("unauthenticated", func() {
 		BeforeEach(func() {
-			ctx, cancel, src = beforeEachUnauthenticated()
+			configure = func(*config.GitHub) {}
+		})
+
+		JustBeforeEach(func() {
+			ctx, cancel, src = beforeEachUnauthenticated(configure)
 		})
 
 		AfterEach(func() {
@@ -64,6 +70,47 @@ var _ = Describe("func source.Clone()", func() {
 				rem, err := repo.Remote("origin")
 				Expect(err).ShouldNot(HaveOccurred())
 				Expect(rem.Config().URLs).To(ConsistOf("https://github.com/gritcli/grit.git"))
+			})
+		})
+
+		When("using an explicit private key", func() {
+			BeforeEach(func() {
+				configure = func(cfg *config.GitHub) {
+					cfg.Git.SSHKeyFile = "./testdata/deploy-key-no-passphrase"
+				}
+			})
+
+			It("clones the repository using SSH", func() {
+				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				skipIfRateLimited(err)
+
+				repo, err := git.PlainOpen(dir)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				rem, err := repo.Remote("origin")
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(rem.Config().URLs).To(ConsistOf("git@github.com:gritcli/grit.git"))
+			})
+		})
+
+		When("using an explicit private key with a passphrase", func() {
+			BeforeEach(func() {
+				configure = func(cfg *config.GitHub) {
+					cfg.Git.SSHKeyFile = "./testdata/deploy-key-with-passphrase"
+					cfg.Git.SSHKeyPassphrase = "passphrase"
+				}
+			})
+
+			It("clones the repository using SSH", func() {
+				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				skipIfRateLimited(err)
+
+				repo, err := git.PlainOpen(dir)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				rem, err := repo.Remote("origin")
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(rem.Config().URLs).To(ConsistOf("git@github.com:gritcli/grit.git"))
 			})
 		})
 
