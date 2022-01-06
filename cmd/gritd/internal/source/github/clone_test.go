@@ -49,6 +49,26 @@ var _ = Describe("func source.Clone()", func() {
 			cancel()
 		})
 
+		When("HTTP is the preferred protocol", func() {
+			BeforeEach(func() {
+				configure = func(cfg *config.GitHub) {
+					cfg.Git.PreferHTTP = true
+				}
+			})
+
+			It("clones the repository using HTTP", func() {
+				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				skipIfRateLimited(err)
+
+				repo, err := git.PlainOpen(dir)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				rem, err := repo.Remote("origin")
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(rem.Config().URLs).To(ConsistOf("https://github.com/gritcli/grit.git"))
+			})
+		})
+
 		When("the SSH agent is unavailable", func() {
 			var orig string
 			BeforeEach(func() {
@@ -90,6 +110,19 @@ var _ = Describe("func source.Clone()", func() {
 				rem, err := repo.Remote("origin")
 				Expect(err).ShouldNot(HaveOccurred())
 				Expect(rem.Config().URLs).To(ConsistOf("git@github.com:gritcli/grit.git"))
+			})
+
+			When("the private key file can not be laoded", func() {
+				BeforeEach(func() {
+					configure = func(cfg *config.GitHub) {
+						cfg.Git.SSHKeyFile = "/does/not/exist"
+					}
+				})
+
+				It("returns an error", func() {
+					err := src.Clone(ctx, gritRepo.ID, dir, logger)
+					Expect(err).To(MatchError("open /does/not/exist: no such file or directory"))
+				})
 			})
 		})
 
@@ -147,6 +180,45 @@ var _ = Describe("func source.Clone()", func() {
 		It("returns an error if the repository ID is non-positive", func() {
 			err := src.Clone(ctx, "0", dir, logger)
 			Expect(err).To(MatchError("invalid repo ID, expected positive integer"))
+		})
+	})
+
+	When("authenticated", func() {
+		BeforeEach(func() {
+			configure = func(*config.GitHub) {}
+		})
+
+		JustBeforeEach(func() {
+			ctx, cancel, src = beforeEachAuthenticated(configure)
+		})
+
+		AfterEach(func() {
+			cancel()
+		})
+
+		When("HTTP is the preferred protocol", func() {
+			BeforeEach(func() {
+				configure = func(cfg *config.GitHub) {
+					cfg.Git.PreferHTTP = true
+				}
+			})
+
+			It("clones the repository using HTTP with token-based authentication", func() {
+				// TODO: https://github.com/gritcli/grit/issues/13
+				//
+				// Change this test to use a private repository so it's actually
+				// verifying that the token is being used.
+
+				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				skipIfRateLimited(err)
+
+				repo, err := git.PlainOpen(dir)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				rem, err := repo.Remote("origin")
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(rem.Config().URLs).To(ConsistOf("https://github.com/gritcli/grit.git"))
+			})
 		})
 	})
 })

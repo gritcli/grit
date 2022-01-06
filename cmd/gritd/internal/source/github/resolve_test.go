@@ -17,6 +17,13 @@ var (
 		WebURL:      "https://github.com/gritcli/grit",
 	}
 
+	gritPrivateTestRepo = source.Repo{
+		ID:          "445039240",
+		Name:        "gritcli/test-private",
+		Description: "Used to test that Grit works with private GitHub repositories.",
+		WebURL:      "https://github.com/gritcli/test-private",
+	}
+
 	gritV1Repo = source.Repo{
 		ID:          "85247932",
 		Name:        "jmalloc/grit",
@@ -73,7 +80,13 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("returns nothing for a qualified name that does not exist", func() {
-			repos, err := src.Resolve(ctx, "gritcli/non-existant", logger)
+			repos, err := src.Resolve(ctx, "gritcli/test-non-existant", logger)
+			skipIfRateLimited(err)
+			Expect(repos).To(BeEmpty())
+		})
+
+		It("returns nothing for a qualified name that refers to a private repo", func() {
+			repos, err := src.Resolve(ctx, gritPrivateTestRepo.Name, logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
@@ -92,6 +105,10 @@ var _ = Describe("func source.Resolve()", func() {
 			repos, err := src.Resolve(ctx, "has a space", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(BeEmpty())
+
+			repos, err = src.Resolve(ctx, "owner has a space/repo", logger)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(repos).To(BeEmpty())
 		})
 
 		It("resolves unqualified repo names using the cache", func() {
@@ -104,6 +121,18 @@ var _ = Describe("func source.Resolve()", func() {
 			repos, err := src.Resolve(ctx, gritRepo.Name, logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(gritRepo))
+		})
+
+		XIt("resolves an exact match for a private repo using the cache", func() {
+			// TODO: https://github.com/gritcli/grit/issues/13
+			//
+			// This requires the "repo" scope on the personal-access-token which
+			// grants read/write access to private repos. We currently use
+			// @jmalloc's access token in GHA, so this is not feasible. We need
+			// to setup a user specifically for testing this.
+			repos, err := src.Resolve(ctx, gritPrivateTestRepo.Name, logger)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(repos).To(ConsistOf(gritPrivateTestRepo))
 		})
 
 		It("resolves an exact match using the API", func() {
