@@ -2,13 +2,12 @@ package github_test
 
 import (
 	"context"
-	"io/ioutil"
 	"math"
 	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/dogmatiq/dodeca/logging"
+	git "github.com/go-git/go-git/v5"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -44,16 +43,54 @@ var _ = Describe("func source.Clone()", func() {
 			cancel()
 		})
 
-		It("clones the repository", func() {
-			err := src.Clone(ctx, gritRepo.ID, dir, logger)
-			skipIfRateLimited(err)
+		When("the SSH agent is unavailable", func() {
+			var orig string
+			BeforeEach(func() {
+				orig = os.Getenv("SSH_AUTH_SOCK")
+				os.Setenv("SSH_AUTH_SOCK", "")
+			})
 
-			// We check that the clone was successful by checking that the
-			// license file was obtained. We don't want to be too strict, as
-			// there's no guarantee this test is running from the main branch.
-			license, err := ioutil.ReadFile(filepath.Join(dir, "LICENSE"))
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(license)).To(ContainSubstring("MIT License"))
+			AfterEach(func() {
+				os.Setenv("SSH_AUTH_SOCK", orig)
+			})
+
+			It("clones the repository using HTTP", func() {
+				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				skipIfRateLimited(err)
+
+				repo, err := git.PlainOpen(dir)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				rem, err := repo.Remote("origin")
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(rem.Config().URLs).To(ConsistOf("https://github.com/gritcli/grit.git"))
+			})
+		})
+
+		When("the SSH agent is available", func() {
+			BeforeEach(func() {
+				if os.Getenv("SSH_AUTH_SOCK") == "" {
+					Skip("the SSH agent is not available")
+				}
+
+				// TODO: https://github.com/gritcli/grit/issues/12
+				// Make this test work under CI.
+			})
+
+			It("clones the repository using SSH", func() {
+				// This test asserts that even though _GRIT_ is not
+				// authenticated with GitHub, the user's SSH key can still be
+				// used for cloning.
+				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				skipIfRateLimited(err)
+
+				repo, err := git.PlainOpen(dir)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				rem, err := repo.Remote("origin")
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(rem.Config().URLs).To(ConsistOf("git@github.com:gritcli/grit.git"))
+			})
 		})
 
 		It("returns an error if the repository does not exist", func() {
