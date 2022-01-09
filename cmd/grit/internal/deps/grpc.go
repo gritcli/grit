@@ -2,8 +2,8 @@ package deps
 
 import (
 	"github.com/gritcli/grit/cmd/grit/internal/flags"
-	"github.com/gritcli/grit/internal/api"
-	"github.com/gritcli/grit/internal/config"
+	"github.com/gritcli/grit/common/api"
+	"github.com/gritcli/grit/common/config"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

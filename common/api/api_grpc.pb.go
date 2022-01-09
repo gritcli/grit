@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.19.1
-// source: github.com/gritcli/grit/internal/api/api.proto
+// source: github.com/gritcli/grit/common/api/api.proto
 
 package api
 
@@ -234,5 +234,5 @@ var API_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "github.com/gritcli/grit/internal/api/api.proto",
+	Metadata: "github.com/gritcli/grit/common/api/api.proto",
 }

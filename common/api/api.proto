@@ -1,7 +1,7 @@
 syntax = "proto3";
 package grit.v2.api;
 
-option go_package = "github.com/gritcli/grit/internal/api";
+option go_package = "github.com/gritcli/grit/common/api";
 
 service API {
     // Sources lists the configured repository sources.

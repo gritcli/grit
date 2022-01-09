@@ -10,7 +10,7 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
-	"github.com/gritcli/grit/internal/api"
+	"github.com/gritcli/grit/common/api"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"
 )

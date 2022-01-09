@@ -4,7 +4,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/cmd/gritd/internal/source/github"
-	"github.com/gritcli/grit/internal/config"
+	"github.com/gritcli/grit/common/config"
 )
 
 // Builder builds source.Source values from Grit configuration.

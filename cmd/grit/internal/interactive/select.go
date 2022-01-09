@@ -6,7 +6,7 @@ import (
 	"reflect"
 
 	"github.com/gritcli/grit/cmd/grit/internal/flags"
-	"github.com/gritcli/grit/internal/api"
+	"github.com/gritcli/grit/common/api"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )

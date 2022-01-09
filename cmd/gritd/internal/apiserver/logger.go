@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/api"
+	"github.com/gritcli/grit/common/api"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )

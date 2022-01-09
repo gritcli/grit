@@ -13,7 +13,7 @@ import (
 	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
 	"github.com/gritcli/grit/cmd/gritd/internal/deps"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
-	"github.com/gritcli/grit/internal/config"
+	"github.com/gritcli/grit/common/config"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )

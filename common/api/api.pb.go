@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.27.1
 // 	protoc        v3.19.1
-// source: github.com/gritcli/grit/internal/api/api.proto
+// source: github.com/gritcli/grit/common/api/api.proto
 
 package api
 

@@ -3,7 +3,7 @@ package deps
 import (
 	"os"
 
-	"github.com/gritcli/grit/internal/config"
+	"github.com/gritcli/grit/common/config"
 )
 
 func init() {

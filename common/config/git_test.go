@@ -3,7 +3,7 @@ package config_test
 import (
 	"path/filepath"
 
-	. "github.com/gritcli/grit/internal/config"
+	. "github.com/gritcli/grit/common/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"

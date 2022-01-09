@@ -6,7 +6,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
 	"github.com/gritcli/grit/cmd/grit/internal/render"
-	"github.com/gritcli/grit/internal/api"
+	"github.com/gritcli/grit/common/api"
 	"github.com/spf13/cobra"
 )
 

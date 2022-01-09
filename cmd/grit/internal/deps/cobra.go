@@ -3,7 +3,7 @@ package deps
 import (
 	"context"
 
-	"github.com/gritcli/grit/internal/di"
+	"github.com/gritcli/grit/common/di"
 	"github.com/spf13/cobra"
 	"go.uber.org/multierr"
 )

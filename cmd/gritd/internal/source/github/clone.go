@@ -9,7 +9,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/google/go-github/github"
-	"github.com/gritcli/grit/internal/config"
+	"github.com/gritcli/grit/common/config"
 )
 
 // Clone makes a repository available at the specified directory.
