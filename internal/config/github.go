@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -25,11 +24,13 @@ func (c GitHub) acceptVisitor(s Source, v SourceVisitor) {
 
 // String returns a human-readable description of the configuration.
 func (c GitHub) String() string {
-	if strings.EqualFold(c.Domain, "github.com") {
-		return "github"
+	desc := c.Domain
+
+	if !strings.EqualFold(c.Domain, "github.com") {
+		desc += " (github enterprise server)"
 	}
 
-	return fmt.Sprintf("github enterprise server (%s)", c.Domain)
+	return desc
 }
 
 // gitHubBlock is the HCL schema for a "source" block that uses the "github"

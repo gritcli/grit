@@ -9,13 +9,22 @@ import (
 
 var _ = Describe("type GitHub", func() {
 	Describe("func String()", func() {
-		It("describes the source", func() {
-			cfg := GitHub{Domain: "github.com"}
-			Expect(cfg.String()).To(Equal("github"))
-
-			cfg.Domain = "code.example.org"
-			Expect(cfg.String()).To(Equal("github enterprise server (code.example.org)"))
-		})
+		DescribeTable(
+			"it describes the source",
+			func(cfg GitHub, expect string) {
+				Expect(cfg.String()).To(Equal(expect))
+			},
+			Entry(
+				"github.com",
+				GitHub{Domain: "github.com"},
+				"github.com",
+			),
+			Entry(
+				"github enterprise server",
+				GitHub{Domain: "code.example.com"},
+				"code.example.com (github enterprise server)",
+			),
+		)
 	})
 })
 
