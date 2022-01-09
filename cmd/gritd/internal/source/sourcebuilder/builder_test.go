@@ -26,6 +26,45 @@ var _ = Describe("func Listen()", func() {
 		}
 	})
 
+	Describe("func FromConfig()", func() {
+		It("constructs all enabled sources from the configuration", func() {
+			cfg := config.Config{
+				Sources: map[string]config.Source{
+					"github-test-source": {
+						Name:    "github-test-source",
+						Enabled: true,
+						Clones: config.Clones{
+							Dir: "/path/to/clones/github",
+						},
+						DriverConfig: config.GitHub{
+							Domain: "github.com",
+						},
+					},
+					"disabled-test-source": {
+						Name:    "disabled-test-source",
+						Enabled: false,
+						// None of the other fields are inspected at all if the
+						// source is disabled.
+					},
+				},
+			}
+
+			sources := builder.FromConfig(cfg)
+			Expect(sources).To(ConsistOf(
+				source.Source{
+					Name:        "github-test-source",
+					Description: "github.com",
+					Driver: &github.Driver{
+						Config: config.GitHub{
+							Domain: "github.com",
+						},
+						Logger: logging.Prefix(&logger, "source[github-test-source]: "),
+					},
+				},
+			))
+		})
+	})
+
 	Describe("func FromSourceConfig()", func() {
 		table.DescribeTable(
 			"it constructs sources based on the driver configuration type",
@@ -36,7 +75,8 @@ var _ = Describe("func Listen()", func() {
 			Entry(
 				"github",
 				config.Source{
-					Name: "test-source",
+					Name:    "test-source",
+					Enabled: false, // note, this is not checked by FromSourceConfig()
 					Clones: config.Clones{
 						Dir: "/path/to/clones",
 					},

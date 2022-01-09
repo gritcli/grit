@@ -13,13 +13,15 @@ type Builder struct {
 	Logger logging.Logger
 }
 
-// FromConfig returns the list of sources defined in cfg.
+// FromConfig returns the list of enabled sources defined in cfg.
 func (b *Builder) FromConfig(cfg config.Config) []source.Source {
 	var sources []source.Source
 
 	for _, cfg := range cfg.Sources {
-		src := b.FromSourceConfig(cfg)
-		sources = append(sources, src)
+		if cfg.Enabled {
+			src := b.FromSourceConfig(cfg)
+			sources = append(sources, src)
+		}
 	}
 
 	return sources
