@@ -4,8 +4,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/gritcli/grit/internal/client/internal/flags"
-	"github.com/gritcli/grit/internal/client/internal/shell"
+	"github.com/gritcli/grit/internal/cli/internal/flags"
+	"github.com/gritcli/grit/internal/cli/internal/shell"
 	"github.com/spf13/cobra"
 )
 

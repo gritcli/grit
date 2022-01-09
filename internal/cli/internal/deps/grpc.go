@@ -1,7 +1,7 @@
 package deps
 
 import (
-	"github.com/gritcli/grit/internal/client/internal/flags"
+	"github.com/gritcli/grit/internal/cli/internal/flags"
 	"github.com/gritcli/grit/internal/common/api"
 	"github.com/gritcli/grit/internal/common/config"
 	"github.com/spf13/cobra"

@@ -1,7 +1,7 @@
 package shell_test
 
 import (
-	. "github.com/gritcli/grit/internal/client/internal/shell"
+	. "github.com/gritcli/grit/internal/cli/internal/shell"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"

@@ -1,4 +1,4 @@
-package client
+package cli
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gritcli/grit/internal/client/internal/commands"
-	"github.com/gritcli/grit/internal/client/internal/deps"
+	"github.com/gritcli/grit/internal/cli/internal/commands"
+	"github.com/gritcli/grit/internal/cli/internal/deps"
 )
 
 // Run starts the Grit CLI.
