@@ -37,6 +37,12 @@ func (r *resolver) Merge(filename string, c configFile) error {
 		}
 	}
 
+	if c.ClonesDefaultsBlock != nil {
+		if err := mergeClonesDefaultsBlock(&r.cfg, filename, *c.ClonesDefaultsBlock); err != nil {
+			return err
+		}
+	}
+
 	if c.GitDefaultsBlock != nil {
 		if err := mergeGitDefaultsBlock(&r.cfg, filename, *c.GitDefaultsBlock); err != nil {
 			return err
@@ -60,6 +66,10 @@ func (r *resolver) Normalize() error {
 		return err
 	}
 
+	if err := normalizeClonesDefaultsBlock(&r.cfg); err != nil {
+		return err
+	}
+
 	if err := normalizeGitDefaultsBlock(&r.cfg); err != nil {
 		return err
 	}
@@ -79,9 +89,10 @@ func (r *resolver) Normalize() error {
 // files.
 func (r *resolver) Assemble() Config {
 	cfg := Config{
-		Daemon:      assembleDaemonBlock(r.cfg.Daemon.Block),
-		GitDefaults: assembleGitBlock(r.cfg.GitDefaults.Block),
-		Sources:     map[string]Source{},
+		Daemon:         assembleDaemonBlock(r.cfg.Daemon.Block),
+		ClonesDefaults: assembleClonesBlock(r.cfg.ClonesDefaults.Block),
+		GitDefaults:    assembleGitBlock(r.cfg.GitDefaults.Block),
+		Sources:        map[string]Source{},
 	}
 
 	for _, s := range r.cfg.Sources {
@@ -98,6 +109,14 @@ type unresolvedConfig struct {
 	// "daemon" block.
 	Daemon struct {
 		Block daemonBlock
+		File  string
+	}
+
+	// ClonesDefaults contains information about the first (root-level) "clones"
+	// defaults block found within the configuration files. Only one of the
+	// loaded files may contain a "clones" defaults block.
+	ClonesDefaults struct {
+		Block clonesBlock
 		File  string
 	}
 
