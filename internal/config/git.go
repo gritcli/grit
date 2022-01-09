@@ -48,19 +48,6 @@ func mergeGitDefaultsBlock(cfg *unresolvedConfig, filename string, b gitBlock) e
 	cfg.GitDefaults.File = filename
 	cfg.GitDefaults.Block = b
 
-	if err := validateGitBlock(b); err != nil {
-		return fmt.Errorf(
-			"%s: the 'git' defaults block is invalid: %w",
-			filename,
-			err,
-		)
-	}
-
-	return nil
-}
-
-// validateGitBlock validates the contents of b.
-func validateGitBlock(b gitBlock) error {
 	return nil
 }
 
@@ -96,13 +83,6 @@ func normalizeSourceSpecificGitBlock(cfg unresolvedConfig, s unresolvedSource, p
 
 	if b.PreferHTTP == nil {
 		b.PreferHTTP = cfg.GitDefaults.Block.PreferHTTP
-	}
-
-	if err := validateGitBlock(*b); err != nil {
-		return fmt.Errorf(
-			"the 'git' block is invalid: %w",
-			err,
-		)
 	}
 
 	return nil
