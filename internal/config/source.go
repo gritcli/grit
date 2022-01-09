@@ -20,6 +20,10 @@ type Source struct {
 	// when searching for repositories to be cloned.
 	Enabled bool
 
+	// Clones is the configuration that controls how Grit stores local
+	// repository clones for this source.
+	Clones Clones
+
 	// Config contains implementation-specific configuration for this source.
 	Config SourceConfig
 }
@@ -43,10 +47,11 @@ type SourceVisitor interface {
 
 // sourceBlock is the HCL schema for a "source" block.
 type sourceBlock struct {
-	Name    string   `hcl:",label"`
-	Impl    string   `hcl:",label"`
-	Enabled *bool    `hcl:"enabled"`
-	Body    hcl.Body `hcl:",remain"` // see sourceBlockBody
+	Name        string       `hcl:",label"`
+	Impl        string       `hcl:",label"`
+	Enabled     *bool        `hcl:"enabled"`
+	ClonesBlock *clonesBlock `hcl:"clones,block"`
+	Body        hcl.Body     `hcl:",remain"` // see sourceBlockBody
 }
 
 // sourceBlockBody is an interface for implementation-specific HCL schema within
@@ -165,7 +170,7 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 		)
 	}
 
-	return nil
+	return normalizeSourceSpecificClonesBlock(cfg, s)
 }
 
 // assembleSourceBlock converts b into its configuration representation.
@@ -173,6 +178,7 @@ func assembleSourceBlock(b sourceBlock, body sourceBlockBody) Source {
 	return Source{
 		Name:    b.Name,
 		Enabled: *b.Enabled,
+		Clones:  assembleClonesBlock(*b.ClonesBlock),
 		Config:  body.Assemble(),
 	}
 }

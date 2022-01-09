@@ -10,10 +10,16 @@ var defaultConfig = Config{
 	Daemon: Daemon{
 		Socket: "~/grit/daemon.sock",
 	},
+	ClonesDefaults: Clones{
+		Dir: "~/grit",
+	},
 	Sources: map[string]Source{
 		"github": {
 			Name:    "github",
 			Enabled: true,
+			Clones: Clones{
+				Dir: "~/grit",
+			},
 			Config: GitHub{
 				Domain: "github.com",
 			},
@@ -27,11 +33,32 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	defaultConfig.ClonesDefaults.Dir, err = homedir.Expand(defaultConfig.ClonesDefaults.Dir)
+	if err != nil {
+		panic(err)
+	}
+
+	for n, s := range defaultConfig.Sources {
+		s.Clones.Dir, err = homedir.Expand(s.Clones.Dir)
+		if err != nil {
+			panic(err)
+		}
+
+		defaultConfig.Sources[n] = s
+	}
 }
 
 // withDaemon returns a copy of cfg with a different daemon configuration.
 func withDaemon(cfg Config, d Daemon) Config {
 	cfg.Daemon = d
+	return cfg
+}
+
+// withClonesDefaults returns a copy of cfg with a different clones defaults
+// configuration.
+func withClonesDefaults(cfg Config, c Clones) Config {
+	cfg.ClonesDefaults = c
 	return cfg
 }
 
@@ -46,6 +73,12 @@ func withGitDefaults(cfg Config, g Git) Config {
 func withSource(cfg Config, src Source) Config {
 	prev := cfg.Sources
 	cfg.Sources = map[string]Source{}
+
+	var err error
+	src.Clones.Dir, err = homedir.Expand(src.Clones.Dir)
+	if err != nil {
+		panic(err)
+	}
 
 	for n, s := range prev {
 		cfg.Sources[n] = s
