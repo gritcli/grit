@@ -47,15 +47,13 @@ func (b *Builder) FromSourceConfig(cfg config.Source) source.Source {
 // driverFactory is a config.SourceVisitor implementation that constructs
 // drivers based on source configurations.
 type driverFactory struct {
-	Logger logging.Logger
 	Driver source.Driver
+	Logger logging.Logger
 }
 
 func (f *driverFactory) VisitGitHubSource(s config.Source, cfg config.GitHub) {
-	d, err := github.NewDriver(cfg, f.Logger)
-	if err != nil {
-		panic(err)
+	f.Driver = &github.Driver{
+		Config: cfg,
+		Logger: f.Logger,
 	}
-
-	f.Driver = d
 }
