@@ -26,6 +26,7 @@ message Source {
     string name = 1;
     string description = 2;
     string status = 3;
+    string clone_dir = 4;
 }
 
 message Repo {

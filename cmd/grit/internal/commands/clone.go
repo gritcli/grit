@@ -8,6 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
 	"github.com/gritcli/grit/cmd/grit/internal/interactive"
+	"github.com/gritcli/grit/cmd/grit/internal/render"
 	"github.com/gritcli/grit/cmd/grit/internal/shell"
 	"github.com/gritcli/grit/internal/api"
 	"github.com/spf13/cobra"
@@ -67,7 +68,7 @@ func newCloneCommand() *cobra.Command {
 				return err
 			}
 
-			cmd.Println(dir)
+			cmd.Println(render.RelPath(dir))
 
 			return executor("cd", dir)
 		}),
