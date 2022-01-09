@@ -47,13 +47,13 @@ var _ = Describe("func source.Resolve()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
-		src    source.Source
+		driver source.Driver
 		logger logging.DiscardLogger
 	)
 
 	When("unauthenticated", func() {
 		BeforeEach(func() {
-			ctx, cancel, src = beforeEachUnauthenticated()
+			ctx, cancel, driver = beforeEachUnauthenticated()
 		})
 
 		AfterEach(func() {
@@ -61,25 +61,25 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("does not resolve unqualified names", func() {
-			repos, err := src.Resolve(ctx, "grit", logger)
+			repos, err := driver.Resolve(ctx, "grit", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
 
 		It("resolves an exact match using the API", func() {
-			repos, err := src.Resolve(ctx, "gritcli/grit", logger)
+			repos, err := driver.Resolve(ctx, "gritcli/grit", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(ConsistOf(gritRepo))
 		})
 
 		It("returns nothing for a qualified name that does not exist", func() {
-			repos, err := src.Resolve(ctx, "gritcli/test-non-existant", logger)
+			repos, err := driver.Resolve(ctx, "gritcli/test-non-existant", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
 
 		It("returns nothing for a qualified name that refers to a private repo", func() {
-			repos, err := src.Resolve(ctx, gritPrivateTestRepo.Name, logger)
+			repos, err := driver.Resolve(ctx, gritPrivateTestRepo.Name, logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
@@ -87,7 +87,7 @@ var _ = Describe("func source.Resolve()", func() {
 
 	When("authenticated", func() {
 		BeforeEach(func() {
-			ctx, cancel, src = beforeEachAuthenticated()
+			ctx, cancel, driver = beforeEachAuthenticated()
 		})
 
 		AfterEach(func() {
@@ -95,23 +95,23 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("ignores invalid names", func() {
-			repos, err := src.Resolve(ctx, "has a space", logger)
+			repos, err := driver.Resolve(ctx, "has a space", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(BeEmpty())
 
-			repos, err = src.Resolve(ctx, "owner has a space/repo", logger)
+			repos, err = driver.Resolve(ctx, "owner has a space/repo", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(BeEmpty())
 		})
 
 		It("resolves unqualified repo names using the cache", func() {
-			repos, err := src.Resolve(ctx, "grit", logger)
+			repos, err := driver.Resolve(ctx, "grit", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(gritRepo, gritV1Repo))
 		})
 
 		It("resolves an exact match using the cache", func() {
-			repos, err := src.Resolve(ctx, gritRepo.Name, logger)
+			repos, err := driver.Resolve(ctx, gritRepo.Name, logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(gritRepo))
 		})
@@ -123,13 +123,13 @@ var _ = Describe("func source.Resolve()", func() {
 			// grants read/write access to private repos. We currently use
 			// @jmalloc's access token in GHA, so this is not feasible. We need
 			// to setup a user specifically for testing this.
-			repos, err := src.Resolve(ctx, gritPrivateTestRepo.Name, logger)
+			repos, err := driver.Resolve(ctx, gritPrivateTestRepo.Name, logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(gritPrivateTestRepo))
 		})
 
 		It("resolves an exact match using the API", func() {
-			repos, err := src.Resolve(ctx, thirdPartyRepo.Name, logger)
+			repos, err := driver.Resolve(ctx, thirdPartyRepo.Name, logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(ConsistOf(thirdPartyRepo))
 		})

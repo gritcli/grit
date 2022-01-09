@@ -6,30 +6,38 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 )
 
-// Source is an interface for a "repository source" that makes repositories
-// available to Grit.
-type Source interface {
-	// Name returns a short, human-readable identifier of the repository source.
-	Name() string
+// Source is a repository source.
+type Source struct {
+	// Name is the unique name for the repository source.
+	Name string
 
-	// Description returns a brief description of the repository source.
-	//
-	// It may be called at any time, including before the source has been
-	// initialized. It may return limited information until the source has been
-	// initialized.
-	Description() string
+	// Driver is the driver used to perform repository operations.
+	Driver Driver
+}
 
-	// Init initializes the source.
+// A Driver performs implementation-specific repository operations for a
+// repository source.
+type Driver interface {
+	// Init initializes the driver.
 	//
-	// It is called before the daemon starts serving API requests.
+	// It is called before the daemon starts serving API requests. If an error
+	// is returned, the daemon fails to start.
 	Init(ctx context.Context) error
 
-	// Run performs any background tasks required by the source.
+	// Run performs any ongoing behavior required by the driver.
 	//
-	// It is called after the source is initialized and should run until ctx is
-	// canceled or there is nothing left to do. The context is canceled when the
-	// daemon shuts down.
+	// It is called in its own goroutine after the driver is initialized, It
+	// should run until ctx is canceled or there is nothing left to do. The
+	// context is canceled when the daemon shuts down.
+	//
+	// If it returns an error before ctx is canceled, the daemon is stopped.
 	Run(ctx context.Context) error
+
+	// Status returns a brief description of the status of the driver.
+	//
+	// This may include information about the driver's ability to communicate
+	// with the remote server, the authenticated user, etc.
+	Status(ctx context.Context) (string, error)
 
 	// Resolve resolves a repository name, URL, or other identifier to a set of
 	// possible repositories.
@@ -42,7 +50,7 @@ type Source interface {
 	//
 	// The query string is typically captured directly from user input and has
 	// not been sanitized. The implementation must not return an error if the
-	// query is invalid; an invalid query may be valid for other sources.
+	// query is invalid; instead return an empty slice.
 	//
 	// clientLog is a target for any log output that should be sent to the
 	// client and displayed to the user.
