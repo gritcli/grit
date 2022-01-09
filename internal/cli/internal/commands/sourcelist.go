@@ -1,4 +1,4 @@
-package source
+package commands
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// newListCommand returns the "source ls" command.
-func newListCommand() *cobra.Command {
+// newSourceListCommand returns the "source list" command.
+func newSourceListCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
 		Args:    cobra.NoArgs,

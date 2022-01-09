@@ -1,18 +1,18 @@
-package source
+package commands
 
 import (
 	"github.com/spf13/cobra"
 )
 
-// NewRoot returns the "source" command.
-func NewRoot() *cobra.Command {
+// newSourceCommand returns the "source" command.
+func newSourceCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "source",
 		Short: "Manage repository sources",
 	}
 
 	cmd.AddCommand(
-		newListCommand(),
+		newSourceListCommand(),
 	)
 
 	return cmd

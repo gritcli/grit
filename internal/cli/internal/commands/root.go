@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 
-	"github.com/gritcli/grit/internal/cli/internal/commands/source"
 	"github.com/gritcli/grit/internal/cli/internal/deps"
 	"github.com/gritcli/grit/internal/cli/internal/flags"
 	"github.com/spf13/cobra"
@@ -39,9 +38,9 @@ func NewRoot(v string) *cobra.Command {
 	flags.SetupShellExecutorOutput(root)
 
 	root.AddCommand(
-		source.NewRoot(),
-		newShellIntegrationCommand(),
 		newCloneCommand(),
+		newShellIntegrationCommand(),
+		newSourceCommand(),
 	)
 
 	return root
