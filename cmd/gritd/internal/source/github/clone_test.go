@@ -19,7 +19,7 @@ var _ = Describe("func source.Clone()", func() {
 		ctx       context.Context
 		cancel    context.CancelFunc
 		configure func(*config.GitHub)
-		src       source.Source
+		driver    source.Driver
 		tempDir   string
 		logger    logging.DiscardLogger
 	)
@@ -42,7 +42,7 @@ var _ = Describe("func source.Clone()", func() {
 		})
 
 		JustBeforeEach(func() {
-			ctx, cancel, src = beforeEachUnauthenticated(configure)
+			ctx, cancel, driver = beforeEachUnauthenticated(configure)
 		})
 
 		AfterEach(func() {
@@ -57,7 +57,7 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using HTTP", func() {
-				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
+				cloneDir, err := driver.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
 				Expect(cloneDir).To(Equal(gritRepo.Name))
 
@@ -82,7 +82,7 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using HTTP", func() {
-				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
+				cloneDir, err := driver.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
 				Expect(cloneDir).To(Equal(gritRepo.Name))
 
@@ -103,7 +103,7 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using SSH", func() {
-				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
+				cloneDir, err := driver.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
 				Expect(cloneDir).To(Equal(gritRepo.Name))
 
@@ -123,7 +123,7 @@ var _ = Describe("func source.Clone()", func() {
 				})
 
 				It("returns an error", func() {
-					_, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
+					_, err := driver.Clone(ctx, gritRepo.ID, tempDir, logger)
 					Expect(err).To(MatchError("open /does/not/exist: no such file or directory"))
 				})
 			})
@@ -138,7 +138,7 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using SSH", func() {
-				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
+				cloneDir, err := driver.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
 				Expect(cloneDir).To(Equal(gritRepo.Name))
 
@@ -159,7 +159,7 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using SSH", func() {
-				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
+				cloneDir, err := driver.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
 				Expect(cloneDir).To(Equal(gritRepo.Name))
 
@@ -173,17 +173,17 @@ var _ = Describe("func source.Clone()", func() {
 		})
 
 		It("returns an error if the repository does not exist", func() {
-			_, err := src.Clone(ctx, strconv.FormatInt(math.MaxInt64, 10), tempDir, logger)
+			_, err := driver.Clone(ctx, strconv.FormatInt(math.MaxInt64, 10), tempDir, logger)
 			Expect(err).To(MatchError("GET https://api.github.com/repositories/9223372036854775807: 404 Not Found []"))
 		})
 
 		It("returns an error if the repository ID is invalid", func() {
-			_, err := src.Clone(ctx, "<invalid>", tempDir, logger)
+			_, err := driver.Clone(ctx, "<invalid>", tempDir, logger)
 			Expect(err).To(MatchError("invalid repo ID, expected positive integer"))
 		})
 
 		It("returns an error if the repository ID is non-positive", func() {
-			_, err := src.Clone(ctx, "0", tempDir, logger)
+			_, err := driver.Clone(ctx, "0", tempDir, logger)
 			Expect(err).To(MatchError("invalid repo ID, expected positive integer"))
 		})
 	})
@@ -194,7 +194,7 @@ var _ = Describe("func source.Clone()", func() {
 		})
 
 		JustBeforeEach(func() {
-			ctx, cancel, src = beforeEachAuthenticated(configure)
+			ctx, cancel, driver = beforeEachAuthenticated(configure)
 		})
 
 		AfterEach(func() {
@@ -214,7 +214,7 @@ var _ = Describe("func source.Clone()", func() {
 				// Change this test to use a private repository so it's actually
 				// verifying that the token is being used.
 
-				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
+				cloneDir, err := driver.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
 				Expect(cloneDir).To(Equal(gritRepo.Name))
 

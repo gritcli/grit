@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/cmd/gritd/internal/source"
@@ -28,9 +29,15 @@ func (s *server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.Sourc
 	res := &api.SourcesResponse{}
 
 	for _, s := range s.sources {
+		status, err := s.Driver.Status(ctx)
+		if err != nil {
+			return nil, err
+		}
+
 		res.Sources = append(res.Sources, &api.Source{
-			Name:        s.Name(),
-			Description: s.Description(),
+			Name:        s.Name,
+			Description: s.Description,
+			Status:      status,
 		})
 	}
 
@@ -63,10 +70,10 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 		src := src // capture loop variable
 
 		g.Go(func() error {
-			repos, err := src.Resolve(
+			repos, err := src.Driver.Resolve(
 				ctx,
 				req.Query,
-				logging.Prefix(log, "%s: ", src.Name()),
+				logging.Prefix(log, "%s: ", src.Name),
 			)
 			if err != nil {
 				return err
@@ -77,7 +84,7 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 					Response: &api.ResolveResponse_Repo{
 						Repo: &api.Repo{
 							Id:          r.ID,
-							Source:      src.Name(),
+							Source:      src.Name,
 							Name:        r.Name,
 							Description: r.Description,
 							WebUrl:      r.WebURL,
@@ -109,7 +116,7 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		return err
 	}
 
-	if _, err := src.Clone(
+	if _, err := src.Driver.Clone(
 		ctx,
 		req.RepoId,
 		dir,
@@ -137,10 +144,10 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 
 func (s *server) sourceByName(n string) (source.Source, bool) {
 	for _, src := range s.sources {
-		if src.Name() == n {
+		if strings.EqualFold(src.Name, n) {
 			return src, true
 		}
 	}
 
-	return nil, false
+	return source.Source{}, false
 }

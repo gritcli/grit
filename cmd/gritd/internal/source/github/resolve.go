@@ -10,12 +10,12 @@ import (
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
 // possible repositories.
-func (s *impl) Resolve(
+func (d *driver) Resolve(
 	ctx context.Context,
 	query string,
 	clientLog logging.Logger,
 ) ([]source.Repo, error) {
-	serverLog := logging.Prefix(s.logger, "resolve[%s]: ", query)
+	serverLog := logging.Prefix(d.logger, "resolve[%s]: ", query)
 	clientLog = logging.Tee(serverLog, clientLog) // log everything sent to the client on the server as well
 
 	ownerName, repoName, err := parseRepoName(query)
@@ -24,7 +24,7 @@ func (s *impl) Resolve(
 		return nil, nil
 	}
 
-	reposByOwner := s.cache.ReposByOwner()
+	reposByOwner := d.cache.ReposByOwner()
 	var repos []source.Repo
 
 	if ownerName == "" {
@@ -52,7 +52,7 @@ func (s *impl) Resolve(
 		}, nil
 	}
 
-	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
+	r, res, err := d.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
 		if res.StatusCode == http.StatusNotFound {
 			logging.Debug(clientLog, "no matches found when querying the API")
@@ -63,7 +63,7 @@ func (s *impl) Resolve(
 		return nil, err
 	}
 
-	logging.Debug(s.logger, "found an exact match by querying the API")
+	logging.Debug(serverLog, "found an exact match by querying the API")
 
 	return []source.Repo{
 		convertRepo(r),

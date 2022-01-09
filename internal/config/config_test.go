@@ -20,7 +20,7 @@ var defaultConfig = Config{
 			Clones: Clones{
 				Dir: "~/grit/github",
 			},
-			Config: GitHub{
+			DriverConfig: GitHub{
 				Domain: "github.com",
 			},
 		},

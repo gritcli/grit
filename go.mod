@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/dogmatiq/dodeca v1.3.0
+	github.com/dustin/go-humanize v1.0.0
 	github.com/hashicorp/hcl/v2 v2.11.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-isatty v0.0.14

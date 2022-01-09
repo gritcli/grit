@@ -30,7 +30,7 @@ var _ = Describe("func Load() (global clones block)", func() {
 					Clones: Clones{ // base directory inherited from the clones default block
 						Dir: "/path/to/clones/github",
 					},
-					Config: GitHub{
+					DriverConfig: GitHub{
 						Domain: "github.com",
 					},
 				},

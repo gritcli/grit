@@ -40,9 +40,19 @@ type sourceFactory struct {
 }
 
 func (f *sourceFactory) VisitGitHubSource(s config.Source, cfg config.GitHub) {
-	f.Source, f.Error = github.NewSource(
-		s.Name,
+	d, err := github.NewDriver(
 		cfg,
 		logging.Prefix(f.Logger, "source[%s]: ", s.Name),
 	)
+
+	if err != nil {
+		f.Error = err
+		return
+	}
+
+	f.Source = source.Source{
+		Name:        s.Name,
+		Description: cfg.String(),
+		Driver:      d,
+	}
 }

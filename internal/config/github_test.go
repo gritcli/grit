@@ -4,7 +4,29 @@ import (
 	. "github.com/gritcli/grit/internal/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("type GitHub", func() {
+	Describe("func String()", func() {
+		DescribeTable(
+			"it describes the source",
+			func(cfg GitHub, expect string) {
+				Expect(cfg.String()).To(Equal(expect))
+			},
+			Entry(
+				"github.com",
+				GitHub{Domain: "github.com"},
+				"github.com",
+			),
+			Entry(
+				"github enterprise server",
+				GitHub{Domain: "code.example.com"},
+				"code.example.com (github enterprise server)",
+			),
+		)
+	})
+})
 
 var _ = Describe("func Load() (github source)", func() {
 	DescribeTable(
@@ -23,7 +45,7 @@ var _ = Describe("func Load() (github source)", func() {
 				Clones: Clones{
 					Dir: "~/grit/github",
 				},
-				Config: GitHub{
+				DriverConfig: GitHub{
 					Domain: "github.com",
 					Token:  "<token>",
 				},
@@ -42,7 +64,7 @@ var _ = Describe("func Load() (github source)", func() {
 				Clones: Clones{
 					Dir: "~/grit/my_company",
 				},
-				Config: GitHub{
+				DriverConfig: GitHub{
 					Domain: "github.example.com",
 				},
 			}),
@@ -66,7 +88,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					Config: GitHub{
+					DriverConfig: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							SSHKeyFile: "/path/to/key",
@@ -95,7 +117,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					Config: GitHub{
+					DriverConfig: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							SSHKeyFile:       "/path/to/key",
@@ -134,7 +156,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					Config: GitHub{
+					DriverConfig: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							SSHKeyFile:       "/path/to/different/key",
@@ -172,7 +194,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					Config: GitHub{
+					DriverConfig: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							PreferHTTP: true,

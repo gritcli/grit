@@ -1,5 +1,9 @@
 package config
 
+import (
+	"strings"
+)
+
 // GitHub contains configuration specific to a GitHub repository source.
 type GitHub struct {
 	// Domain is the base domain name of the GitHub installation.
@@ -18,8 +22,19 @@ func (c GitHub) acceptVisitor(s Source, v SourceVisitor) {
 	v.VisitGitHubSource(s, c)
 }
 
+// String returns a human-readable description of the configuration.
+func (c GitHub) String() string {
+	desc := c.Domain
+
+	if !strings.EqualFold(c.Domain, "github.com") {
+		desc += " (github enterprise server)"
+	}
+
+	return desc
+}
+
 // gitHubBlock is the HCL schema for a "source" block that uses the "github"
-// source implementation.
+// source driver.
 type gitHubBlock struct {
 	Domain string    `hcl:"domain,optional"`
 	Token  string    `hcl:"token,optional"`
@@ -34,7 +49,7 @@ func (b *gitHubBlock) Normalize(cfg unresolvedConfig, s unresolvedSource) error 
 	return normalizeSourceSpecificGitBlock(cfg, s, &b.Git)
 }
 
-func (b *gitHubBlock) Assemble() SourceConfig {
+func (b *gitHubBlock) Assemble() SourceDriverConfig {
 	return GitHub{
 		Domain: b.Domain,
 		Token:  b.Token,
@@ -43,16 +58,16 @@ func (b *gitHubBlock) Assemble() SourceConfig {
 }
 
 func init() {
-	registerSourceImpl(
+	registerSourceDriver(
 		"github",
-		func() sourceBlockBody {
+		func() sourceDriverBlock {
 			return &gitHubBlock{}
 		},
 	)
 
 	registerDefaultSource(
 		"github",
-		func() sourceBlockBody {
+		func() sourceDriverBlock {
 			return &gitHubBlock{
 				Domain: "github.com",
 			}

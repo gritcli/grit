@@ -46,14 +46,14 @@ func run() (err error) {
 	) error {
 		logging.Log(logger, "grit daemon v%s", version)
 
-		if err := initSources(ctx, logger, sources); err != nil {
+		if err := initSourceDrivers(ctx, logger, sources); err != nil {
 			return err
 		}
 
 		g, ctx := errgroup.WithContext(ctx)
 
 		g.Go(func() error {
-			return runSources(ctx, logger, sources)
+			return runSourceDrivers(ctx, logger, sources)
 		})
 
 		g.Go(func() error {
@@ -64,28 +64,28 @@ func run() (err error) {
 	})
 }
 
-// initSources initializes each source in parallel.
-func initSources(ctx context.Context, logger logging.Logger, sources []source.Source) error {
+// initSourceDrivers initializes each source's driver in parallel.
+func initSourceDrivers(ctx context.Context, logger logging.Logger, sources []source.Source) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, src := range sources {
 		src := src // capture loop variable
 		g.Go(func() error {
-			return src.Init(ctx)
+			return src.Driver.Init(ctx)
 		})
 	}
 
 	return g.Wait()
 }
 
-// runSources runs each source in parallel.
-func runSources(ctx context.Context, logger logging.Logger, sources []source.Source) error {
+// runSourceDrivers runs each source's driver in parallel.
+func runSourceDrivers(ctx context.Context, logger logging.Logger, sources []source.Source) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, src := range sources {
 		src := src // capture loop variable
 		g.Go(func() error {
-			return src.Run(ctx)
+			return src.Driver.Run(ctx)
 		})
 	}
 
