@@ -55,9 +55,18 @@ type Source interface {
 	// whatever action best matches this intent. For example, for Subversion
 	// repositories an equivalent operation would be "checkout".
 	//
+	// tempDir is a temporary directory into which the repository clone is
+	// placed. cloneDir is a directory, relative to the source's configured
+	// clone directory, to which the content of the temporary directory should
+	// be moved after a successful clone.
+	//
 	// clientLog is a target for any log output that should be sent to the
 	// client and displayed to the user.
-	Clone(ctx context.Context, repoID, dir string, clientLog logging.Logger) error
+	Clone(
+		ctx context.Context,
+		repoID, tempDir string,
+		clientLog logging.Logger,
+	) (cloneDir string, err error)
 }
 
 // Repo is a reference to a remote repository provided by a source.

@@ -20,19 +20,19 @@ var _ = Describe("func source.Clone()", func() {
 		cancel    context.CancelFunc
 		configure func(*config.GitHub)
 		src       source.Source
-		dir       string
+		tempDir   string
 		logger    logging.DiscardLogger
 	)
 
 	BeforeEach(func() {
 		var err error
-		dir, err = os.MkdirTemp("", "grit-clone-test-")
+		tempDir, err = os.MkdirTemp("", "")
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 
 	AfterEach(func() {
-		if dir != "" {
-			os.RemoveAll(dir)
+		if tempDir != "" {
+			os.RemoveAll(tempDir)
 		}
 	})
 
@@ -57,10 +57,11 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using HTTP", func() {
-				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
+				Expect(cloneDir).To(Equal(gritRepo.Name))
 
-				repo, err := git.PlainOpen(dir)
+				repo, err := git.PlainOpen(tempDir)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				rem, err := repo.Remote("origin")
@@ -81,10 +82,11 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using HTTP", func() {
-				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
+				Expect(cloneDir).To(Equal(gritRepo.Name))
 
-				repo, err := git.PlainOpen(dir)
+				repo, err := git.PlainOpen(tempDir)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				rem, err := repo.Remote("origin")
@@ -101,10 +103,11 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using SSH", func() {
-				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
+				Expect(cloneDir).To(Equal(gritRepo.Name))
 
-				repo, err := git.PlainOpen(dir)
+				repo, err := git.PlainOpen(tempDir)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				rem, err := repo.Remote("origin")
@@ -120,7 +123,7 @@ var _ = Describe("func source.Clone()", func() {
 				})
 
 				It("returns an error", func() {
-					err := src.Clone(ctx, gritRepo.ID, dir, logger)
+					_, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
 					Expect(err).To(MatchError("open /does/not/exist: no such file or directory"))
 				})
 			})
@@ -135,10 +138,11 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using SSH", func() {
-				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
+				Expect(cloneDir).To(Equal(gritRepo.Name))
 
-				repo, err := git.PlainOpen(dir)
+				repo, err := git.PlainOpen(tempDir)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				rem, err := repo.Remote("origin")
@@ -155,10 +159,11 @@ var _ = Describe("func source.Clone()", func() {
 			})
 
 			It("clones the repository using SSH", func() {
-				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
+				Expect(cloneDir).To(Equal(gritRepo.Name))
 
-				repo, err := git.PlainOpen(dir)
+				repo, err := git.PlainOpen(tempDir)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				rem, err := repo.Remote("origin")
@@ -168,17 +173,17 @@ var _ = Describe("func source.Clone()", func() {
 		})
 
 		It("returns an error if the repository does not exist", func() {
-			err := src.Clone(ctx, strconv.FormatInt(math.MaxInt64, 10), dir, logger)
+			_, err := src.Clone(ctx, strconv.FormatInt(math.MaxInt64, 10), tempDir, logger)
 			Expect(err).To(MatchError("GET https://api.github.com/repositories/9223372036854775807: 404 Not Found []"))
 		})
 
 		It("returns an error if the repository ID is invalid", func() {
-			err := src.Clone(ctx, "<invalid>", dir, logger)
+			_, err := src.Clone(ctx, "<invalid>", tempDir, logger)
 			Expect(err).To(MatchError("invalid repo ID, expected positive integer"))
 		})
 
 		It("returns an error if the repository ID is non-positive", func() {
-			err := src.Clone(ctx, "0", dir, logger)
+			_, err := src.Clone(ctx, "0", tempDir, logger)
 			Expect(err).To(MatchError("invalid repo ID, expected positive integer"))
 		})
 	})
@@ -209,10 +214,11 @@ var _ = Describe("func source.Clone()", func() {
 				// Change this test to use a private repository so it's actually
 				// verifying that the token is being used.
 
-				err := src.Clone(ctx, gritRepo.ID, dir, logger)
+				cloneDir, err := src.Clone(ctx, gritRepo.ID, tempDir, logger)
 				skipIfRateLimited(err)
+				Expect(cloneDir).To(Equal(gritRepo.Name))
 
-				repo, err := git.PlainOpen(dir)
+				repo, err := git.PlainOpen(tempDir)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				rem, err := repo.Remote("origin")

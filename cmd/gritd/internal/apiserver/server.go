@@ -109,7 +109,7 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		return err
 	}
 
-	if err := src.Clone(
+	if _, err := src.Clone(
 		ctx,
 		req.RepoId,
 		dir,

@@ -15,15 +15,15 @@ import (
 // Clone makes a repository available at the specified directory.
 func (s *impl) Clone(
 	ctx context.Context,
-	repoID, dir string,
+	repoID, tempDir string,
 	clientLog logging.Logger,
-) error {
+) (string, error) {
 	serverLog := logging.Prefix(s.logger, "clone[%s]: ", repoID)
 
 	id, err := parseRepoID(repoID)
 	if err != nil {
 		logging.LogString(serverLog, err.Error())
-		return err
+		return "", err
 	}
 
 	r, ok := s.cache.RepoByID(id)
@@ -32,11 +32,11 @@ func (s *impl) Clone(
 		r, _, err = s.client.Repositories.GetByID(ctx, id)
 		if err != nil {
 			logging.Log(serverLog, "unable to query API: %s", err)
-			return err
+			return "", err
 		}
 	}
 
-	logging.Debug(serverLog, "cloning %s to %s", r.GetFullName(), dir)
+	logging.Debug(serverLog, "cloning %s to %s", r.GetFullName(), tempDir)
 
 	opts, err := newCloneOptions(
 		s.cfg,
@@ -48,17 +48,17 @@ func (s *impl) Clone(
 	)
 	if err != nil {
 		logging.Log(serverLog, "unable to construct clone options: %w", err)
-		return err
+		return "", err
 	}
 
 	_, err = git.PlainCloneContext(
 		ctx,
-		dir,
+		tempDir,
 		false, // isBare
 		opts,
 	)
 
-	return err
+	return r.GetFullName(), err
 }
 
 // newCloneOptions returns new clone options based on source configuration.

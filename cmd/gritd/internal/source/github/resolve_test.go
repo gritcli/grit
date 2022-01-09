@@ -69,14 +69,7 @@ var _ = Describe("func source.Resolve()", func() {
 		It("resolves an exact match using the API", func() {
 			repos, err := src.Resolve(ctx, "gritcli/grit", logger)
 			skipIfRateLimited(err)
-			Expect(repos).To(ConsistOf(
-				source.Repo{
-					ID:          "397822937",
-					Name:        "gritcli/grit",
-					Description: "Manage your local Git clones.",
-					WebURL:      "https://github.com/gritcli/grit",
-				},
-			))
+			Expect(repos).To(ConsistOf(gritRepo))
 		})
 
 		It("returns nothing for a qualified name that does not exist", func() {
