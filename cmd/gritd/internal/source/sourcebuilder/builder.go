@@ -42,6 +42,7 @@ func (b *Builder) FromSourceConfig(cfg config.Source) source.Source {
 	return source.Source{
 		Name:        cfg.Name,
 		Description: cfg.Driver.String(),
+		CloneDir:    cfg.Clones.Dir,
 		Driver:      f.Driver,
 	}
 }

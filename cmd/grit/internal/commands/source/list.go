@@ -5,6 +5,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/cmd/grit/internal/deps"
+	"github.com/gritcli/grit/cmd/grit/internal/render"
 	"github.com/gritcli/grit/internal/api"
 	"github.com/spf13/cobra"
 )
@@ -33,10 +34,11 @@ func newListCommand() *cobra.Command {
 
 			for _, src := range res.Sources {
 				cmd.Printf(
-					"%s\t%s\t%s\n",
+					"%s\t%s\t%s\t%s\n",
 					src.Name,
 					src.Description,
 					src.Status,
+					render.AbsPath(src.CloneDir),
 				)
 			}
 

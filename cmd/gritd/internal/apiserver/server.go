@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -38,6 +39,7 @@ func (s *server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.Sourc
 			Name:        s.Name,
 			Description: s.Description,
 			Status:      status,
+			CloneDir:    s.CloneDir,
 		})
 	}
 
@@ -111,15 +113,15 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		return errors.New("unrecognized source name")
 	}
 
-	dir, err := os.MkdirTemp("", "grit-clone-")
+	tempDir, err := os.MkdirTemp("", "grit-clone-")
 	if err != nil {
 		return err
 	}
 
-	if _, err := src.Driver.Clone(
+	relDir, err := src.Driver.Clone(
 		ctx,
 		req.RepoId,
-		dir,
+		tempDir,
 		newStreamLogger(
 			stream,
 			req.ClientOptions,
@@ -131,13 +133,27 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 				}
 			},
 		),
-	); err != nil {
+	)
+	if err != nil {
+		return err
+	}
+
+	cloneDir := filepath.Join(src.CloneDir, relDir)
+	parentDir := filepath.Dir(cloneDir)
+
+	if err := os.MkdirAll(parentDir, 0700); err != nil {
+		return err
+	}
+
+	if err := os.Rename(tempDir, cloneDir); err != nil {
+		// TODO: check if error is due to tempDir and cloneDir being on
+		// different disk drives and if so, copy, then delete.
 		return err
 	}
 
 	return stream.Send(&api.CloneResponse{
 		Response: &api.CloneResponse_Directory{
-			Directory: dir,
+			Directory: cloneDir,
 		},
 	})
 }

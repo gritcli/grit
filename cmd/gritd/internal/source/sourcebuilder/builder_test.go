@@ -54,6 +54,7 @@ var _ = Describe("func Listen()", func() {
 				source.Source{
 					Name:        "github-test-source",
 					Description: "github.com",
+					CloneDir:    "/path/to/clones/github",
 					Driver: &github.Driver{
 						Config: config.GitHub{
 							Domain: "github.com",
@@ -87,6 +88,7 @@ var _ = Describe("func Listen()", func() {
 				source.Source{
 					Name:        "test-source",
 					Description: "github.com",
+					CloneDir:    "/path/to/clones",
 					Driver: &github.Driver{
 						Config: config.GitHub{
 							Domain: "github.com",

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -170,6 +171,16 @@ func normalizePath(filename string, p *string) error {
 
 	if !filepath.IsAbs(n) {
 		dir := filepath.Dir(filename)
+
+		if !filepath.IsAbs(dir) {
+			cwd, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+
+			dir = filepath.Join(cwd, dir)
+		}
+
 		n = filepath.Join(dir, n)
 	}
 
