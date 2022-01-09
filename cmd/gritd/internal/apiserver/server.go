@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -111,15 +112,15 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		return errors.New("unrecognized source name")
 	}
 
-	dir, err := os.MkdirTemp("", "grit-clone-")
+	tempDir, err := os.MkdirTemp("", "grit-clone-")
 	if err != nil {
 		return err
 	}
 
-	if _, err := src.Driver.Clone(
+	relDir, err := src.Driver.Clone(
 		ctx,
 		req.RepoId,
-		dir,
+		tempDir,
 		newStreamLogger(
 			stream,
 			req.ClientOptions,
@@ -131,13 +132,16 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 				}
 			},
 		),
-	); err != nil {
+	)
+	if err != nil {
 		return err
 	}
 
+	cloneDir := filepath.Join(src.CloneDir, relDir)
+
 	return stream.Send(&api.CloneResponse{
 		Response: &api.CloneResponse_Directory{
-			Directory: dir,
+			Directory: cloneDir,
 		},
 	})
 }
