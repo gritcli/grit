@@ -138,6 +138,17 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 	}
 
 	cloneDir := filepath.Join(src.CloneDir, relDir)
+	parentDir := filepath.Dir(cloneDir)
+
+	if err := os.MkdirAll(parentDir, 0700); err != nil {
+		return err
+	}
+
+	if err := os.Rename(tempDir, cloneDir); err != nil {
+		// TODO: check if error is due to tempDir and cloneDir being on
+		// different disk drives and if so, copy, then delete.
+		return err
+	}
 
 	return stream.Send(&api.CloneResponse{
 		Response: &api.CloneResponse_Directory{

@@ -67,6 +67,8 @@ func newCloneCommand() *cobra.Command {
 				return err
 			}
 
+			cmd.Println(dir)
+
 			return executor("cd", dir)
 		}),
 	}
