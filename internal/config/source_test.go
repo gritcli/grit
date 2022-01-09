@@ -29,6 +29,29 @@ var _ = Describe("func Load() (source blocks)", func() {
 			withSource(defaultConfig, Source{
 				Name:    "github",
 				Enabled: false,
+				Clones: Clones{
+					Dir: "~/grit",
+				},
+				Config: GitHub{
+					Domain: "github.com",
+				},
+			}),
+		),
+		Entry(
+			"explicit clone directory",
+			[]string{
+				`source "github" "github" {
+					clones {
+						dir = "/path/to/clones"
+					}
+				}`,
+			},
+			withSource(defaultConfig, Source{
+				Name:    "github",
+				Enabled: true,
+				Clones: Clones{
+					Dir: "/path/to/clones",
+				},
 				Config: GitHub{
 					Domain: "github.com",
 				},

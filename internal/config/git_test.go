@@ -29,6 +29,9 @@ var _ = Describe("func Load() (git defaults block)", func() {
 				Source{
 					Name:    "github",
 					Enabled: true,
+					Clones: Clones{
+						Dir: "~/grit",
+					},
 					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{ // inherited from git defaults block
@@ -56,6 +59,9 @@ var _ = Describe("func Load() (git defaults block)", func() {
 				Source{
 					Name:    "github",
 					Enabled: true,
+					Clones: Clones{
+						Dir: "~/grit",
+					},
 					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{ // inherited from git defaults block
@@ -89,6 +95,9 @@ var _ = Describe("func Load() (git defaults block)", func() {
 				Source{
 					Name:    "github",
 					Enabled: true,
+					Clones: Clones{
+						Dir: "~/grit",
+					},
 					Config: GitHub{
 						Domain: "github.com",
 						Git: Git{ // inherited from git defaults block

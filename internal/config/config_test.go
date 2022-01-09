@@ -17,6 +17,9 @@ var defaultConfig = Config{
 		"github": {
 			Name:    "github",
 			Enabled: true,
+			Clones: Clones{
+				Dir: "~/grit",
+			},
 			Config: GitHub{
 				Domain: "github.com",
 			},
@@ -34,6 +37,15 @@ func init() {
 	defaultConfig.ClonesDefaults.Dir, err = homedir.Expand(defaultConfig.ClonesDefaults.Dir)
 	if err != nil {
 		panic(err)
+	}
+
+	for n, s := range defaultConfig.Sources {
+		s.Clones.Dir, err = homedir.Expand(s.Clones.Dir)
+		if err != nil {
+			panic(err)
+		}
+
+		defaultConfig.Sources[n] = s
 	}
 }
 
@@ -61,6 +73,12 @@ func withGitDefaults(cfg Config, g Git) Config {
 func withSource(cfg Config, src Source) Config {
 	prev := cfg.Sources
 	cfg.Sources = map[string]Source{}
+
+	var err error
+	src.Clones.Dir, err = homedir.Expand(src.Clones.Dir)
+	if err != nil {
+		panic(err)
+	}
 
 	for n, s := range prev {
 		cfg.Sources[n] = s

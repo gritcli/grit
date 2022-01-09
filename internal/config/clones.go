@@ -52,6 +52,27 @@ func normalizeClonesDefaultsBlock(cfg *unresolvedConfig) error {
 	return nil
 }
 
+// normalizeSourceSpecificClonesBlock normalizes a clonesBlock within a source
+// configuration.
+func normalizeSourceSpecificClonesBlock(cfg unresolvedConfig, s *unresolvedSource) error {
+	if s.Block.ClonesBlock == nil {
+		s.Block.ClonesBlock = &clonesBlock{}
+	}
+
+	if s.Block.ClonesBlock.Dir == "" {
+		s.Block.ClonesBlock.Dir = cfg.ClonesDefaults.Block.Dir
+	} else {
+		// We make sure to only normalize the private key path against s.File if
+		// it actually came from the source config (not inherited from the
+		// git defaults block).
+		if err := normalizePath(s.File, &s.Block.ClonesBlock.Dir); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // assembleClonesBlock converts b into its configuration representation.
 func assembleClonesBlock(b clonesBlock) Clones {
 	return Clones(b)

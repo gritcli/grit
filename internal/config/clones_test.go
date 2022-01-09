@@ -27,6 +27,9 @@ var _ = Describe("func Load() (global clones block)", func() {
 				Source{
 					Name:    "github",
 					Enabled: true,
+					Clones: Clones{ // inherited from the clones default block
+						Dir: "/path/to/clones",
+					},
 					Config: GitHub{
 						Domain: "github.com",
 					},
