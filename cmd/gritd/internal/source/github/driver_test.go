@@ -51,10 +51,10 @@ var _ = Describe("type driver", func() {
 			})
 
 			Describe("func Status()", func() {
-				It("indicates that the user is unauthenticated", func() {
+				It("indicates that the token is invalid", func() {
 					status, err := driver.Status(ctx)
 					Expect(err).ShouldNot(HaveOccurred())
-					Expect(status).To(MatchRegexp(`unauthenticated (bad credentials)`))
+					Expect(status).To(Equal(`unauthenticated (invalid token)`))
 				})
 			})
 		})
