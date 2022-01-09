@@ -4,7 +4,20 @@ import (
 	. "github.com/gritcli/grit/internal/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("type GitHub", func() {
+	Describe("func String()", func() {
+		It("describes the source", func() {
+			cfg := GitHub{Domain: "github.com"}
+			Expect(cfg.String()).To(Equal("github"))
+
+			cfg.Domain = "code.example.org"
+			Expect(cfg.String()).To(Equal("github enterprise server (code.example.org)"))
+		})
+	})
+})
 
 var _ = Describe("func Load() (github source)", func() {
 	DescribeTable(

@@ -38,6 +38,9 @@ func (s Source) AcceptVisitor(v SourceVisitor) {
 type SourceDriverConfig interface {
 	// acceptVisitor calls the appropriate method on v.
 	acceptVisitor(s Source, v SourceVisitor)
+
+	// String returns a human-readable description of the configuration.
+	String() string
 }
 
 // SourceVisitor dispatches Source values to driver-specific logic.
