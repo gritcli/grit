@@ -30,7 +30,7 @@ var _ = Describe("func Load() (source blocks)", func() {
 				Name:    "github",
 				Enabled: false,
 				Clones: Clones{
-					Dir: "~/grit",
+					Dir: "~/grit/github",
 				},
 				Config: GitHub{
 					Domain: "github.com",

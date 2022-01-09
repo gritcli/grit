@@ -60,7 +60,10 @@ func normalizeSourceSpecificClonesBlock(cfg unresolvedConfig, s *unresolvedSourc
 	}
 
 	if s.Block.ClonesBlock.Dir == "" {
-		s.Block.ClonesBlock.Dir = cfg.ClonesDefaults.Block.Dir
+		s.Block.ClonesBlock.Dir = filepath.Join(
+			cfg.ClonesDefaults.Block.Dir,
+			s.Block.Name,
+		)
 	} else {
 		// We make sure to only normalize the private key path against s.File if
 		// it actually came from the source config (not inherited from the

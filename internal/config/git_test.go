@@ -30,7 +30,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 					Name:    "github",
 					Enabled: true,
 					Clones: Clones{
-						Dir: "~/grit",
+						Dir: "~/grit/github",
 					},
 					Config: GitHub{
 						Domain: "github.com",
@@ -60,7 +60,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 					Name:    "github",
 					Enabled: true,
 					Clones: Clones{
-						Dir: "~/grit",
+						Dir: "~/grit/github",
 					},
 					Config: GitHub{
 						Domain: "github.com",
@@ -96,7 +96,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 					Name:    "github",
 					Enabled: true,
 					Clones: Clones{
-						Dir: "~/grit",
+						Dir: "~/grit/github",
 					},
 					Config: GitHub{
 						Domain: "github.com",

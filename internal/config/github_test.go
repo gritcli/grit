@@ -21,7 +21,7 @@ var _ = Describe("func Load() (github source)", func() {
 				Name:    "github",
 				Enabled: true,
 				Clones: Clones{
-					Dir: "~/grit",
+					Dir: "~/grit/github",
 				},
 				Config: GitHub{
 					Domain: "github.com",
@@ -40,7 +40,7 @@ var _ = Describe("func Load() (github source)", func() {
 				Name:    "my_company",
 				Enabled: true,
 				Clones: Clones{
-					Dir: "~/grit",
+					Dir: "~/grit/my_company",
 				},
 				Config: GitHub{
 					Domain: "github.example.com",
@@ -64,7 +64,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Name:    "github",
 					Enabled: true,
 					Clones: Clones{
-						Dir: "~/grit",
+						Dir: "~/grit/github",
 					},
 					Config: GitHub{
 						Domain: "github.com",
@@ -93,7 +93,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Name:    "github",
 					Enabled: true,
 					Clones: Clones{
-						Dir: "~/grit",
+						Dir: "~/grit/github",
 					},
 					Config: GitHub{
 						Domain: "github.com",
@@ -132,7 +132,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Name:    "github",
 					Enabled: true,
 					Clones: Clones{
-						Dir: "~/grit",
+						Dir: "~/grit/github",
 					},
 					Config: GitHub{
 						Domain: "github.com",
@@ -170,7 +170,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Name:    "github",
 					Enabled: true,
 					Clones: Clones{
-						Dir: "~/grit",
+						Dir: "~/grit/github",
 					},
 					Config: GitHub{
 						Domain: "github.com",
