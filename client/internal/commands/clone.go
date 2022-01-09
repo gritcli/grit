@@ -6,10 +6,10 @@ import (
 	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/gritcli/grit/cmd/grit/internal/deps"
-	"github.com/gritcli/grit/cmd/grit/internal/interactive"
-	"github.com/gritcli/grit/cmd/grit/internal/render"
-	"github.com/gritcli/grit/cmd/grit/internal/shell"
+	"github.com/gritcli/grit/client/internal/deps"
+	"github.com/gritcli/grit/client/internal/interactive"
+	"github.com/gritcli/grit/client/internal/render"
+	"github.com/gritcli/grit/client/internal/shell"
 	"github.com/gritcli/grit/common/api"
 	"github.com/spf13/cobra"
 )

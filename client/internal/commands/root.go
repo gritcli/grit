@@ -3,9 +3,9 @@ package commands
 import (
 	"context"
 
-	"github.com/gritcli/grit/cmd/grit/internal/commands/source"
-	"github.com/gritcli/grit/cmd/grit/internal/deps"
-	"github.com/gritcli/grit/cmd/grit/internal/flags"
+	"github.com/gritcli/grit/client/internal/commands/source"
+	"github.com/gritcli/grit/client/internal/deps"
+	"github.com/gritcli/grit/client/internal/flags"
 	"github.com/spf13/cobra"
 )
 

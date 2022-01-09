@@ -3,7 +3,7 @@ package shell_test
 import (
 	"strings"
 
-	. "github.com/gritcli/grit/cmd/grit/internal/shell"
+	. "github.com/gritcli/grit/client/internal/shell"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
