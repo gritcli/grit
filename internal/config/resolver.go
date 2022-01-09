@@ -37,8 +37,8 @@ func (r *resolver) Merge(filename string, c configFile) error {
 		}
 	}
 
-	if c.GitBlock != nil {
-		if err := mergeGlobalGitBlock(&r.cfg, filename, *c.GitBlock); err != nil {
+	if c.GitDefaultsBlock != nil {
+		if err := mergeGitDefaultsBlock(&r.cfg, filename, *c.GitDefaultsBlock); err != nil {
 			return err
 		}
 	}
@@ -60,7 +60,7 @@ func (r *resolver) Normalize() error {
 		return err
 	}
 
-	if err := normalizeGlobalGitBlock(&r.cfg); err != nil {
+	if err := normalizeGitDefaultsBlock(&r.cfg); err != nil {
 		return err
 	}
 
@@ -79,9 +79,9 @@ func (r *resolver) Normalize() error {
 // files.
 func (r *resolver) Assemble() Config {
 	cfg := Config{
-		Daemon:    assembleDaemonBlock(r.cfg.Daemon.Block),
-		GlobalGit: assembleGitBlock(r.cfg.GlobalGit.Block),
-		Sources:   map[string]Source{},
+		Daemon:      assembleDaemonBlock(r.cfg.Daemon.Block),
+		GitDefaults: assembleGitBlock(r.cfg.GitDefaults.Block),
+		Sources:     map[string]Source{},
 	}
 
 	for _, s := range r.cfg.Sources {
@@ -101,10 +101,10 @@ type unresolvedConfig struct {
 		File  string
 	}
 
-	// GlobalGit contains information about the first global (root-level) "git"
-	// block found within the configuration files. Only one of the loaded files
-	// may contain a global "git" block.
-	GlobalGit struct {
+	// GitDefaults contains information about the first (root-level) "git"
+	// defaults block found within the configuration files. Only one of the
+	// loaded files may contain a "git" defaults block.
+	GitDefaults struct {
 		Block gitBlock
 		File  string
 	}

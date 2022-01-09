@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func Load() (global git block)", func() {
+var _ = Describe("func Load() (git defaults block)", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,
@@ -23,7 +23,7 @@ var _ = Describe("func Load() (global git block)", func() {
 				}`,
 			},
 			withSource(
-				withGlobalGit(defaultConfig, Git{
+				withGitDefaults(defaultConfig, Git{
 					SSHKeyFile: "/path/to/key",
 				}),
 				Source{
@@ -31,7 +31,7 @@ var _ = Describe("func Load() (global git block)", func() {
 					Enabled: true,
 					Config: GitHub{
 						Domain: "github.com",
-						Git: Git{ // inherited from global git block
+						Git: Git{ // inherited from git defaults block
 							SSHKeyFile: "/path/to/key",
 						},
 					},
@@ -49,7 +49,7 @@ var _ = Describe("func Load() (global git block)", func() {
 				}`,
 			},
 			withSource(
-				withGlobalGit(defaultConfig, Git{
+				withGitDefaults(defaultConfig, Git{
 					SSHKeyFile:       "/path/to/key",
 					SSHKeyPassphrase: "<passphrase>",
 				}),
@@ -58,7 +58,7 @@ var _ = Describe("func Load() (global git block)", func() {
 					Enabled: true,
 					Config: GitHub{
 						Domain: "github.com",
-						Git: Git{ // inherited from global git block
+						Git: Git{ // inherited from git defaults block
 							SSHKeyFile:       "/path/to/key",
 							SSHKeyPassphrase: "<passphrase>",
 						},
@@ -83,7 +83,7 @@ var _ = Describe("func Load() (global git block)", func() {
 				}`,
 			},
 			withSource(
-				withGlobalGit(defaultConfig, Git{
+				withGitDefaults(defaultConfig, Git{
 					PreferHTTP: true,
 				}),
 				Source{
@@ -91,7 +91,7 @@ var _ = Describe("func Load() (global git block)", func() {
 					Enabled: true,
 					Config: GitHub{
 						Domain: "github.com",
-						Git: Git{ // inherited from global git block
+						Git: Git{ // inherited from git defaults block
 							PreferHTTP: true,
 						},
 					},
@@ -104,12 +104,12 @@ var _ = Describe("func Load() (global git block)", func() {
 		"it returns an error if there is a problem with the configuration",
 		testLoadFailure,
 		Entry(
-			`multiple files with global git blocks`,
+			`multiple files with git defaults blocks`,
 			[]string{
 				`git {}`,
 				`git {}`,
 			},
-			`<dir>/config-1.hcl: a global 'git' block is already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: a 'git' defaults block is already defined in <dir>/config-0.hcl`,
 		),
 		Entry(
 			`explicit SSH passphrase without key file`,
@@ -136,7 +136,7 @@ var _ = Describe("func Load() (global git block)", func() {
 
 		cfg, err := Load(dir)
 		Expect(err).ShouldNot(HaveOccurred())
-		Expect(cfg.GlobalGit.SSHKeyFile).To(Equal(
+		Expect(cfg.GitDefaults.SSHKeyFile).To(Equal(
 			filepath.Join(dir, "relative/path/to/key"),
 		))
 	})

@@ -35,9 +35,10 @@ func withDaemon(cfg Config, d Daemon) Config {
 	return cfg
 }
 
-// withGlobalGit returns a copy of cfg with a different git configuration.
-func withGlobalGit(cfg Config, g Git) Config {
-	cfg.GlobalGit = g
+// withGitDefaults returns a copy of cfg with a different git defaults
+// configuration.
+func withGitDefaults(cfg Config, g Git) Config {
+	cfg.GitDefaults = g
 	return cfg
 }
 

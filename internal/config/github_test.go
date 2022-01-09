@@ -94,7 +94,7 @@ var _ = Describe("func Load() (github source)", func() {
 			),
 		),
 		Entry(
-			"does not inherit global passphase when SSH key is specified explicitly",
+			"does not inherit default passphrase when SSH key is specified explicitly",
 			[]string{
 				`git {
 					ssh_key {
@@ -112,7 +112,7 @@ var _ = Describe("func Load() (github source)", func() {
 				}`,
 			},
 			withSource(
-				withGlobalGit(defaultConfig, Git{
+				withGitDefaults(defaultConfig, Git{
 					SSHKeyFile:       "/path/to/key",
 					SSHKeyPassphrase: "<passphrase>",
 				}),
@@ -123,7 +123,7 @@ var _ = Describe("func Load() (github source)", func() {
 						Domain: "github.com",
 						Git: Git{
 							SSHKeyFile:       "/path/to/different/key",
-							SSHKeyPassphrase: "", // note: different to global git config
+							SSHKeyPassphrase: "", // note: different to default git config
 						},
 					},
 				},

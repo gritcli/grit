@@ -9,10 +9,10 @@ type Config struct {
 	// Daemon is the configuration of the Grit daemon.
 	Daemon Daemon
 
-	// GlobalGit is the configuration that controls how Grit uses Git across all
+	// GitDefaults is the configuration that controls how Grit uses Git across all
 	// sources. Repository sources that use Git may allow these settings to be
 	// overridden.
-	GlobalGit Git
+	GitDefaults Git
 
 	// Sources is the set of repository sources from which repositories can be
 	// cloned.
@@ -21,7 +21,7 @@ type Config struct {
 
 // configFile is HCL schema for a single configuration file.
 type configFile struct {
-	DaemonBlock  *daemonBlock  `hcl:"daemon,block"`
-	GitBlock     *gitBlock     `hcl:"git,block"`
-	SourceBlocks []sourceBlock `hcl:"source,block"`
+	DaemonBlock      *daemonBlock  `hcl:"daemon,block"`
+	GitDefaultsBlock *gitBlock     `hcl:"git,block"`
+	SourceBlocks     []sourceBlock `hcl:"source,block"`
 }

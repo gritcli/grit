@@ -35,22 +35,22 @@ type sshKeyBlock struct {
 	Passphrase string `hcl:"passphrase,optional"`
 }
 
-// mergeGlobalGitBlock merges b into cfg.
-func mergeGlobalGitBlock(cfg *unresolvedConfig, filename string, b gitBlock) error {
-	if cfg.GlobalGit.File != "" {
+// mergeGitDefaultsBlock merges b into cfg.
+func mergeGitDefaultsBlock(cfg *unresolvedConfig, filename string, b gitBlock) error {
+	if cfg.GitDefaults.File != "" {
 		return fmt.Errorf(
-			"%s: a global 'git' block is already defined in %s",
+			"%s: a 'git' defaults block is already defined in %s",
 			filename,
-			cfg.GlobalGit.File,
+			cfg.GitDefaults.File,
 		)
 	}
 
-	cfg.GlobalGit.File = filename
-	cfg.GlobalGit.Block = b
+	cfg.GitDefaults.File = filename
+	cfg.GitDefaults.Block = b
 
 	if err := validateGitBlock(b); err != nil {
 		return fmt.Errorf(
-			"%s: the global 'git' block is invalid: %w",
+			"%s: the 'git' defaults block is invalid: %w",
 			filename,
 			err,
 		)
@@ -64,11 +64,11 @@ func validateGitBlock(b gitBlock) error {
 	return nil
 }
 
-// normalizeGlobalGitBlock normalizes cfg.GlobalGit.Block and populates it with
-// default values.
-func normalizeGlobalGitBlock(cfg *unresolvedConfig) error {
-	if cfg.GlobalGit.Block.SSHKey != nil {
-		return normalizePath(cfg.GlobalGit.File, &cfg.GlobalGit.Block.SSHKey.File)
+// normalizeGitDefaultsBlock normalizes cfg.GitDefaults.Block and populates it
+// with default values.
+func normalizeGitDefaultsBlock(cfg *unresolvedConfig) error {
+	if cfg.GitDefaults.Block.SSHKey != nil {
+		return normalizePath(cfg.GitDefaults.File, &cfg.GitDefaults.Block.SSHKey.File)
 	}
 
 	return nil
@@ -84,18 +84,18 @@ func normalizeSourceSpecificGitBlock(cfg unresolvedConfig, s unresolvedSource, p
 	b := *p
 
 	if b.SSHKey == nil {
-		b.SSHKey = cfg.GlobalGit.Block.SSHKey
+		b.SSHKey = cfg.GitDefaults.Block.SSHKey
 	} else {
 		// We make sure to only normalize the private key path against s.File if
 		// it actually came from the source config (not inherited from the
-		// global git block).
+		// git defaults block).
 		if err := normalizePath(s.File, &b.SSHKey.File); err != nil {
 			return err
 		}
 	}
 
 	if b.PreferHTTP == nil {
-		b.PreferHTTP = cfg.GlobalGit.Block.PreferHTTP
+		b.PreferHTTP = cfg.GitDefaults.Block.PreferHTTP
 	}
 
 	if err := validateGitBlock(*b); err != nil {
