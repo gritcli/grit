@@ -18,6 +18,7 @@ func convertRepo(r *github.Repository) source.Repo {
 		Name:        r.GetFullName(),
 		Description: r.GetDescription(),
 		WebURL:      r.GetHTMLURL(),
+		CloneDir:    r.GetFullName(),
 	}
 }
 

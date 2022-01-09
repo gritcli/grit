@@ -15,6 +15,7 @@ var (
 		Name:        "gritcli/grit",
 		Description: "Manage your local Git clones.",
 		WebURL:      "https://github.com/gritcli/grit",
+		CloneDir:    "gritcli/grit",
 	}
 
 	gritPrivateTestRepo = source.Repo{
@@ -22,6 +23,7 @@ var (
 		Name:        "gritcli/test-private",
 		Description: "Used to test that Grit works with private GitHub repositories.",
 		WebURL:      "https://github.com/gritcli/test-private",
+		CloneDir:    "gritcli/test-private",
 	}
 
 	gritV1Repo = source.Repo{
@@ -29,6 +31,7 @@ var (
 		Name:        "jmalloc/grit",
 		Description: "Keep track of your local Git clones.",
 		WebURL:      "https://github.com/jmalloc/grit",
+		CloneDir:    "jmalloc/grit",
 	}
 
 	// thirdPartyRepo is a repo that the authenticated user does not have access
@@ -40,6 +43,7 @@ var (
 		Name:        "google/go-github",
 		Description: "Go library for accessing the GitHub API",
 		WebURL:      "https://github.com/google/go-github",
+		CloneDir:    "google/go-github",
 	}
 )
 
@@ -69,14 +73,7 @@ var _ = Describe("func source.Resolve()", func() {
 		It("resolves an exact match using the API", func() {
 			repos, err := src.Resolve(ctx, "gritcli/grit", logger)
 			skipIfRateLimited(err)
-			Expect(repos).To(ConsistOf(
-				source.Repo{
-					ID:          "397822937",
-					Name:        "gritcli/grit",
-					Description: "Manage your local Git clones.",
-					WebURL:      "https://github.com/gritcli/grit",
-				},
-			))
+			Expect(repos).To(ConsistOf(gritRepo))
 		})
 
 		It("returns nothing for a qualified name that does not exist", func() {

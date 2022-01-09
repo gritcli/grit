@@ -73,4 +73,8 @@ type Repo struct {
 
 	// WebURL is the URL of the repository's web page, if available.
 	WebURL string
+
+	// CloneDir is the directory a clone of this repository would be placed
+	// in, relative to the clone directory for the source that provides it.
+	CloneDir string
 }
