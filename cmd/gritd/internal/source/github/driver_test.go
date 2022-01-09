@@ -132,13 +132,14 @@ func initDriver(cfg func() config.GitHub, configure []func(*config.GitHub)) (con
 		fn(&c)
 	}
 
-	d, err := NewDriver(c, logging.SilentLogger)
-	Expect(err).ShouldNot(HaveOccurred())
+	d := &Driver{
+		Config: c,
+		Logger: logging.SilentLogger,
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	err = d.Init(ctx)
-	if err != nil {
+	if err := d.Init(ctx); err != nil {
 		cancel()
 		skipIfRateLimited(err)
 	}

@@ -10,67 +10,53 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/google/go-github/github"
-	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/internal/config"
 	"golang.org/x/oauth2"
 )
 
-// driver is an implementation of source.Driver that provides repositories from
+// Driver is an implementation of source.Driver that provides repositories from
 // GitHub.com or a GitHub Enterprise Server installation.
-type driver struct {
-	cfg    config.GitHub
-	client *github.Client
-	logger logging.Logger
+type Driver struct {
+	Config config.GitHub
+	Logger logging.Logger
 
-	cache cache
+	client *github.Client
+	cache  cache
 }
 
-// NewDriver returns a new driver with the given configuration.
-func NewDriver(
-	cfg config.GitHub,
-	logger logging.Logger,
-) (source.Driver, error) {
-	d := &driver{
-		cfg:    cfg,
-		logger: logger,
-	}
-
+// Init initializes the driver.
+func (d *Driver) Init(ctx context.Context) error {
 	httpClient := http.DefaultClient
-	if cfg.Token != "" {
+	if d.Config.Token != "" {
 		httpClient = oauth2.NewClient(
 			context.Background(),
 			oauth2.StaticTokenSource(
-				&oauth2.Token{AccessToken: cfg.Token},
+				&oauth2.Token{AccessToken: d.Config.Token},
 			),
 		)
 	}
 
-	if isGitHubDotCom(cfg) {
+	if isGitHubDotCom(d.Config) {
 		d.client = github.NewClient(httpClient)
 	} else {
 		var err error
-		d.client, err = github.NewEnterpriseClient(cfg.Domain, "", httpClient)
+		d.client, err = github.NewEnterpriseClient(d.Config.Domain, "", httpClient)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return d, nil
-}
-
-// Init initializes the driver.
-func (d *driver) Init(ctx context.Context) error {
 	user, res, err := d.client.Users.Get(ctx, "")
 	if err != nil {
 		if res.StatusCode != http.StatusUnauthorized {
 			return err
 		}
 
-		logging.Log(d.logger, "not authenticated")
+		logging.Log(d.Logger, "not authenticated")
 		return nil
 	}
 
-	logging.Log(d.logger, "authenticated as %s", user.GetLogin())
+	logging.Log(d.Logger, "authenticated as %s", user.GetLogin())
 	d.cache.SetCurrentUser(user)
 
 	if err := d.populateRepoCache(ctx); err != nil {
@@ -81,12 +67,12 @@ func (d *driver) Init(ctx context.Context) error {
 }
 
 // Run performs any ongoing behavior required by the driver.
-func (d *driver) Run(ctx context.Context) error {
+func (d *Driver) Run(ctx context.Context) error {
 	return nil
 }
 
 // Status returns a brief description of the status of the driver.
-func (d *driver) Status(ctx context.Context) (string, error) {
+func (d *Driver) Status(ctx context.Context) (string, error) {
 	invalidToken := false
 	limits, _, err := d.client.RateLimits(ctx)
 	if err != nil {
@@ -134,7 +120,7 @@ func (d *driver) Status(ctx context.Context) (string, error) {
 
 // populateRepoCache populates s.populateRepoCache with the repositories to
 // which the authenticated user has explicit read, write or admin access.
-func (d *driver) populateRepoCache(ctx context.Context) error {
+func (d *Driver) populateRepoCache(ctx context.Context) error {
 	opts := &github.RepositoryListOptions{
 		ListOptions: github.ListOptions{
 			Page:    1,
@@ -151,7 +137,7 @@ func (d *driver) populateRepoCache(ctx context.Context) error {
 		}
 
 		for _, r := range repoPage {
-			logging.Debug(d.logger, "cached repository: %s", r.GetFullName())
+			logging.Debug(d.Logger, "cached repository: %s", r.GetFullName())
 			repos = append(repos, r)
 		}
 
@@ -159,7 +145,7 @@ func (d *driver) populateRepoCache(ctx context.Context) error {
 	}
 
 	logging.Log(
-		d.logger,
+		d.Logger,
 		"cached %d repositories",
 		len(repos),
 	)

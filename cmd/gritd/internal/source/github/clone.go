@@ -13,12 +13,12 @@ import (
 )
 
 // Clone makes a repository available at the specified directory.
-func (d *driver) Clone(
+func (d *Driver) Clone(
 	ctx context.Context,
 	repoID, tempDir string,
 	clientLog logging.Logger,
 ) (string, error) {
-	serverLog := logging.Prefix(d.logger, "clone[%s]: ", repoID)
+	serverLog := logging.Prefix(d.Logger, "clone[%s]: ", repoID)
 
 	id, err := parseRepoID(repoID)
 	if err != nil {
@@ -39,7 +39,7 @@ func (d *driver) Clone(
 	logging.Debug(serverLog, "cloning %s to %s", r.GetFullName(), tempDir)
 
 	opts, err := newCloneOptions(
-		d.cfg,
+		d.Config,
 		r,
 		logging.Tee(
 			logging.Demote(serverLog), // log to the server as debug

@@ -10,12 +10,12 @@ import (
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
 // possible repositories.
-func (d *driver) Resolve(
+func (d *Driver) Resolve(
 	ctx context.Context,
 	query string,
 	clientLog logging.Logger,
 ) ([]source.Repo, error) {
-	serverLog := logging.Prefix(d.logger, "resolve[%s]: ", query)
+	serverLog := logging.Prefix(d.Logger, "resolve[%s]: ", query)
 	clientLog = logging.Tee(serverLog, clientLog) // log everything sent to the client on the server as well
 
 	ownerName, repoName, err := parseRepoName(query)
