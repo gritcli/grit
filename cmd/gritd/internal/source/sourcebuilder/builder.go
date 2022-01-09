@@ -41,7 +41,7 @@ func (b *Builder) FromSourceConfig(cfg config.Source) source.Source {
 
 	return source.Source{
 		Name:        cfg.Name,
-		Description: cfg.DriverConfig.String(),
+		Description: cfg.Driver.String(),
 		Driver:      f.Driver,
 	}
 }

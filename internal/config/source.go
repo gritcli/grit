@@ -24,18 +24,18 @@ type Source struct {
 	// repository clones for this source.
 	Clones Clones
 
-	// DriverConfig contains driver-specific configuration for this source.
-	DriverConfig SourceDriverConfig
+	// Driver contains driver-specific configuration for this source.
+	Driver SourceDriver
 }
 
 // AcceptVisitor calls the appropriate method on v.
 func (s Source) AcceptVisitor(v SourceVisitor) {
-	s.DriverConfig.acceptVisitor(s, v)
+	s.Driver.acceptVisitor(s, v)
 }
 
-// SourceDriverConfig is an interface for driver-specific configuration options
-// for a repository source.
-type SourceDriverConfig interface {
+// SourceDriver is an interface for driver-specific configuration options for a
+// repository source.
+type SourceDriver interface {
 	// acceptVisitor calls the appropriate method on v.
 	acceptVisitor(s Source, v SourceVisitor)
 
@@ -50,21 +50,21 @@ type SourceVisitor interface {
 
 // sourceBlock is the HCL schema for a "source" block.
 type sourceBlock struct {
-	Name           string       `hcl:",label"`
-	Driver         string       `hcl:",label"`
-	Enabled        *bool        `hcl:"enabled"`
-	ClonesBlock    *clonesBlock `hcl:"clones,block"`
-	DriverSpecific hcl.Body     `hcl:",remain"` // parsed into a sourceDriverBlock, as per sourceDriverBlockFactory
+	Name        string       `hcl:",label"`
+	Driver      string       `hcl:",label"`
+	Enabled     *bool        `hcl:"enabled"`
+	ClonesBlock *clonesBlock `hcl:"clones,block"`
+	DriverBlock hcl.Body     `hcl:",remain"` // parsed into a sourceDriverBlock, as per sourceDriverBlockFactory
 }
 
 // sourceDriverBlock is an interface for the HCL schema for driver-specific
-// parts of a "source" block's body.
+// attributes & sub-blocks of a "source" block.
 type sourceDriverBlock interface {
 	// Normalize normalizes the block in-place.
 	Normalize(cfg unresolvedConfig, s unresolvedSource) error
 
 	// Assemble converts the block into its configuration representation.
-	Assemble() SourceDriverConfig
+	Assemble() SourceDriver
 }
 
 // sourceNameRegexp is a regular expression used to validate source names.
@@ -98,7 +98,7 @@ func mergeSourceBlock(cfg *unresolvedConfig, filename string, b sourceBlock) err
 		}
 	}
 
-	newBody, ok := sourceDriverBlockFactory[b.Driver]
+	newBlock, ok := sourceDriverBlockFactory[b.Driver]
 	if !ok {
 		var drivers []string
 		for n := range sourceDriverBlockFactory {
@@ -115,8 +115,8 @@ func mergeSourceBlock(cfg *unresolvedConfig, filename string, b sourceBlock) err
 		)
 	}
 
-	body := newBody()
-	if diag := gohcl.DecodeBody(b.DriverSpecific, nil, body); diag.HasErrors() {
+	driverBlock := newBlock()
+	if diag := gohcl.DecodeBody(b.DriverBlock, nil, driverBlock); diag.HasErrors() {
 		return diag
 	}
 
@@ -125,9 +125,9 @@ func mergeSourceBlock(cfg *unresolvedConfig, filename string, b sourceBlock) err
 	}
 
 	cfg.Sources[b.Name] = unresolvedSource{
-		File:  filename,
-		Block: b,
-		Body:  body,
+		File:        filename,
+		Block:       b,
+		DriverBlock: driverBlock,
 	}
 
 	return nil
@@ -151,7 +151,7 @@ func mergeDefaultSources(cfg *unresolvedConfig) {
 			Block: sourceBlock{
 				Name: n,
 			},
-			Body: newBody(),
+			DriverBlock: newBody(),
 		}
 	}
 }
@@ -164,7 +164,7 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 		s.Block.Enabled = &enabled
 	}
 
-	if err := s.Body.Normalize(cfg, *s); err != nil {
+	if err := s.DriverBlock.Normalize(cfg, *s); err != nil {
 		return fmt.Errorf(
 			"%s: the '%s' repository source is invalid: %w",
 			s.File,
@@ -177,12 +177,12 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 }
 
 // assembleSourceBlock converts b into its configuration representation.
-func assembleSourceBlock(b sourceBlock, body sourceDriverBlock) Source {
+func assembleSourceBlock(b sourceBlock, db sourceDriverBlock) Source {
 	return Source{
-		Name:         b.Name,
-		Enabled:      *b.Enabled,
-		Clones:       assembleClonesBlock(*b.ClonesBlock),
-		DriverConfig: body.Assemble(),
+		Name:    b.Name,
+		Enabled: *b.Enabled,
+		Clones:  assembleClonesBlock(*b.ClonesBlock),
+		Driver:  db.Assemble(),
 	}
 }
 

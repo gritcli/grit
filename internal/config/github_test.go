@@ -45,7 +45,7 @@ var _ = Describe("func Load() (github source)", func() {
 				Clones: Clones{
 					Dir: "~/grit/github",
 				},
-				DriverConfig: GitHub{
+				Driver: GitHub{
 					Domain: "github.com",
 					Token:  "<token>",
 				},
@@ -64,7 +64,7 @@ var _ = Describe("func Load() (github source)", func() {
 				Clones: Clones{
 					Dir: "~/grit/my_company",
 				},
-				DriverConfig: GitHub{
+				Driver: GitHub{
 					Domain: "github.example.com",
 				},
 			}),
@@ -88,7 +88,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					DriverConfig: GitHub{
+					Driver: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							SSHKeyFile: "/path/to/key",
@@ -117,7 +117,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					DriverConfig: GitHub{
+					Driver: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							SSHKeyFile:       "/path/to/key",
@@ -156,7 +156,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					DriverConfig: GitHub{
+					Driver: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							SSHKeyFile:       "/path/to/different/key",
@@ -194,7 +194,7 @@ var _ = Describe("func Load() (github source)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					DriverConfig: GitHub{
+					Driver: GitHub{
 						Domain: "github.com",
 						Git: Git{
 							PreferHTTP: true,

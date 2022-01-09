@@ -49,7 +49,7 @@ func (b *gitHubBlock) Normalize(cfg unresolvedConfig, s unresolvedSource) error 
 	return normalizeSourceSpecificGitBlock(cfg, s, &b.Git)
 }
 
-func (b *gitHubBlock) Assemble() SourceDriverConfig {
+func (b *gitHubBlock) Assemble() SourceDriver {
 	return GitHub{
 		Domain: b.Domain,
 		Token:  b.Token,

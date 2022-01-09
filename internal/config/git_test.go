@@ -32,7 +32,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					DriverConfig: GitHub{
+					Driver: GitHub{
 						Domain: "github.com",
 						Git: Git{ // inherited from git defaults block
 							SSHKeyFile: "/path/to/key",
@@ -62,7 +62,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					DriverConfig: GitHub{
+					Driver: GitHub{
 						Domain: "github.com",
 						Git: Git{ // inherited from git defaults block
 							SSHKeyFile:       "/path/to/key",
@@ -98,7 +98,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 					Clones: Clones{
 						Dir: "~/grit/github",
 					},
-					DriverConfig: GitHub{
+					Driver: GitHub{
 						Domain: "github.com",
 						Git: Git{ // inherited from git defaults block
 							PreferHTTP: true,

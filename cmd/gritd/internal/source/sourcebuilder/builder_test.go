@@ -36,7 +36,7 @@ var _ = Describe("func Listen()", func() {
 						Clones: config.Clones{
 							Dir: "/path/to/clones/github",
 						},
-						DriverConfig: config.GitHub{
+						Driver: config.GitHub{
 							Domain: "github.com",
 						},
 					},
@@ -80,7 +80,7 @@ var _ = Describe("func Listen()", func() {
 					Clones: config.Clones{
 						Dir: "/path/to/clones",
 					},
-					DriverConfig: config.GitHub{
+					Driver: config.GitHub{
 						Domain: "github.com",
 					},
 				},

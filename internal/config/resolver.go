@@ -96,7 +96,7 @@ func (r *resolver) Assemble() Config {
 	}
 
 	for _, s := range r.cfg.Sources {
-		cfg.Sources[s.Block.Name] = assembleSourceBlock(s.Block, s.Body)
+		cfg.Sources[s.Block.Name] = assembleSourceBlock(s.Block, s.DriverBlock)
 	}
 
 	return cfg
@@ -136,9 +136,9 @@ type unresolvedConfig struct {
 // unresolvedSource contains information about a "source" block within an
 // as-yet-unresolved configuration.
 type unresolvedSource struct {
-	Block sourceBlock
-	Body  sourceDriverBlock
-	File  string
+	Block       sourceBlock
+	DriverBlock sourceDriverBlock
+	File        string
 }
 
 // normalizePath normalizes the path *p relative to the config file that

@@ -32,7 +32,7 @@ var _ = Describe("func Load() (source blocks)", func() {
 				Clones: Clones{
 					Dir: "~/grit/github",
 				},
-				DriverConfig: GitHub{
+				Driver: GitHub{
 					Domain: "github.com",
 				},
 			}),
@@ -52,7 +52,7 @@ var _ = Describe("func Load() (source blocks)", func() {
 				Clones: Clones{
 					Dir: "/path/to/clones",
 				},
-				DriverConfig: GitHub{
+				Driver: GitHub{
 					Domain: "github.com",
 				},
 			}),
