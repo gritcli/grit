@@ -11,6 +11,9 @@ type Source struct {
 	// Name is the unique name for the repository source.
 	Name string
 
+	// Description is a human-readable description of the source.
+	Description string
+
 	// Driver is the driver used to perform repository operations.
 	Driver Driver
 }

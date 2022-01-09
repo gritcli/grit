@@ -25,6 +25,7 @@ message SourcesResponse {
 message Source {
     string name = 1;
     string description = 2;
+    string status = 3;
 }
 
 message Repo {

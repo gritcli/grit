@@ -28,19 +28,16 @@ func New(sources []source.Source) api.APIServer {
 func (s *server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.SourcesResponse, error) {
 	res := &api.SourcesResponse{}
 
-	var desc string
-
 	for _, s := range s.sources {
 		status, err := s.Driver.Status(ctx)
 		if err != nil {
-			desc = err.Error()
-		} else {
-			desc = status
+			return nil, err
 		}
 
 		res.Sources = append(res.Sources, &api.Source{
 			Name:        s.Name,
-			Description: desc, // TODO: add "generic" description from config
+			Description: s.Description,
+			Status:      status,
 		})
 	}
 

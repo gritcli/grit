@@ -33,9 +33,10 @@ func newListCommand() *cobra.Command {
 
 			for _, src := range res.Sources {
 				cmd.Printf(
-					"%s\t%s\n",
+					"%s\t%s\t%s\n",
 					src.Name,
 					src.Description,
+					src.Status,
 				)
 			}
 

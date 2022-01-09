@@ -51,7 +51,8 @@ func (f *sourceFactory) VisitGitHubSource(s config.Source, cfg config.GitHub) {
 	}
 
 	f.Source = source.Source{
-		Name:   s.Name,
-		Driver: d,
+		Name:        s.Name,
+		Description: cfg.String(),
+		Driver:      d,
 	}
 }
