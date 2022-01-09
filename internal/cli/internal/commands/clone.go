@@ -22,12 +22,11 @@ func newCloneCommand() *cobra.Command {
 		Short: "Clone a remote repository",
 		Long: heredoc.Doc(`
 		The "clone" command makes a local clone of a remote repository then
-		changes the shell's current working directory to the clone's working
-		tree.
+		changes the users's current working directory to that of the clone.
 
 		The <repo> argument is a repository name (or a part thereof), URL, or
 		other identifier. For example, the Grit repository itself may be
-		referred to as "gritcli/grit", just "grit".
+		referred to as "gritcli/grit" or simply "grit".
 
 		Each of the repository sources defined in the Grit configuration file is
 		searched for matches to the provided repository name. If there are
