@@ -137,7 +137,7 @@ type unresolvedConfig struct {
 // as-yet-unresolved configuration.
 type unresolvedSource struct {
 	Block sourceBlock
-	Body  sourceBlockBody
+	Body  sourceDriverBlock
 	File  string
 }
 

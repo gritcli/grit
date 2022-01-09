@@ -13,7 +13,7 @@ import (
 // Source represents a repository source defined in the configuration.
 type Source struct {
 	// Name is a short identifier for the source. Each source in the
-	// configuration has a unique name.
+	// configuration has a unique name. Names are case-insensitive.
 	Name string
 
 	// Enabled is true if the source is enabled. Disabled sources are not used
@@ -24,44 +24,44 @@ type Source struct {
 	// repository clones for this source.
 	Clones Clones
 
-	// Config contains implementation-specific configuration for this source.
-	Config SourceConfig
+	// DriverConfig contains driver-specific configuration for this source.
+	DriverConfig SourceDriverConfig
 }
 
 // AcceptVisitor calls the appropriate method on v.
 func (s Source) AcceptVisitor(v SourceVisitor) {
-	s.Config.acceptVisitor(s, v)
+	s.DriverConfig.acceptVisitor(s, v)
 }
 
-// SourceConfig is an interface for implementation-specific configuration
-// options for a repository source.
-type SourceConfig interface {
+// SourceDriverConfig is an interface for driver-specific configuration options
+// for a repository source.
+type SourceDriverConfig interface {
 	// acceptVisitor calls the appropriate method on v.
 	acceptVisitor(s Source, v SourceVisitor)
 }
 
-// SourceVisitor dispatches Source values to implementation-specific logic.
+// SourceVisitor dispatches Source values to driver-specific logic.
 type SourceVisitor interface {
 	VisitGitHubSource(s Source, cfg GitHub)
 }
 
 // sourceBlock is the HCL schema for a "source" block.
 type sourceBlock struct {
-	Name        string       `hcl:",label"`
-	Impl        string       `hcl:",label"`
-	Enabled     *bool        `hcl:"enabled"`
-	ClonesBlock *clonesBlock `hcl:"clones,block"`
-	Body        hcl.Body     `hcl:",remain"` // see sourceBlockBody
+	Name           string       `hcl:",label"`
+	Driver         string       `hcl:",label"`
+	Enabled        *bool        `hcl:"enabled"`
+	ClonesBlock    *clonesBlock `hcl:"clones,block"`
+	DriverSpecific hcl.Body     `hcl:",remain"` // parsed into a sourceDriverBlock, as per sourceDriverBlockFactory
 }
 
-// sourceBlockBody is an interface for implementation-specific HCL schema within
-// the body of a source block.
-type sourceBlockBody interface {
-	// Normalize normalizes the body in-place.
+// sourceDriverBlock is an interface for the HCL schema for driver-specific
+// parts of a "source" block's body.
+type sourceDriverBlock interface {
+	// Normalize normalizes the block in-place.
 	Normalize(cfg unresolvedConfig, s unresolvedSource) error
 
-	// Assemble converts the body into its configuration representation.
-	Assemble() SourceConfig
+	// Assemble converts the block into its configuration representation.
+	Assemble() SourceDriverConfig
 }
 
 // sourceNameRegexp is a regular expression used to validate source names.
@@ -95,25 +95,25 @@ func mergeSourceBlock(cfg *unresolvedConfig, filename string, b sourceBlock) err
 		}
 	}
 
-	newBody, ok := sourceBodyFactoryByImpl[b.Impl]
+	newBody, ok := sourceDriverBlockFactory[b.Driver]
 	if !ok {
-		var impls []string
-		for impl := range sourceBodyFactoryByImpl {
-			impls = append(impls, impl)
+		var drivers []string
+		for n := range sourceDriverBlockFactory {
+			drivers = append(drivers, n)
 		}
-		sort.Strings(impls)
+		sort.Strings(drivers)
 
 		return fmt.Errorf(
-			"%s: the '%s' source uses '%s' which is not supported, the supported source implementations are: '%s'",
+			"%s: the '%s' source uses '%s' which is not supported, the supported drivers are: '%s'",
 			filename,
 			b.Name,
-			b.Impl,
-			strings.Join(impls, "', '"),
+			b.Driver,
+			strings.Join(drivers, "', '"),
 		)
 	}
 
 	body := newBody()
-	if diag := gohcl.DecodeBody(b.Body, nil, body); diag.HasErrors() {
+	if diag := gohcl.DecodeBody(b.DriverSpecific, nil, body); diag.HasErrors() {
 		return diag
 	}
 
@@ -174,49 +174,48 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 }
 
 // assembleSourceBlock converts b into its configuration representation.
-func assembleSourceBlock(b sourceBlock, body sourceBlockBody) Source {
+func assembleSourceBlock(b sourceBlock, body sourceDriverBlock) Source {
 	return Source{
-		Name:    b.Name,
-		Enabled: *b.Enabled,
-		Clones:  assembleClonesBlock(*b.ClonesBlock),
-		Config:  body.Assemble(),
+		Name:         b.Name,
+		Enabled:      *b.Enabled,
+		Clones:       assembleClonesBlock(*b.ClonesBlock),
+		DriverConfig: body.Assemble(),
 	}
 }
 
 var (
-	// sourceBodyFactoryByImpl is a map of a source implementation name to a
-	// function that returns a new, empty sourceBlockBody type for that
-	// implementation.
-	sourceBodyFactoryByImpl = map[string]func() sourceBlockBody{}
+	// sourceDriverBlockFactory is a map of a source driver name to a function
+	// that returns a new, empty sourceDriverBlock for that driver.
+	sourceDriverBlockFactory = map[string]func() sourceDriverBlock{}
 
 	// defaultSourceFactoryByName is a map of a source name to a function that
 	// returns a new default source. These defaults are merged into any
 	// configuration that does not already contain a repository source with the
 	// same name.
-	defaultSourceFactoryByName = map[string]func() sourceBlockBody{}
+	defaultSourceFactoryByName = map[string]func() sourceDriverBlock{}
 )
 
-// registerSourceImpl registers a source implementation, allowing its
-// configuration to be parsed.
+// registerSourceDriver registers a source driver, allowing its configuration to
+// be parsed.
 //
-// impl is the name of the implementation, as specified in "source" blocks
-// within the configuration file.
-func registerSourceImpl(
-	impl string,
-	newBody func() sourceBlockBody,
+// name is the name of the driver, which is given as the second "label" (HCL
+// terminology) on the "source" blocks within the configuration file.
+func registerSourceDriver(
+	name string,
+	newBlock func() sourceDriverBlock,
 ) {
-	if _, ok := sourceBodyFactoryByImpl[impl]; ok {
-		panic("source implementation name already registered")
+	if _, ok := sourceDriverBlockFactory[name]; ok {
+		panic("source driver name already registered")
 	}
 
-	sourceBodyFactoryByImpl[impl] = newBody
+	sourceDriverBlockFactory[name] = newBlock
 }
 
 // registerDefaultSource registers a default source that is merged into every
 // configuration unless overridden by the user.
 func registerDefaultSource(
 	name string,
-	newBody func() sourceBlockBody,
+	newBody func() sourceDriverBlock,
 ) {
 	if _, ok := defaultSourceFactoryByName[name]; ok {
 		panic("default source name already registered")

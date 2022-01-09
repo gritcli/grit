@@ -32,7 +32,7 @@ var _ = Describe("func Load() (source blocks)", func() {
 				Clones: Clones{
 					Dir: "~/grit/github",
 				},
-				Config: GitHub{
+				DriverConfig: GitHub{
 					Domain: "github.com",
 				},
 			}),
@@ -52,7 +52,7 @@ var _ = Describe("func Load() (source blocks)", func() {
 				Clones: Clones{
 					Dir: "/path/to/clones",
 				},
-				Config: GitHub{
+				DriverConfig: GitHub{
 					Domain: "github.com",
 				},
 			}),
@@ -85,11 +85,11 @@ var _ = Describe("func Load() (source blocks)", func() {
 			`<dir>/config-1.hcl: a source named 'my_company' is already defined in <dir>/config-0.hcl`,
 		),
 		Entry(
-			`unrecognized source implementation`,
+			`unrecognized source driver`,
 			[]string{
 				`source "my_source" "<unrecognized>" {}`,
 			},
-			`<dir>/config-0.hcl: the 'my_source' source uses '<unrecognized>' which is not supported, the supported source implementations are: 'github'`,
+			`<dir>/config-0.hcl: the 'my_source' source uses '<unrecognized>' which is not supported, the supported drivers are: 'github'`,
 		),
 		Entry(
 			`source with a well-structured, but invalid body`,
