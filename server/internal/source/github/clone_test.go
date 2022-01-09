@@ -8,8 +8,8 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	git "github.com/go-git/go-git/v5"
-	"github.com/gritcli/grit/cmd/gritd/internal/source"
 	"github.com/gritcli/grit/common/config"
+	"github.com/gritcli/grit/server/internal/source"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

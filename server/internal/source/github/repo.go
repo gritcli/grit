@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
-	"github.com/gritcli/grit/cmd/gritd/internal/source"
+	"github.com/gritcli/grit/server/internal/source"
 )
 
 // convertRepo converts a github.Repository to a source.Repo.

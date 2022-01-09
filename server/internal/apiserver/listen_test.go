@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	. "github.com/gritcli/grit/cmd/gritd/internal/apiserver"
+	. "github.com/gritcli/grit/server/internal/apiserver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

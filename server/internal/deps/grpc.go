@@ -1,8 +1,8 @@
 package deps
 
 import (
-	"github.com/gritcli/grit/cmd/gritd/internal/apiserver"
 	"github.com/gritcli/grit/common/api"
+	"github.com/gritcli/grit/server/internal/apiserver"
 	"google.golang.org/grpc"
 )
 

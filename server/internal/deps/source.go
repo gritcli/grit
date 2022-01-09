@@ -2,9 +2,9 @@ package deps
 
 import (
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/cmd/gritd/internal/source"
-	"github.com/gritcli/grit/cmd/gritd/internal/source/sourcebuilder"
 	"github.com/gritcli/grit/common/config"
+	"github.com/gritcli/grit/server/internal/source"
+	"github.com/gritcli/grit/server/internal/source/sourcebuilder"
 )
 
 func init() {

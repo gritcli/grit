@@ -2,10 +2,10 @@ package sourcebuilder_test
 
 import (
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/cmd/gritd/internal/source"
-	"github.com/gritcli/grit/cmd/gritd/internal/source/github"
-	. "github.com/gritcli/grit/cmd/gritd/internal/source/sourcebuilder"
 	"github.com/gritcli/grit/common/config"
+	"github.com/gritcli/grit/server/internal/source"
+	"github.com/gritcli/grit/server/internal/source/github"
+	. "github.com/gritcli/grit/server/internal/source/sourcebuilder"
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/ginkgo/extensions/table"

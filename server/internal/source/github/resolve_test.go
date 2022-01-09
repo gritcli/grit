@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/cmd/gritd/internal/source"
+	"github.com/gritcli/grit/server/internal/source"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

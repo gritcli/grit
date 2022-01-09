@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/cmd/gritd/internal/source"
+	"github.com/gritcli/grit/server/internal/source"
 )
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
