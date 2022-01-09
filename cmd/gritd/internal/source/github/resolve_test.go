@@ -15,7 +15,6 @@ var (
 		Name:        "gritcli/grit",
 		Description: "Manage your local Git clones.",
 		WebURL:      "https://github.com/gritcli/grit",
-		CloneDir:    "gritcli/grit",
 	}
 
 	gritPrivateTestRepo = source.Repo{
@@ -23,7 +22,6 @@ var (
 		Name:        "gritcli/test-private",
 		Description: "Used to test that Grit works with private GitHub repositories.",
 		WebURL:      "https://github.com/gritcli/test-private",
-		CloneDir:    "gritcli/test-private",
 	}
 
 	gritV1Repo = source.Repo{
@@ -31,7 +29,6 @@ var (
 		Name:        "jmalloc/grit",
 		Description: "Keep track of your local Git clones.",
 		WebURL:      "https://github.com/jmalloc/grit",
-		CloneDir:    "jmalloc/grit",
 	}
 
 	// thirdPartyRepo is a repo that the authenticated user does not have access
@@ -43,7 +40,6 @@ var (
 		Name:        "google/go-github",
 		Description: "Go library for accessing the GitHub API",
 		WebURL:      "https://github.com/google/go-github",
-		CloneDir:    "google/go-github",
 	}
 )
 

@@ -26,7 +26,7 @@ var _ = Describe("func source.Clone()", func() {
 
 	BeforeEach(func() {
 		var err error
-		dir, err = os.MkdirTemp("", "grit-clone-test-")
+		dir, err = os.MkdirTemp("", "")
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 
