@@ -63,7 +63,7 @@ type Driver interface {
 	// client and displayed to the user.
 	Resolve(ctx context.Context, query string, clientLog logging.Logger) ([]Repo, error)
 
-	// NewCloner returns an scm.Cloner that clones the specified repository.
+	// NewCloner returns a cloner that clones the repository with the given ID.
 	//
 	// id is the repository ID, as discovered by a prior call to Resolve().
 	//

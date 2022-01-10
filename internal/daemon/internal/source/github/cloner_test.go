@@ -5,8 +5,8 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/common/config"
-	"github.com/gritcli/grit/internal/daemon/internal/scm/git"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/github"
+	"github.com/gritcli/grit/internal/daemon/internal/source/internal/git"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
