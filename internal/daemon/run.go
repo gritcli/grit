@@ -27,7 +27,7 @@ func Run(version string) (err error) {
 	return deps.Container.Invoke(func(
 		cfg config.Config,
 		s *grpc.Server,
-		sources []source.Source,
+		sources source.List,
 		logger logging.Logger,
 	) error {
 		logging.Log(logger, "grit daemon v%s", version)
@@ -51,7 +51,7 @@ func Run(version string) (err error) {
 }
 
 // initSourceDrivers initializes each source's driver in parallel.
-func initSourceDrivers(ctx context.Context, logger logging.Logger, sources []source.Source) error {
+func initSourceDrivers(ctx context.Context, logger logging.Logger, sources source.List) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, src := range sources {
@@ -65,7 +65,7 @@ func initSourceDrivers(ctx context.Context, logger logging.Logger, sources []sou
 }
 
 // runSourceDrivers runs each source's driver in parallel.
-func runSourceDrivers(ctx context.Context, logger logging.Logger, sources []source.Source) error {
+func runSourceDrivers(ctx context.Context, logger logging.Logger, sources source.List) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, src := range sources {
