@@ -12,12 +12,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("type Cloner", func() {
+var _ = Describe("type BoundCloner", func() {
 	var (
 		ctx     context.Context
 		cancel  context.CancelFunc
 		logger  logging.BufferedLogger
-		cloner  *Cloner
+		cloner  *BoundCloner
 		tempDir string
 	)
 
@@ -26,7 +26,7 @@ var _ = Describe("type Cloner", func() {
 
 		logger.Reset()
 
-		cloner = &Cloner{
+		cloner = &BoundCloner{
 			SSHEndpoint:  "git@github.com:gritcli/test-public.git",
 			HTTPEndpoint: "https://github.com/gritcli/test-public.git",
 			Logger:       &logger,

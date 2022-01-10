@@ -8,12 +8,13 @@ import (
 	"github.com/gritcli/grit/internal/daemon/internal/source/internal/git"
 )
 
-// NewCloner returns a cloner that clones the repository with the given ID.
-func (d *Driver) NewCloner(
+// NewBoundCloner returns a bound cloner that clones the repository with the
+// given ID.
+func (d *Driver) NewBoundCloner(
 	ctx context.Context,
 	id string,
 	clientLog logging.Logger,
-) (source.Cloner, string, error) {
+) (source.BoundCloner, string, error) {
 	serverLog := logging.Prefix(d.Logger, "clone[%s]: ", id)
 
 	intID, err := parseRepoID(id)
@@ -32,7 +33,7 @@ func (d *Driver) NewCloner(
 		}
 	}
 
-	c := &git.Cloner{
+	c := &git.BoundCloner{
 		Config:       d.Config.Git,
 		SSHEndpoint:  r.GetSSHURL(),
 		HTTPEndpoint: r.GetCloneURL(),

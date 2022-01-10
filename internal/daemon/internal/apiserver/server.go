@@ -108,7 +108,7 @@ func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		return errors.New("unrecognized source name")
 	}
 
-	cloner, dir, err := src.Driver.NewCloner(
+	cloner, dir, err := src.Driver.NewBoundCloner(
 		ctx,
 		req.RepoId,
 		newStreamLogger(

@@ -2,16 +2,12 @@ package source
 
 import "context"
 
-// Cloner is an interface for making a local clone of a specific remote
-// repository.
+// BoundCloner is an interface for cloning repositories that is "bound" to a
+// specific repository.
 //
-// Cloners are obtained by calling the Source.NewCloner() method.
-//
-// The term "clone" is intended in the manner used by Git and similar
-// distributed source control systems. The implementation should take whatever
-// action best matches this intent. For example, for Subversion repositories an
-// equivalent operation would be "checkout".
-type Cloner interface {
-	// Clone clones the repository into the given target directory.
+// A BoundCloner can be obtained by calling the Source.NewBoundCloner() method.
+type BoundCloner interface {
+	// Clone makes a local clone of the remote repository in the given
+	// directory.
 	Clone(ctx context.Context, dir string) error
 }
