@@ -29,8 +29,8 @@ var _ = Describe("type Builder", func() {
 	Describe("func FromConfig()", func() {
 		It("constructs all enabled sources from the configuration", func() {
 			cfg := config.Config{
-				Sources: map[string]config.Source{
-					"github-test-source": {
+				Sources: []config.Source{
+					{
 						Name:    "github-test-source",
 						Enabled: true,
 						Clones: config.Clones{
@@ -40,7 +40,7 @@ var _ = Describe("type Builder", func() {
 							Domain: "github.com",
 						},
 					},
-					"disabled-test-source": {
+					{
 						Name:    "disabled-test-source",
 						Enabled: false,
 						// None of the other fields are inspected at all if the
@@ -67,15 +67,15 @@ var _ = Describe("type Builder", func() {
 
 		It("sorts by name", func() {
 			cfg := config.Config{
-				Sources: map[string]config.Source{
-					"test-source-2": {
+				Sources: []config.Source{
+					{
 						Name:    "test-source-2",
 						Enabled: true,
 						Driver: config.GitHub{
 							Domain: "github.com",
 						},
 					},
-					"test-source-1": {
+					{
 						Name:    "test-source-1",
 						Enabled: true,
 						Driver: config.GitHub{

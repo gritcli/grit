@@ -21,7 +21,7 @@ type Config struct {
 
 	// Sources is the set of repository sources from which repositories can be
 	// cloned.
-	Sources map[string]Source
+	Sources []Source
 }
 
 // configFile is HCL schema for a single configuration file.
