@@ -85,6 +85,14 @@ var _ = Describe("func Load() (source blocks)", func() {
 			`<dir>/config-1.hcl: a source named 'my_company' is already defined in <dir>/config-0.hcl`,
 		),
 		Entry(
+			`duplicate source names (case-insensitive)`,
+			[]string{
+				`source "my_company" "github" {}`,
+				`source "MY_COMPANY" "github" {}`,
+			},
+			`<dir>/config-1.hcl: a source named 'my_company' is already defined in <dir>/config-0.hcl`,
+		),
+		Entry(
 			`unrecognized source driver`,
 			[]string{
 				`source "my_source" "<unrecognized>" {}`,
