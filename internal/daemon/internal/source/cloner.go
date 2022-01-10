@@ -2,6 +2,7 @@ package source
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -34,7 +35,7 @@ func (c *Cloner) Clone(
 ) (string, error) {
 	src, ok := c.Sources.ByName(source)
 	if !ok {
-		return "", fmt.Errorf("unrecognized source (%s)", source)
+		return "", fmt.Errorf("unable to clone: unrecognized source (%s)", source)
 	}
 
 	bc, dir, err := src.Driver.NewBoundCloner(
@@ -43,25 +44,31 @@ func (c *Cloner) Clone(
 		clientLogger,
 	)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to prepare for cloning: %w", err)
 	}
 
 	dir = filepath.Join(src.CloneDir, dir)
 
-	if _, err := os.Stat(dir); err == nil {
-		return "", fmt.Errorf("clone directory (%s) already exists", dir)
-	} else if !os.IsNotExist(err) {
-		return "", err
-	}
-
-	if err := os.MkdirAll(dir, 0700); err != nil {
-		return "", err
+	if err := makeCloneDir(dir); err != nil {
+		return "", fmt.Errorf("unable to create clone directory (%s): %w", dir, err)
 	}
 
 	if err := bc.Clone(ctx, dir); err != nil {
-		os.RemoveAll(dir) //nolint:errcheck
-		return "", err
+		os.RemoveAll(dir)
+		return "", fmt.Errorf("unable to clone: %w", err)
 	}
 
 	return dir, nil
+}
+
+// makeCloneDir makes the given directory (and all of its parents) only if it
+// does not already exist.
+func makeCloneDir(dir string) error {
+	if _, err := os.Stat(dir); err == nil {
+		return errors.New("file or directory already exists")
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+
+	return os.MkdirAll(dir, 0700)
 }

@@ -45,7 +45,11 @@ type Driver interface {
 	//
 	// clientLog is a target for any log output that should be sent to the
 	// client and displayed to the user.
-	Resolve(ctx context.Context, query string, clientLog logging.Logger) ([]Repo, error)
+	Resolve(
+		ctx context.Context,
+		query string,
+		clientLog logging.Logger,
+	) ([]Repo, error)
 
 	// NewBoundCloner returns a bound cloner that clones the repository with the
 	// given ID.
