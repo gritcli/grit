@@ -3,6 +3,8 @@ package source_test
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 
 	"github.com/dogmatiq/dodeca/logging"
 	. "github.com/gritcli/grit/internal/daemon/internal/source"
@@ -58,6 +60,34 @@ var _ = Describe("type Cloner", func() {
 				logging.SilentLogger,
 			)
 			Expect(err).To(MatchError("unable to prepare for cloning: <error>"))
+		})
+
+		It("returns an error if the bound cloner returns an error", func() {
+			dir, err := os.MkdirTemp("", "")
+			Expect(err).ShouldNot(HaveOccurred())
+			defer os.RemoveAll(dir)
+
+			dir = filepath.Join(dir, "clone-dir")
+
+			driver.NewBoundClonerFunc = func(
+				context.Context,
+				string,
+				logging.Logger,
+			) (BoundCloner, string, error) {
+				return &BoundClonerStub{
+					CloneFunc: func(c context.Context, s string) error {
+						return errors.New("<error>")
+					},
+				}, dir, nil
+			}
+
+			_, err = cloner.Clone(
+				context.Background(),
+				"<source>",
+				"<id>",
+				logging.SilentLogger,
+			)
+			Expect(err).To(MatchError("unable to clone: <error>"))
 		})
 	})
 })
