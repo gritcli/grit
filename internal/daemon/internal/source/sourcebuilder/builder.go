@@ -1,6 +1,8 @@
 package sourcebuilder
 
 import (
+	"sort"
+
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/common/config"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
@@ -14,8 +16,8 @@ type Builder struct {
 }
 
 // FromConfig returns the list of enabled sources defined in cfg.
-func (b *Builder) FromConfig(cfg config.Config) []source.Source {
-	var sources []source.Source
+func (b *Builder) FromConfig(cfg config.Config) source.List {
+	var sources source.List
 
 	for _, cfg := range cfg.Sources {
 		if cfg.Enabled {
@@ -23,6 +25,13 @@ func (b *Builder) FromConfig(cfg config.Config) []source.Source {
 			sources = append(sources, src)
 		}
 	}
+
+	sort.Slice(
+		sources,
+		func(i, j int) bool {
+			return sources[i].Name < sources[j].Name
+		},
+	)
 
 	return sources
 }

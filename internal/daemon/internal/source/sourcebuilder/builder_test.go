@@ -12,7 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func Listen()", func() {
+var _ = Describe("type Builder", func() {
 	var (
 		logger  logging.BufferedLogger
 		builder *Builder
@@ -63,6 +63,32 @@ var _ = Describe("func Listen()", func() {
 					},
 				},
 			))
+		})
+
+		It("sorts by name", func() {
+			cfg := config.Config{
+				Sources: map[string]config.Source{
+					"test-source-2": {
+						Name:    "test-source-2",
+						Enabled: true,
+						Driver: config.GitHub{
+							Domain: "github.com",
+						},
+					},
+					"test-source-1": {
+						Name:    "test-source-1",
+						Enabled: true,
+						Driver: config.GitHub{
+							Domain: "github.com",
+						},
+					},
+				},
+			}
+
+			sources := builder.FromConfig(cfg)
+			Expect(sources).To(HaveLen(2))
+			Expect(sources[0].Name).To(Equal("test-source-1"))
+			Expect(sources[1].Name).To(Equal("test-source-2"))
 		})
 	})
 
