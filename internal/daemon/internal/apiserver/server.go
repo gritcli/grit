@@ -15,21 +15,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// server is an implementation of api.APIServer
-type server struct {
-	sources source.List
-}
-
-// New returns a new API server.
-func New(sources source.List) api.APIServer {
-	return &server{sources}
+// Server is the implementation of api.APIServer
+type Server struct {
+	SourceList source.List
 }
 
 // Sources lists the configured repository sources.
-func (s *server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.SourcesResponse, error) {
+func (s *Server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.SourcesResponse, error) {
 	res := &api.SourcesResponse{}
 
-	for _, s := range s.sources {
+	for _, s := range s.SourceList {
 		status, err := s.Driver.Status(ctx)
 		if err != nil {
 			return nil, err
@@ -52,7 +47,7 @@ func (s *server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.Sourc
 
 // Resolve resolves repository name, URL or other identifier to a list of
 // candidate repositories.
-func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) error {
+func (s *Server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) error {
 	ctx := stream.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -68,7 +63,7 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 		},
 	)
 
-	for _, src := range s.sources {
+	for _, src := range s.SourceList {
 		src := src // capture loop variable
 
 		g.Go(func() error {
@@ -105,10 +100,10 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 }
 
 // Clone makes a local clone of a repository from a source.
-func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error {
+func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error {
 	ctx := stream.Context()
 
-	src, ok := s.sources.ByName(req.Source)
+	src, ok := s.SourceList.ByName(req.Source)
 	if !ok {
 		return errors.New("unrecognized source name")
 	}
