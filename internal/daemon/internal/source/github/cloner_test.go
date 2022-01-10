@@ -41,7 +41,15 @@ var _ = Describe("func source.NewCloner()", func() {
 				Config:       driver.Config.Git,
 				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
 				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
-				Logger:       logger,
+				Logger: logging.Tee(
+					logging.Demote(
+						logging.Prefix(
+							driver.Logger,
+							"clone[446260684]: ",
+						),
+					),
+					logger,
+				),
 			}))
 
 			Expect(dir).To(Equal("gritcli/test-public"))
@@ -65,7 +73,15 @@ var _ = Describe("func source.NewCloner()", func() {
 				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
 				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
 				HTTPPassword: driver.Config.Token,
-				Logger:       logger,
+				Logger: logging.Tee(
+					logging.Demote(
+						logging.Prefix(
+							driver.Logger,
+							"clone[446260684]: ",
+						),
+					),
+					logger,
+				),
 			}))
 
 			Expect(dir).To(Equal("gritcli/test-public"))

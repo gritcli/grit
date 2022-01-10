@@ -36,7 +36,10 @@ func (d *Driver) NewCloner(
 		Config:       d.Config.Git,
 		SSHEndpoint:  r.GetSSHURL(),
 		HTTPEndpoint: r.GetCloneURL(),
-		Logger:       clientLog,
+		Logger: logging.Tee(
+			logging.Demote(serverLog), // log to the server as debug
+			clientLog,                 // log to the client as regular message
+		),
 	}
 
 	if d.Config.Token != "" {
