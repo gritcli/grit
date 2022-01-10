@@ -24,9 +24,10 @@ type Cloner struct {
 	// protocol.
 	HTTPEndpoint string
 
-	// HTTPUsername and HTTPPassword are the credentials to use when cloning via
-	// HTTP, if any.
+	// HTTPUsername is the username to use when cloning via HTTP, if any.
 	HTTPUsername string
+
+	// HTTPPassword is the password to use when cloning via HTTP, if any.
 	HTTPPassword string
 
 	// Logger is the target for output from the cloning operation.
