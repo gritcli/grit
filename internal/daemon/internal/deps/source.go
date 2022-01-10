@@ -18,4 +18,14 @@ func init() {
 
 		return builder.FromConfig(cfg)
 	})
+
+	Container.Provide(func(
+		sources source.List,
+		logger logging.Logger,
+	) *source.Cloner {
+		return &source.Cloner{
+			Sources: sources,
+			Logger:  logger,
+		}
+	})
 }

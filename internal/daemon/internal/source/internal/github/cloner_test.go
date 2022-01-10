@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func source.NewCloner()", func() {
+var _ = Describe("func Driver.NewBoundCloner()", func() {
 	var (
 		ctx       context.Context
 		cancel    context.CancelFunc
@@ -33,11 +33,11 @@ var _ = Describe("func source.NewCloner()", func() {
 			ctx, cancel, driver = beforeEachUnauthenticated(configure)
 		})
 
-		It("returns a git.Cloner", func() {
-			cloner, dir, err := driver.NewCloner(ctx, gritPublicTestRepo.ID, logger)
+		It("returns a git.BoundCloner", func() {
+			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logger)
 			skipIfRateLimited(err)
 
-			Expect(cloner).To(Equal(&git.Cloner{
+			Expect(cloner).To(Equal(&git.BoundCloner{
 				Config:       driver.Config.Git,
 				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
 				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
@@ -61,14 +61,14 @@ var _ = Describe("func source.NewCloner()", func() {
 			ctx, cancel, driver = beforeEachAuthenticated(configure)
 		})
 
-		It("returns a git.Cloner with the token as the HTTP password", func() {
+		It("returns a git.BoundCloner with the token as the HTTP password", func() {
 			// TODO: https://github.com/gritcli/grit/issues/13
 			//
 			// Test with a private repository instead.
-			cloner, dir, err := driver.NewCloner(ctx, gritPublicTestRepo.ID, logger)
+			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logger)
 			skipIfRateLimited(err)
 
-			Expect(cloner).To(Equal(&git.Cloner{
+			Expect(cloner).To(Equal(&git.BoundCloner{
 				Config:       driver.Config.Git,
 				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
 				HTTPEndpoint: "https://github.com/gritcli/test-public.git",

@@ -10,9 +10,11 @@ import (
 func init() {
 	Container.Provide(func(
 		sources source.List,
+		c *source.Cloner,
 	) api.APIServer {
 		return &apiserver.Server{
 			SourceList: sources,
+			Cloner:     c,
 		}
 	})
 

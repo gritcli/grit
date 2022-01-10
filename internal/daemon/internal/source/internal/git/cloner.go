@@ -11,8 +11,9 @@ import (
 	"github.com/gritcli/grit/internal/common/config"
 )
 
-// Cloner clones Git repositories.
-type Cloner struct {
+// BoundCloner is an implementation of source.BoundCloner that clones a Git
+// repository.
+type BoundCloner struct {
 	// Config is the Git configuration for the source that returned the cloner.
 	Config config.Git
 
@@ -35,7 +36,7 @@ type Cloner struct {
 }
 
 // Clone clones the repository into the given target directory.
-func (c *Cloner) Clone(ctx context.Context, dir string) error {
+func (c *BoundCloner) Clone(ctx context.Context, dir string) error {
 	opts, err := c.cloneOptions()
 	if err != nil {
 		return err
@@ -53,7 +54,7 @@ func (c *Cloner) Clone(ctx context.Context, dir string) error {
 
 // cloneOptions returns the options to use when cloning the repository, based on
 // the configuration of the cloner.
-func (c *Cloner) cloneOptions() (*git.CloneOptions, error) {
+func (c *BoundCloner) cloneOptions() (*git.CloneOptions, error) {
 	h, err := useHTTP(
 		c.SSHEndpoint != "",
 		c.HTTPEndpoint != "",
@@ -72,7 +73,7 @@ func (c *Cloner) cloneOptions() (*git.CloneOptions, error) {
 
 // sshCloneOptions returns options that clone the repository using the HTTP
 // protocol.
-func (c *Cloner) httpCloneOptions() (*git.CloneOptions, error) {
+func (c *BoundCloner) httpCloneOptions() (*git.CloneOptions, error) {
 	var auth *http.BasicAuth
 	if c.HTTPUsername != "" || c.HTTPPassword != "" {
 		auth = &http.BasicAuth{
@@ -92,7 +93,7 @@ func (c *Cloner) httpCloneOptions() (*git.CloneOptions, error) {
 
 // sshCloneOptions returns options that clone the repository using the SSH
 // protocol.
-func (c *Cloner) sshCloneOptions() (*git.CloneOptions, error) {
+func (c *BoundCloner) sshCloneOptions() (*git.CloneOptions, error) {
 	opts := &git.CloneOptions{
 		URL: c.SSHEndpoint,
 		Progress: &logging.LineWriter{
