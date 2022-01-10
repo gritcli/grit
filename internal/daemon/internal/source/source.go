@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/daemon/internal/scm"
 )
 
 // Source is a repository source.
@@ -78,7 +77,7 @@ type Driver interface {
 		ctx context.Context,
 		id string,
 		clientLog logging.Logger,
-	) (c scm.Cloner, dir string, err error)
+	) (c Cloner, dir string, err error)
 }
 
 // Repo is a reference to a remote repository provided by a source.

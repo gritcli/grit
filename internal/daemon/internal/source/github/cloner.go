@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/daemon/internal/scm"
 	"github.com/gritcli/grit/internal/daemon/internal/scm/git"
+	"github.com/gritcli/grit/internal/daemon/internal/source"
 )
 
 // NewCloner returns an scm.Cloner that clones the specified repository.
@@ -13,7 +13,7 @@ func (d *Driver) NewCloner(
 	ctx context.Context,
 	id string,
 	clientLog logging.Logger,
-) (scm.Cloner, string, error) {
+) (source.Cloner, string, error) {
 	serverLog := logging.Prefix(d.Logger, "clone[%s]: ", id)
 
 	intID, err := parseRepoID(id)
