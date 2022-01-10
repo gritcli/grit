@@ -1,17 +1,16 @@
 package source_test
 
 import (
-	"github.com/gritcli/grit/internal/daemon/internal/source"
 	. "github.com/gritcli/grit/internal/daemon/internal/source"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("type List", func() {
-	var list source.List
+	var list List
 
 	BeforeEach(func() {
-		list = source.List{
+		list = List{
 			{
 				Name: "<source>",
 			},
