@@ -17,6 +17,13 @@ var (
 		WebURL:      "https://github.com/gritcli/grit",
 	}
 
+	gritPublicTestRepo = source.Repo{
+		ID:          "446260684",
+		Name:        "gritcli/test-public",
+		Description: "Used to test that Grit works with public GitHub repositories.",
+		WebURL:      "https://github.com/gritcli/test-public",
+	}
+
 	gritPrivateTestRepo = source.Repo{
 		ID:          "445039240",
 		Name:        "gritcli/test-private",
@@ -67,9 +74,9 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("resolves an exact match using the API", func() {
-			repos, err := driver.Resolve(ctx, "gritcli/grit", logger)
+			repos, err := driver.Resolve(ctx, gritPublicTestRepo.Name, logger)
 			skipIfRateLimited(err)
-			Expect(repos).To(ConsistOf(gritRepo))
+			Expect(repos).To(ConsistOf(gritPublicTestRepo))
 		})
 
 		It("returns nothing for a qualified name that does not exist", func() {
@@ -111,9 +118,9 @@ var _ = Describe("func source.Resolve()", func() {
 		})
 
 		It("resolves an exact match using the cache", func() {
-			repos, err := driver.Resolve(ctx, gritRepo.Name, logger)
+			repos, err := driver.Resolve(ctx, gritPublicTestRepo.Name, logger)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(repos).To(ConsistOf(gritRepo))
+			Expect(repos).To(ConsistOf(gritPublicTestRepo))
 		})
 
 		XIt("resolves an exact match for a private repo using the cache", func() {

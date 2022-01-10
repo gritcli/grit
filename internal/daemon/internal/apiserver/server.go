@@ -3,6 +3,7 @@ package apiserver
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -113,15 +114,9 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		return errors.New("unrecognized source name")
 	}
 
-	tempDir, err := os.MkdirTemp("", "grit-clone-")
-	if err != nil {
-		return err
-	}
-
-	relDir, err := src.Driver.Clone(
+	cloner, dir, err := src.Driver.NewCloner(
 		ctx,
 		req.RepoId,
-		tempDir,
 		newStreamLogger(
 			stream,
 			req.ClientOptions,
@@ -138,22 +133,26 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		return err
 	}
 
-	cloneDir := filepath.Join(src.CloneDir, relDir)
-	parentDir := filepath.Dir(cloneDir)
+	dir = filepath.Join(src.CloneDir, dir)
 
-	if err := os.MkdirAll(parentDir, 0700); err != nil {
+	if _, err := os.Stat(dir); err == nil {
+		return fmt.Errorf("clone directory (%s) already exists", dir)
+	} else if !os.IsNotExist(err) {
 		return err
 	}
 
-	if err := os.Rename(tempDir, cloneDir); err != nil {
-		// TODO: check if error is due to tempDir and cloneDir being on
-		// different disk drives and if so, copy, then delete.
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
+
+	if err := cloner.Clone(ctx, dir); err != nil {
+		os.RemoveAll(dir)
 		return err
 	}
 
 	return stream.Send(&api.CloneResponse{
 		Response: &api.CloneResponse_Directory{
-			Directory: cloneDir,
+			Directory: dir,
 		},
 	})
 }
