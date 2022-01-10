@@ -2,10 +2,6 @@ package apiserver
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
 	"sort"
 
 	"github.com/dogmatiq/dodeca/logging"
@@ -18,6 +14,7 @@ import (
 // Server is the implementation of api.APIServer
 type Server struct {
 	SourceList source.List
+	Cloner     *source.Cloner
 }
 
 // Sources lists the configured repository sources.
@@ -101,15 +98,9 @@ func (s *Server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 
 // Clone makes a local clone of a repository from a source.
 func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error {
-	ctx := stream.Context()
-
-	src, ok := s.SourceList.ByName(req.Source)
-	if !ok {
-		return errors.New("unrecognized source name")
-	}
-
-	cloner, dir, err := src.Driver.NewBoundCloner(
-		ctx,
+	dir, err := s.Cloner.Clone(
+		stream.Context(),
+		req.Source,
 		req.RepoId,
 		newStreamLogger(
 			stream,
@@ -124,23 +115,6 @@ func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		),
 	)
 	if err != nil {
-		return err
-	}
-
-	dir = filepath.Join(src.CloneDir, dir)
-
-	if _, err := os.Stat(dir); err == nil {
-		return fmt.Errorf("clone directory (%s) already exists", dir)
-	} else if !os.IsNotExist(err) {
-		return err
-	}
-
-	if err := os.MkdirAll(dir, 0700); err != nil {
-		return err
-	}
-
-	if err := cloner.Clone(ctx, dir); err != nil {
-		os.RemoveAll(dir)
 		return err
 	}
 
