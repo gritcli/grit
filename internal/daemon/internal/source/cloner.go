@@ -2,7 +2,6 @@ package source
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -32,7 +31,7 @@ func (c *Cloner) Clone(
 	ctx context.Context,
 	source, repoID string,
 	clientLogger logging.Logger,
-) (string, error) {
+) (_ string, err error) {
 	src, ok := c.Sources.ByName(source)
 	if !ok {
 		return "", fmt.Errorf("unable to clone: unrecognized source (%s)", source)
@@ -50,11 +49,15 @@ func (c *Cloner) Clone(
 	dir = filepath.Join(src.CloneDir, dir)
 
 	if err := makeCloneDir(dir); err != nil {
-		return "", fmt.Errorf("unable to create clone directory (%s): %w", dir, err)
+		return "", fmt.Errorf("unable to create clone directory: %w", err)
 	}
+	defer func() {
+		if err != nil {
+			os.RemoveAll(dir)
+		}
+	}()
 
 	if err := bc.Clone(ctx, dir); err != nil {
-		os.RemoveAll(dir)
 		return "", fmt.Errorf("unable to clone: %w", err)
 	}
 
@@ -65,10 +68,10 @@ func (c *Cloner) Clone(
 // does not already exist.
 func makeCloneDir(dir string) error {
 	if _, err := os.Stat(dir); err == nil {
-		return errors.New("file or directory already exists")
-	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("mkdir %s: file exists", dir)
+	} else if os.IsNotExist(err) {
+		return os.MkdirAll(dir, 0700)
+	} else {
 		return err
 	}
-
-	return os.MkdirAll(dir, 0700)
 }
