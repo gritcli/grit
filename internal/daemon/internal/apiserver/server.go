@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/common/api"
@@ -18,11 +17,11 @@ import (
 
 // server is an implementation of api.APIServer
 type server struct {
-	sources []source.Source
+	sources source.List
 }
 
 // New returns a new API server.
-func New(sources []source.Source) api.APIServer {
+func New(sources source.List) api.APIServer {
 	return &server{sources}
 }
 
@@ -109,7 +108,7 @@ func (s *server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error {
 	ctx := stream.Context()
 
-	src, ok := s.sourceByName(req.Source)
+	src, ok := s.sources.ByName(req.Source)
 	if !ok {
 		return errors.New("unrecognized source name")
 	}
@@ -155,14 +154,4 @@ func (s *server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 			Directory: dir,
 		},
 	})
-}
-
-func (s *server) sourceByName(n string) (source.Source, bool) {
-	for _, src := range s.sources {
-		if strings.EqualFold(src.Name, n) {
-			return src, true
-		}
-	}
-
-	return source.Source{}, false
 }

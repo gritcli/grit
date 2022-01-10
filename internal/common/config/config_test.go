@@ -1,6 +1,9 @@
 package config_test
 
 import (
+	"sort"
+	"strings"
+
 	. "github.com/gritcli/grit/internal/common/config"
 	homedir "github.com/mitchellh/go-homedir"
 )
@@ -13,8 +16,8 @@ var defaultConfig = Config{
 	ClonesDefaults: Clones{
 		Dir: "~/grit",
 	},
-	Sources: map[string]Source{
-		"github": {
+	Sources: []Source{
+		{
 			Name:    "github",
 			Enabled: true,
 			Clones: Clones{
@@ -72,7 +75,7 @@ func withGitDefaults(cfg Config, g Git) Config {
 // withSource returns a copy of cfg with an additional repository source.
 func withSource(cfg Config, src Source) Config {
 	prev := cfg.Sources
-	cfg.Sources = map[string]Source{}
+	cfg.Sources = nil
 
 	var err error
 	src.Clones.Dir, err = homedir.Expand(src.Clones.Dir)
@@ -80,11 +83,20 @@ func withSource(cfg Config, src Source) Config {
 		panic(err)
 	}
 
-	for n, s := range prev {
-		cfg.Sources[n] = s
+	for _, s := range prev {
+		if !strings.EqualFold(src.Name, s.Name) {
+			cfg.Sources = append(cfg.Sources, s)
+		}
 	}
 
-	cfg.Sources[src.Name] = src
+	cfg.Sources = append(cfg.Sources, src)
+
+	sort.Slice(
+		cfg.Sources,
+		func(i, j int) bool {
+			return cfg.Sources[i].Name < cfg.Sources[j].Name
+		},
+	)
 
 	return cfg
 }

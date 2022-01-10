@@ -92,7 +92,7 @@ func mergeSourceBlock(cfg *unresolvedConfig, filename string, b sourceBlock) err
 			return fmt.Errorf(
 				"%s: a source named '%s' is already defined in %s",
 				filename,
-				b.Name,
+				s.Block.Name,
 				s.File,
 			)
 		}

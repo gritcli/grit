@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 
 	homedir "github.com/mitchellh/go-homedir"
 )
@@ -93,12 +94,21 @@ func (r *resolver) Assemble() Config {
 		Daemon:         assembleDaemonBlock(r.cfg.Daemon.Block),
 		ClonesDefaults: assembleClonesBlock(r.cfg.ClonesDefaults.Block),
 		GitDefaults:    assembleGitBlock(r.cfg.GitDefaults.Block),
-		Sources:        map[string]Source{},
 	}
 
 	for _, s := range r.cfg.Sources {
-		cfg.Sources[s.Block.Name] = assembleSourceBlock(s.Block, s.DriverBlock)
+		cfg.Sources = append(
+			cfg.Sources,
+			assembleSourceBlock(s.Block, s.DriverBlock),
+		)
 	}
+
+	sort.Slice(
+		cfg.Sources,
+		func(i, j int) bool {
+			return cfg.Sources[i].Name < cfg.Sources[j].Name
+		},
+	)
 
 	return cfg
 }

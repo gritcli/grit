@@ -11,7 +11,7 @@ func init() {
 	Container.Provide(func(
 		cfg config.Config,
 		logger logging.Logger,
-	) []source.Source {
+	) source.List {
 		builder := &sourcebuilder.Builder{
 			Logger: logger,
 		}
