@@ -63,25 +63,21 @@ type Driver interface {
 	// client and displayed to the user.
 	Resolve(ctx context.Context, query string, clientLog logging.Logger) ([]Repo, error)
 
-	// Clone makes a repository available at the specified directory.
+	// NewCloner returns a cloner that clones the repository with the given ID.
 	//
-	// The term "clone" is intended in the manner used by Git and similar
-	// distributed source control systems. The implementation should take
-	// whatever action best matches this intent. For example, for Subversion
-	// repositories an equivalent operation would be "checkout".
-	//
-	// tempDir is a temporary directory into which the repository clone is
-	// placed. cloneDir is a directory, relative to the source's configured
-	// clone directory, to which the content of the temporary directory should
-	// be moved after a successful clone.
+	// id is the repository ID, as discovered by a prior call to Resolve().
 	//
 	// clientLog is a target for any log output that should be sent to the
-	// client and displayed to the user.
-	Clone(
+	// client and displayed to the user while cloning.
+	//
+	// dir is the sub-directory that the clone should be placed into, relative
+	// to the source's configured clone directory. Typically this should be some
+	// form of the repository's name, sanitized for use as a directory name.
+	NewCloner(
 		ctx context.Context,
-		repoID, tempDir string,
+		id string,
 		clientLog logging.Logger,
-	) (cloneDir string, err error)
+	) (c Cloner, dir string, err error)
 }
 
 // Repo is a reference to a remote repository provided by a source.
