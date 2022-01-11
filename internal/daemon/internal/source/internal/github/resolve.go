@@ -30,7 +30,7 @@ func (d *Driver) Resolve(
 			}
 		}
 
-		logging.Log(
+		logging.Debug(
 			logger,
 			"found %d match(es) for '%s' in the repository list for @%s",
 			len(repos),
@@ -39,7 +39,7 @@ func (d *Driver) Resolve(
 		)
 
 		if len(repos) == 0 {
-			logging.Log(
+			logging.Debug(
 				logger,
 				"skipping GitHub API query for '%s' because it is not a fully-qualified repository name",
 				query,
@@ -50,7 +50,7 @@ func (d *Driver) Resolve(
 	}
 
 	if r, ok := reposByOwner[ownerName][repoName]; ok {
-		logging.Log(
+		logging.Debug(
 			logger,
 			"found an exact match for '%s' in the repository list for @%s",
 			query,
@@ -65,7 +65,7 @@ func (d *Driver) Resolve(
 	r, res, err := d.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
 		if res.StatusCode == http.StatusNotFound {
-			logging.Log(
+			logging.Debug(
 				logger,
 				"no repository named '%s' found by querying the GitHub API",
 				query,
@@ -77,7 +77,7 @@ func (d *Driver) Resolve(
 		return nil, err
 	}
 
-	logging.Log(
+	logging.Debug(
 		logger,
 		"found a repository named '%s' by querying the GitHub API",
 		query,
