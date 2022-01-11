@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"io"
 
 	"github.com/dogmatiq/dodeca/logging"
 	git "github.com/go-git/go-git/v5"
@@ -30,14 +31,15 @@ type BoundCloner struct {
 
 	// HTTPPassword is the password to use when cloning via HTTP, if any.
 	HTTPPassword string
-
-	// Logger is the target for output from the cloning operation.
-	Logger logging.Logger
 }
 
 // Clone clones the repository into the given target directory.
-func (c *BoundCloner) Clone(ctx context.Context, dir string) error {
-	opts, err := c.cloneOptions()
+func (c *BoundCloner) Clone(
+	ctx context.Context,
+	dir string,
+	logger logging.Logger,
+) error {
+	opts, err := c.cloneOptions(logger)
 	if err != nil {
 		return err
 	}
@@ -54,7 +56,7 @@ func (c *BoundCloner) Clone(ctx context.Context, dir string) error {
 
 // cloneOptions returns the options to use when cloning the repository, based on
 // the configuration of the cloner.
-func (c *BoundCloner) cloneOptions() (*git.CloneOptions, error) {
+func (c *BoundCloner) cloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
 	h, err := useHTTP(
 		c.SSHEndpoint != "",
 		c.HTTPEndpoint != "",
@@ -65,15 +67,15 @@ func (c *BoundCloner) cloneOptions() (*git.CloneOptions, error) {
 	}
 
 	if h {
-		return c.httpCloneOptions()
+		return c.httpCloneOptions(logger)
 	}
 
-	return c.sshCloneOptions()
+	return c.sshCloneOptions(logger)
 }
 
 // sshCloneOptions returns options that clone the repository using the HTTP
 // protocol.
-func (c *BoundCloner) httpCloneOptions() (*git.CloneOptions, error) {
+func (c *BoundCloner) httpCloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
 	var auth *http.BasicAuth
 	if c.HTTPUsername != "" || c.HTTPPassword != "" {
 		auth = &http.BasicAuth{
@@ -83,22 +85,18 @@ func (c *BoundCloner) httpCloneOptions() (*git.CloneOptions, error) {
 	}
 
 	return &git.CloneOptions{
-		URL:  c.HTTPEndpoint,
-		Auth: auth,
-		Progress: &logging.LineWriter{
-			Target: c.Logger,
-		},
+		URL:      c.HTTPEndpoint,
+		Auth:     auth,
+		Progress: progressWriter(logger),
 	}, nil
 }
 
 // sshCloneOptions returns options that clone the repository using the SSH
 // protocol.
-func (c *BoundCloner) sshCloneOptions() (*git.CloneOptions, error) {
+func (c *BoundCloner) sshCloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
 	opts := &git.CloneOptions{
-		URL: c.SSHEndpoint,
-		Progress: &logging.LineWriter{
-			Target: c.Logger,
-		},
+		URL:      c.SSHEndpoint,
+		Progress: progressWriter(logger),
 	}
 
 	if c.Config.SSHKeyFile != "" {
@@ -120,4 +118,11 @@ func (c *BoundCloner) sshCloneOptions() (*git.CloneOptions, error) {
 	}
 
 	return opts, nil
+}
+
+// progressWriter returns the writer used to log the output from Git.
+func progressWriter(logger logging.Logger) io.Writer {
+	return &logging.StreamWriter{
+		Target: logging.Prefix(logger, "git: "),
+	}
 }

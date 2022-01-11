@@ -57,7 +57,14 @@ func initSourceDrivers(ctx context.Context, logger logging.Logger, sources sourc
 	for _, src := range sources {
 		src := src // capture loop variable
 		g.Go(func() error {
-			return src.Driver.Init(ctx)
+			return src.Driver.Init(
+				ctx,
+				logging.Prefix(
+					logger,
+					"source[%s]: ",
+					src.Name,
+				),
+			)
 		})
 	}
 
@@ -71,7 +78,14 @@ func runSourceDrivers(ctx context.Context, logger logging.Logger, sources source
 	for _, src := range sources {
 		src := src // capture loop variable
 		g.Go(func() error {
-			return src.Driver.Run(ctx)
+			return src.Driver.Run(
+				ctx,
+				logging.Prefix(
+					logger,
+					"source[%s]: ",
+					src.Name,
+				),
+			)
 		})
 	}
 

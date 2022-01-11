@@ -10,12 +10,8 @@ import (
 func init() {
 	Container.Provide(func(
 		cfg config.Config,
-		logger logging.Logger,
 	) source.List {
-		builder := &sourcebuilder.Builder{
-			Logger: logger,
-		}
-
+		builder := &sourcebuilder.Builder{}
 		return builder.FromConfig(cfg)
 	})
 

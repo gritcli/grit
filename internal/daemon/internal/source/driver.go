@@ -13,7 +13,7 @@ type Driver interface {
 	//
 	// It is called before the daemon starts serving API requests. If an error
 	// is returned, the daemon fails to start.
-	Init(ctx context.Context) error
+	Init(ctx context.Context, logger logging.Logger) error
 
 	// Run performs any ongoing behavior required by the driver.
 	//
@@ -22,7 +22,7 @@ type Driver interface {
 	// context is canceled when the daemon shuts down.
 	//
 	// If it returns an error before ctx is canceled, the daemon is stopped.
-	Run(ctx context.Context) error
+	Run(ctx context.Context, logger logging.Logger) error
 
 	// Status returns a brief description of the status of the driver.
 	//
@@ -42,13 +42,10 @@ type Driver interface {
 	// The query string is typically captured directly from user input and has
 	// not been sanitized. The implementation must not return an error if the
 	// query is invalid; instead return an empty slice.
-	//
-	// clientLog is a target for any log output that should be sent to the
-	// client and displayed to the user.
 	Resolve(
 		ctx context.Context,
 		query string,
-		clientLog logging.Logger,
+		logger logging.Logger,
 	) ([]Repo, error)
 
 	// NewBoundCloner returns a bound cloner that clones the repository with the
@@ -56,15 +53,12 @@ type Driver interface {
 	//
 	// id is the repository ID, as discovered by a prior call to Resolve().
 	//
-	// clientLog is a target for any log output that should be sent to the
-	// client and displayed to the user while cloning.
-	//
 	// dir is the sub-directory that the clone should be placed into, relative
 	// to the source's configured clone directory. Typically this should be some
 	// form of the repository's name, sanitized for use as a directory name.
 	NewBoundCloner(
 		ctx context.Context,
 		id string,
-		clientLog logging.Logger,
+		logger logging.Logger,
 	) (c BoundCloner, dir string, err error)
 }

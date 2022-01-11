@@ -17,7 +17,6 @@ var _ = Describe("func Driver.NewBoundCloner()", func() {
 		cancel    context.CancelFunc
 		configure func(*config.GitHub)
 		driver    *Driver
-		logger    logging.DiscardLogger
 	)
 
 	BeforeEach(func() {
@@ -34,22 +33,13 @@ var _ = Describe("func Driver.NewBoundCloner()", func() {
 		})
 
 		It("returns a git.BoundCloner", func() {
-			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logger)
+			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&git.BoundCloner{
 				Config:       driver.Config.Git,
 				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
 				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
-				Logger: logging.Tee(
-					logging.Demote(
-						logging.Prefix(
-							driver.Logger,
-							"clone[446260684]: ",
-						),
-					),
-					logger,
-				),
 			}))
 
 			Expect(dir).To(Equal("gritcli/test-public"))
@@ -65,7 +55,7 @@ var _ = Describe("func Driver.NewBoundCloner()", func() {
 			// TODO: https://github.com/gritcli/grit/issues/13
 			//
 			// Test with a private repository instead.
-			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logger)
+			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&git.BoundCloner{
@@ -73,15 +63,6 @@ var _ = Describe("func Driver.NewBoundCloner()", func() {
 				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
 				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
 				HTTPPassword: driver.Config.Token,
-				Logger: logging.Tee(
-					logging.Demote(
-						logging.Prefix(
-							driver.Logger,
-							"clone[446260684]: ",
-						),
-					),
-					logger,
-				),
 			}))
 
 			Expect(dir).To(Equal("gritcli/test-public"))
