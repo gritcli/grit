@@ -13,14 +13,10 @@ import (
 func (d *Driver) Resolve(
 	ctx context.Context,
 	query string,
-	clientLog logging.Logger,
+	logger logging.Logger,
 ) ([]source.Repo, error) {
-	serverLog := logging.Prefix(d.Logger, "resolve[%s]: ", query)
-	clientLog = logging.Tee(serverLog, clientLog) // log everything sent to the client on the server as well
-
 	ownerName, repoName, err := parseRepoName(query)
 	if err != nil {
-		logging.Debug(clientLog, err.Error())
 		return nil, nil
 	}
 
@@ -35,17 +31,31 @@ func (d *Driver) Resolve(
 		}
 
 		logging.Debug(
-			clientLog,
-			"found %d repo(s) named '%s' by scanning the user's repo cache",
+			logger,
+			"found %d match(es) for '%s' in the repository list for @%s",
 			len(repos),
-			repoName,
+			query,
+			d.cache.CurrentUser().GetLogin(),
 		)
+
+		if len(repos) == 0 {
+			logging.Debug(
+				logger,
+				"skipping GitHub API query for '%s' because it is not a fully-qualified repository name",
+				query,
+			)
+		}
 
 		return repos, nil
 	}
 
 	if r, ok := reposByOwner[ownerName][repoName]; ok {
-		logging.Debug(clientLog, "found an exact match in the user's repo cache")
+		logging.Debug(
+			logger,
+			"found an exact match for '%s' in the repository list for @%s",
+			query,
+			d.cache.CurrentUser().GetLogin(),
+		)
 
 		return []source.Repo{
 			convertRepo(r),
@@ -55,15 +65,23 @@ func (d *Driver) Resolve(
 	r, res, err := d.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
 		if res.StatusCode == http.StatusNotFound {
-			logging.Debug(clientLog, "no matches found when querying the API")
+			logging.Debug(
+				logger,
+				"no repository named '%s' found by querying the GitHub API",
+				query,
+			)
+
 			return nil, nil
 		}
 
-		logging.Log(serverLog, "unable to query API: %s", err)
 		return nil, err
 	}
 
-	logging.Debug(serverLog, "found an exact match by querying the API")
+	logging.Debug(
+		logger,
+		"found a repository named '%s' by querying the GitHub API",
+		query,
+	)
 
 	return []source.Repo{
 		convertRepo(r),

@@ -18,14 +18,16 @@ import (
 // GitHub.com or a GitHub Enterprise Server installation.
 type Driver struct {
 	Config config.GitHub
-	Logger logging.Logger
 
 	client *github.Client
 	cache  cache
 }
 
 // Init initializes the driver.
-func (d *Driver) Init(ctx context.Context) error {
+func (d *Driver) Init(
+	ctx context.Context,
+	logger logging.Logger,
+) error {
 	httpClient := http.DefaultClient
 	if d.Config.Token != "" {
 		httpClient = oauth2.NewClient(
@@ -46,20 +48,26 @@ func (d *Driver) Init(ctx context.Context) error {
 		}
 	}
 
+	if d.Config.Token == "" {
+		logging.Log(logger, "not authenticated (no token specified)")
+		return nil
+	}
+
 	user, res, err := d.client.Users.Get(ctx, "")
 	if err != nil {
 		if res.StatusCode != http.StatusUnauthorized {
 			return err
 		}
 
-		logging.Log(d.Logger, "not authenticated")
+		// TODO: rebuild client without token provider
+		logging.Log(logger, "not authenticated (token is invalid)")
 		return nil
 	}
 
-	logging.Log(d.Logger, "authenticated as %s", user.GetLogin())
+	logging.Log(logger, "authenticated as %s", user.GetLogin())
 	d.cache.SetCurrentUser(user)
 
-	if err := d.populateRepoCache(ctx); err != nil {
+	if err := d.populateRepoCache(ctx, logger); err != nil {
 		return err
 	}
 
@@ -67,7 +75,10 @@ func (d *Driver) Init(ctx context.Context) error {
 }
 
 // Run performs any ongoing behavior required by the driver.
-func (d *Driver) Run(ctx context.Context) error {
+func (d *Driver) Run(
+	ctx context.Context,
+	logger logging.Logger,
+) error {
 	return nil
 }
 
@@ -120,7 +131,10 @@ func (d *Driver) Status(ctx context.Context) (string, error) {
 
 // populateRepoCache populates s.populateRepoCache with the repositories to
 // which the authenticated user has explicit read, write or admin access.
-func (d *Driver) populateRepoCache(ctx context.Context) error {
+func (d *Driver) populateRepoCache(
+	ctx context.Context,
+	logger logging.Logger,
+) error {
 	opts := &github.RepositoryListOptions{
 		ListOptions: github.ListOptions{
 			Page:    1,
@@ -137,7 +151,7 @@ func (d *Driver) populateRepoCache(ctx context.Context) error {
 		}
 
 		for _, r := range repoPage {
-			logging.Debug(d.Logger, "cached repository: %s", r.GetFullName())
+			logging.Debug(logger, "discovered %s", r.GetFullName())
 			repos = append(repos, r)
 		}
 
@@ -145,9 +159,10 @@ func (d *Driver) populateRepoCache(ctx context.Context) error {
 	}
 
 	logging.Log(
-		d.Logger,
-		"cached %d repositories",
+		logger,
+		"added %d repositories to the repository list for @%s",
 		len(repos),
+		d.cache.CurrentUser().GetLogin(),
 	)
 
 	d.cache.SetRepos(repos)

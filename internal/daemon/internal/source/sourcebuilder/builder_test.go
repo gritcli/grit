@@ -1,7 +1,6 @@
 package sourcebuilder_test
 
 import (
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/common/config"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
 	"github.com/gritcli/grit/internal/daemon/internal/source/internal/github"
@@ -13,17 +12,10 @@ import (
 )
 
 var _ = Describe("type Builder", func() {
-	var (
-		logger  logging.BufferedLogger
-		builder *Builder
-	)
+	var builder *Builder
 
 	BeforeEach(func() {
-		logger.Reset()
-
-		builder = &Builder{
-			Logger: &logger,
-		}
+		builder = &Builder{}
 	})
 
 	Describe("func FromConfig()", func() {
@@ -59,7 +51,6 @@ var _ = Describe("type Builder", func() {
 						Config: config.GitHub{
 							Domain: "github.com",
 						},
-						Logger: logging.Prefix(&logger, "source[github-test-source]: "),
 					},
 				},
 			))
@@ -119,7 +110,6 @@ var _ = Describe("type Builder", func() {
 						Config: config.GitHub{
 							Domain: "github.com",
 						},
-						Logger: logging.Prefix(&logger, "source[test-source]: "),
 					},
 				},
 			),

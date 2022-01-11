@@ -54,7 +54,11 @@ var _ = Describe("type Cloner", func() {
 				logging.Logger,
 			) (BoundCloner, string, error) {
 				return &BoundClonerStub{
-					CloneFunc: func(c context.Context, s string) error {
+					CloneFunc: func(
+						context.Context,
+						string,
+						logging.Logger,
+					) error {
 						return nil
 					},
 				}, "clone-dir", nil
@@ -155,7 +159,11 @@ var _ = Describe("type Cloner", func() {
 				logging.Logger,
 			) (BoundCloner, string, error) {
 				return &BoundClonerStub{
-					CloneFunc: func(c context.Context, s string) error {
+					CloneFunc: func(
+						context.Context,
+						string,
+						logging.Logger,
+					) error {
 						return errors.New("<error>")
 					},
 				}, "clone-dir", nil

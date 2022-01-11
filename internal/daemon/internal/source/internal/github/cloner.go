@@ -13,13 +13,10 @@ import (
 func (d *Driver) NewBoundCloner(
 	ctx context.Context,
 	id string,
-	clientLog logging.Logger,
+	logger logging.Logger,
 ) (source.BoundCloner, string, error) {
-	serverLog := logging.Prefix(d.Logger, "clone[%s]: ", id)
-
 	intID, err := parseRepoID(id)
 	if err != nil {
-		logging.LogString(serverLog, err.Error())
 		return nil, "", err
 	}
 
@@ -28,19 +25,21 @@ func (d *Driver) NewBoundCloner(
 		var err error
 		r, _, err = d.client.Repositories.GetByID(ctx, intID)
 		if err != nil {
-			logging.Log(serverLog, "unable to query API: %s", err)
 			return nil, "", err
 		}
 	}
+
+	logging.Debug(
+		logger,
+		"resolved %s to %s",
+		id,
+		r.GetFullName(),
+	)
 
 	c := &git.BoundCloner{
 		Config:       d.Config.Git,
 		SSHEndpoint:  r.GetSSHURL(),
 		HTTPEndpoint: r.GetCloneURL(),
-		Logger: logging.Tee(
-			logging.Demote(serverLog), // log to the server as debug
-			clientLog,                 // log to the client as regular message
-		),
 	}
 
 	if d.Config.Token != "" {

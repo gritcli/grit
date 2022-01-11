@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("type driver", func() {
+var _ = Describe("type Driver", func() {
 	var (
 		ctx       context.Context
 		cancel    context.CancelFunc
@@ -134,12 +134,11 @@ func initDriver(cfg func() config.GitHub, configure []func(*config.GitHub)) (con
 
 	d := &Driver{
 		Config: c,
-		Logger: logging.SilentLogger,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	if err := d.Init(ctx); err != nil {
+	if err := d.Init(ctx, logging.SilentLogger); err != nil {
 		cancel()
 		skipIfRateLimited(err)
 	}
@@ -150,7 +149,7 @@ func initDriver(cfg func() config.GitHub, configure []func(*config.GitHub)) (con
 		defer GinkgoRecover()
 		defer close(done)
 
-		err := d.Run(ctx)
+		err := d.Run(ctx, logging.SilentLogger)
 		if err != context.Canceled {
 			Expect(err).ShouldNot(HaveOccurred())
 		}

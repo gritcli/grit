@@ -16,7 +16,11 @@ import (
 type BoundCloner interface {
 	// Clone makes a local clone of the remote repository in the given
 	// directory.
-	Clone(ctx context.Context, dir string) error
+	Clone(
+		ctx context.Context,
+		dir string,
+		logger logging.Logger,
+	) error
 }
 
 // A Cloner clones repositories.
@@ -32,16 +36,28 @@ func (c *Cloner) Clone(
 	source, repoID string,
 	clientLogger logging.Logger,
 ) (_ string, err error) {
+	logger := logging.Tee(
+		clientLogger,
+		logging.Prefix(
+			c.Logger,
+			"source[%s]: clone %s: ",
+			source,
+			repoID,
+		),
+	)
+
+	defer func() {
+		if err != nil {
+			logger.LogString(err.Error())
+		}
+	}()
+
 	src, ok := c.Sources.ByName(source)
 	if !ok {
 		return "", fmt.Errorf("unable to clone: unrecognized source (%s)", source)
 	}
 
-	bc, dir, err := src.Driver.NewBoundCloner(
-		ctx,
-		repoID,
-		clientLogger,
-	)
+	bc, dir, err := src.Driver.NewBoundCloner(ctx, repoID, logger)
 	if err != nil {
 		return "", fmt.Errorf("unable to prepare for cloning: %w", err)
 	}
@@ -57,7 +73,7 @@ func (c *Cloner) Clone(
 		}
 	}()
 
-	if err := bc.Clone(ctx, dir); err != nil {
+	if err := bc.Clone(ctx, dir, logger); err != nil {
 		return "", fmt.Errorf("unable to clone: %w", err)
 	}
 
