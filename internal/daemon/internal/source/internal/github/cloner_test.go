@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/common/config"
+	"github.com/gritcli/grit/internal/daemon/internal/config"
 	"github.com/gritcli/grit/internal/daemon/internal/source/internal/git"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/github"
 	. "github.com/onsi/ginkgo"

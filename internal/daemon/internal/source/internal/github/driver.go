@@ -10,7 +10,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/google/go-github/github"
-	"github.com/gritcli/grit/internal/common/config"
+	"github.com/gritcli/grit/internal/daemon/internal/config"
 	"golang.org/x/oauth2"
 )
 

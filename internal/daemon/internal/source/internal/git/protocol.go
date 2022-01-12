@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/gritcli/grit/internal/common/config"
+	"github.com/gritcli/grit/internal/daemon/internal/config"
 )
 
 // useHTTP returns true if the HTTP protocol should be used to clone a

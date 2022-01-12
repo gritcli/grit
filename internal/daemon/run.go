@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/common/config"
 	"github.com/gritcli/grit/internal/daemon/internal/apiserver"
+	"github.com/gritcli/grit/internal/daemon/internal/config"
 	"github.com/gritcli/grit/internal/daemon/internal/deps"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
 	"golang.org/x/sync/errgroup"

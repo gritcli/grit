@@ -9,7 +9,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"github.com/gritcli/grit/internal/common/config"
+	"github.com/gritcli/grit/internal/daemon/internal/config"
 )
 
 // BoundCloner is an implementation of source.BoundCloner that clones a Git

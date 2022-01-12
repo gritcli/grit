@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	. "github.com/gritcli/grit/internal/common/config"
+	. "github.com/gritcli/grit/internal/daemon/internal/config"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
