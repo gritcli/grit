@@ -49,7 +49,7 @@ func loadDir(r *resolver, dir string) error {
 		}
 
 		name := entry.Name()
-		if name[0] == '_' {
+		if name[0] == '_' || name[0] == '.' {
 			continue
 		}
 

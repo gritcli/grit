@@ -49,7 +49,7 @@ var _ = Describe("func Load()", func() {
 		Expect(cfg).To(Equal(defaultConfig))
 	})
 
-	It("ignores non-HCL files, directories and HCL files that begin with an underscore", func() {
+	It("ignores non-HCL files, directories and HCL files that begin with a dot or an underscore", func() {
 		dir, err := os.MkdirTemp("", "")
 		Expect(err).ShouldNot(HaveOccurred())
 		defer os.RemoveAll(dir)
@@ -64,6 +64,9 @@ var _ = Describe("func Load()", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 
 		err = os.WriteFile(filepath.Join(dir, "_underscore.hcl"), []byte("<invalid config>"), 0600)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		err = os.WriteFile(filepath.Join(dir, ".dot.hcl"), []byte("<invalid config>"), 0600)
 		Expect(err).ShouldNot(HaveOccurred())
 
 		cfg, err := Load(dir)
