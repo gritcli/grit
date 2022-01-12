@@ -8,9 +8,6 @@ import (
 )
 
 // Daemon holds the configuration for the Grit daemon.
-//
-// The CLI also uses this configuration to determine how to connect to the
-// daemon's API.
 type Daemon struct {
 	// Socket is the path of the Unix socket used for communication between
 	// the Grit CLI and the Grit daemon (via gRPC).

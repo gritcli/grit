@@ -34,7 +34,7 @@ func NewRoot(v string) *cobra.Command {
 
 	flags.SetupVerbose(root)
 	flags.SetupNoInteractive(root)
-	flags.SetupConfig(root)
+	flags.SetupSocket(root)
 	flags.SetupShellExecutorOutput(root)
 
 	root.AddCommand(

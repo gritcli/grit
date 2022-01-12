@@ -3,7 +3,6 @@ package deps
 import (
 	"github.com/gritcli/grit/internal/cli/internal/flags"
 	"github.com/gritcli/grit/internal/common/api"
-	"github.com/gritcli/grit/internal/common/config"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -11,10 +10,15 @@ import (
 
 func init() {
 	Container.Provide(func(
-		cfg config.Config,
+		cmd *cobra.Command,
 	) (grpc.ClientConnInterface, error) {
+		socket, err := flags.Socket(cmd)
+		if err != nil {
+			return nil, err
+		}
+
 		conn, err := grpc.Dial(
-			"unix:"+cfg.Daemon.Socket,
+			"unix:"+socket,
 			grpc.WithTransportCredentials(
 				insecure.NewCredentials(),
 			),
