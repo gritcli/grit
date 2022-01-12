@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	"path/filepath"
 
+	"github.com/gritcli/grit/internal/common/api"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -42,12 +42,12 @@ func normalizeDaemonBlock(cfg *unresolvedConfig) error {
 		return normalizePath(cfg.Daemon.File, &cfg.Daemon.Block.Socket)
 	}
 
-	homeDir, err := homedir.Dir()
+	dir, err := homedir.Expand(api.DefaultSocket)
 	if err != nil {
-		return fmt.Errorf("unable to determine the current user's home directory")
+		return err
 	}
 
-	cfg.Daemon.Block.Socket = filepath.Join(homeDir, "grit", "daemon.sock")
+	cfg.Daemon.Block.Socket = dir
 
 	return nil
 }
