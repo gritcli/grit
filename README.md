@@ -73,7 +73,7 @@ For historical reasons (and to avoid overly abstract language) Grit largely uses
 Git's terminology for version control concepts. For example, a local working
 copy of a repository is referred to as a "clone".
 
-## Source
+### Source
 
 A source is some remote system that hosts VCS repositories that can be cloned by
 Grit.
@@ -90,7 +90,7 @@ Each source is identified by a unique name. There are several built-in sources:
 Additionally, user-defined sources can be configured to consume repositories
 from self-hosted VCS systems.
 
-## Driver
+### Driver
 
 A driver integrates Grit with a specific kind of [source](#source). It
 encapsulates all of the communication with the remote source, such as API calls
