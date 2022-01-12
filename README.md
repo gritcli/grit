@@ -78,8 +78,8 @@ copy of a repository is referred to as a "clone".
 A source is some remote system that hosts VCS repositories that can be cloned by
 Grit.
 
-Grit can be configured to consume any number sources. Each source has a name and
-uses a specific [driver](#driver) to communicate with the remote system.
+Grit can be configured to consume any number of sources. Each source uses a
+specific [driver](#driver) to communicate with the remote system.
 
 Each source is identified by a unique name. There are several built-in sources:
 
