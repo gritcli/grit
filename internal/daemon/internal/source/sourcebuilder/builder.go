@@ -55,7 +55,5 @@ type driverFactory struct {
 }
 
 func (f *driverFactory) VisitGitHubSource(s config.Source, cfg config.GitHub) {
-	f.Driver = &github.Driver{
-		Config: cfg,
-	}
+	f.Driver = github.NewDriver(cfg)
 }

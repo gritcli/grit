@@ -37,14 +37,14 @@ func (d *Driver) NewCloner(
 
 	c := &gitvcs.Cloner{
 		SSHEndpoint:      r.GetSSHURL(),
-		SSHKeyFile:       d.Config.Git.SSHKeyFile,
-		SSHKeyPassphrase: d.Config.Git.SSHKeyPassphrase,
+		SSHKeyFile:       d.config.Git.SSHKeyFile,
+		SSHKeyPassphrase: d.config.Git.SSHKeyPassphrase,
 		HTTPEndpoint:     r.GetCloneURL(),
-		PreferHTTP:       d.Config.Git.PreferHTTP,
+		PreferHTTP:       d.config.Git.PreferHTTP,
 	}
 
-	if d.Config.Token != "" {
-		c.HTTPPassword = d.Config.Token
+	if d.config.Token != "" {
+		c.HTTPPassword = d.config.Token
 	}
 
 	return c, r.GetFullName(), nil

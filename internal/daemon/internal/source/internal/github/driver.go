@@ -5,15 +5,20 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/internal/daemon/internal/config"
+	"github.com/gritcli/grit/plugin/driver"
 )
 
 // Driver is an implementation of driver.Driver that provides repositories from
 // GitHub.com or a GitHub Enterprise Server installation.
 type Driver struct {
-	Config config.GitHub
-
+	config config.GitHub
 	client *github.Client
 	cache  cache
+}
+
+// NewDriver returns a new GitHub driver.
+func NewDriver(cfg config.GitHub) driver.Driver {
+	return &Driver{config: cfg}
 }
 
 // isEnterpriseServer returns true if domain seems to refer to a GitHub

@@ -15,18 +15,18 @@ func (d *Driver) Init(
 	logger logging.Logger,
 ) error {
 	httpClient := http.DefaultClient
-	if d.Config.Token != "" {
+	if d.config.Token != "" {
 		httpClient = oauth2.NewClient(
 			context.Background(),
 			oauth2.StaticTokenSource(
-				&oauth2.Token{AccessToken: d.Config.Token},
+				&oauth2.Token{AccessToken: d.config.Token},
 			),
 		)
 	}
 
-	if isEnterpriseServer(d.Config.Domain) {
+	if isEnterpriseServer(d.config.Domain) {
 		var err error
-		d.client, err = github.NewEnterpriseClient(d.Config.Domain, "", httpClient)
+		d.client, err = github.NewEnterpriseClient(d.config.Domain, "", httpClient)
 		if err != nil {
 			return err
 		}
@@ -34,7 +34,7 @@ func (d *Driver) Init(
 		d.client = github.NewClient(httpClient)
 	}
 
-	if d.Config.Token == "" {
+	if d.config.Token == "" {
 		logging.Log(logger, "not authenticated (no token specified)")
 		return nil
 	}

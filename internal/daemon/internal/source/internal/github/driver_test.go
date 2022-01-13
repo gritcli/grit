@@ -82,9 +82,7 @@ func initDriver(
 		fn(&c)
 	}
 
-	d := &Driver{
-		Config: c,
-	}
+	d := NewDriver(c)
 
 	ctx, cancel := context.WithCancel(context.Background())
 

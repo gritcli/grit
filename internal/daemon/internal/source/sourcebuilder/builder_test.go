@@ -47,11 +47,11 @@ var _ = Describe("type Builder", func() {
 					Name:        "github-test-source",
 					Description: "github.com",
 					CloneDir:    "/path/to/clones/github",
-					Driver: &github.Driver{
-						Config: config.GitHub{
+					Driver: github.NewDriver(
+						config.GitHub{
 							Domain: "github.com",
 						},
-					},
+					),
 				},
 			))
 		})
@@ -106,11 +106,11 @@ var _ = Describe("type Builder", func() {
 					Name:        "test-source",
 					Description: "github.com",
 					CloneDir:    "/path/to/clones",
-					Driver: &github.Driver{
-						Config: config.GitHub{
+					Driver: github.NewDriver(
+						config.GitHub{
 							Domain: "github.com",
 						},
-					},
+					),
 				},
 			),
 		)
