@@ -9,7 +9,7 @@ import (
 )
 
 // NewCloner returns a cloner that clones the repository with the given ID.
-func (d *Driver) NewCloner(
+func (d *impl) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,

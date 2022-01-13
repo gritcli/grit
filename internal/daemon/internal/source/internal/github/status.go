@@ -12,7 +12,7 @@ import (
 )
 
 // Status returns a brief description of the status of the driver.
-func (d *Driver) Status(ctx context.Context) (string, error) {
+func (d *impl) Status(ctx context.Context) (string, error) {
 	invalidToken := false
 	limits, _, err := d.client.RateLimits(ctx)
 	if err != nil {

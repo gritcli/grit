@@ -11,7 +11,7 @@ import (
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
 // possible repositories.
-func (d *Driver) Resolve(
+func (d *impl) Resolve(
 	ctx context.Context,
 	query string,
 	logger logging.Logger,

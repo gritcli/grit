@@ -7,7 +7,7 @@ import (
 )
 
 // Run performs any ongoing behavior required by the driver.
-func (d *Driver) Run(
+func (d *impl) Run(
 	ctx context.Context,
 	logger logging.Logger,
 ) error {

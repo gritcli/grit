@@ -10,7 +10,7 @@ import (
 )
 
 // Init initializes the driver.
-func (d *Driver) Init(
+func (d *impl) Init(
 	ctx context.Context,
 	logger logging.Logger,
 ) error {
@@ -62,7 +62,7 @@ func (d *Driver) Init(
 
 // populateRepoCache populates s.populateRepoCache with the repositories to
 // which the authenticated user has explicit read, write or admin access.
-func (d *Driver) populateRepoCache(
+func (d *impl) populateRepoCache(
 	ctx context.Context,
 	logger logging.Logger,
 ) error {
