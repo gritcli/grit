@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dogmatiq/dodeca/logging"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/internal/daemon/internal/config"
@@ -20,14 +19,6 @@ type Driver struct {
 
 	client *github.Client
 	cache  cache
-}
-
-// Run performs any ongoing behavior required by the driver.
-func (d *Driver) Run(
-	ctx context.Context,
-	logger logging.Logger,
-) error {
-	return nil
 }
 
 // Status returns a brief description of the status of the driver.
