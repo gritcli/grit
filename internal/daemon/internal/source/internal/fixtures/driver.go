@@ -11,11 +11,11 @@ import (
 
 // DriverStub is a test implementation of the source.Driver interface.
 type DriverStub struct {
-	InitFunc           func(context.Context, logging.Logger) error
-	RunFunc            func(context.Context, logging.Logger) error
-	StatusFunc         func(context.Context) (string, error)
-	ResolveFunc        func(context.Context, string, logging.Logger) ([]driver.RemoteRepo, error)
-	NewBoundClonerFunc func(context.Context, string, logging.Logger) (source.BoundCloner, string, error)
+	InitFunc      func(context.Context, logging.Logger) error
+	RunFunc       func(context.Context, logging.Logger) error
+	StatusFunc    func(context.Context) (string, error)
+	ResolveFunc   func(context.Context, string, logging.Logger) ([]driver.RemoteRepo, error)
+	NewClonerFunc func(context.Context, string, logging.Logger) (source.BoundCloner, string, error)
 }
 
 // Init calls s.InitFunc(ctx, logger) if s.InitFunc is non-nil; otherwise it
@@ -62,15 +62,15 @@ func (s *DriverStub) Resolve(
 	return nil, nil
 }
 
-// NewBoundCloner calls s.NewBoundClonerFunc(ctx, id, logger) if
-// s.NewBoundClonerFunc is non-nil; otherwise it returns an error.
-func (s *DriverStub) NewBoundCloner(
+// NewCloner calls s.NewClonerFunc(ctx, id, logger) if
+// s.NewClonerFunc is non-nil; otherwise it returns an error.
+func (s *DriverStub) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,
 ) (c source.BoundCloner, dir string, err error) {
-	if s.NewBoundClonerFunc != nil {
-		return s.NewBoundClonerFunc(ctx, id, logger)
+	if s.NewClonerFunc != nil {
+		return s.NewClonerFunc(ctx, id, logger)
 	}
 
 	return nil, "", errors.New("<not implemented>")

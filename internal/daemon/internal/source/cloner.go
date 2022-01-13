@@ -12,7 +12,7 @@ import (
 // BoundCloner is an interface for cloning repositories that is "bound" to a
 // specific repository.
 //
-// A BoundCloner can be obtained by calling the Source.NewBoundCloner() method.
+// A BoundCloner can be obtained by calling the Source.NewCloner() method.
 type BoundCloner interface {
 	// Clone makes a local clone of the remote repository in the given
 	// directory.
@@ -57,7 +57,7 @@ func (c *Cloner) Clone(
 		return "", fmt.Errorf("unable to clone: unrecognized source (%s)", source)
 	}
 
-	bc, dir, err := src.Driver.NewBoundCloner(ctx, repoID, logger)
+	bc, dir, err := src.Driver.NewCloner(ctx, repoID, logger)
 	if err != nil {
 		return "", fmt.Errorf("unable to prepare for cloning: %w", err)
 	}

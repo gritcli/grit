@@ -49,7 +49,7 @@ type Driver interface {
 		logger logging.Logger,
 	) ([]driver.RemoteRepo, error)
 
-	// NewBoundCloner returns a bound cloner that clones the repository with the
+	// NewCloner returns a bound cloner that clones the repository with the
 	// given ID.
 	//
 	// id is the repository ID, as discovered by a prior call to Resolve().
@@ -57,7 +57,7 @@ type Driver interface {
 	// dir is the sub-directory that the clone should be placed into, relative
 	// to the source's configured clone directory. Typically this should be some
 	// form of the repository's name, sanitized for use as a directory name.
-	NewBoundCloner(
+	NewCloner(
 		ctx context.Context,
 		id string,
 		logger logging.Logger,

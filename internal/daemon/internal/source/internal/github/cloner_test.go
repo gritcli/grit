@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func Driver.NewBoundCloner()", func() {
+var _ = Describe("func Driver.NewCloner()", func() {
 	var (
 		ctx       context.Context
 		cancel    context.CancelFunc
@@ -33,7 +33,7 @@ var _ = Describe("func Driver.NewBoundCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner", func() {
-			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
+			cloner, dir, err := driver.NewCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
@@ -57,7 +57,7 @@ var _ = Describe("func Driver.NewBoundCloner()", func() {
 			// TODO: https://github.com/gritcli/grit/issues/13
 			//
 			// Test with a private repository instead.
-			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
+			cloner, dir, err := driver.NewCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{

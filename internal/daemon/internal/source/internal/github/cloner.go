@@ -8,9 +8,9 @@ import (
 	"github.com/gritcli/grit/plugin/vcs/gitvcs"
 )
 
-// NewBoundCloner returns a bound cloner that clones the repository with the
-// given ID.
-func (d *Driver) NewBoundCloner(
+// NewCloner returns a bound cloner that clones the repository with the given
+// ID.
+func (d *Driver) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,
