@@ -6,7 +6,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 )
 
-// Run performs any ongoing behavior required by the driver.
+// Run performs any background processing required by the driver.
 func (d *impl) Run(
 	ctx context.Context,
 	logger logging.Logger,
