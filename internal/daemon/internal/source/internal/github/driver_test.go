@@ -9,14 +9,20 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/internal/daemon/internal/config"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/github"
+	"github.com/gritcli/grit/plugin/driver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 // beforeEachAuthenticated returns the context and driver used for running
 // integration tests with an authenticated user.
-func beforeEachAuthenticated(configure ...func(*config.GitHub)) (context.Context, context.CancelFunc, *Driver, string) {
-	token := os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
+func beforeEachAuthenticated(configure ...func(*config.GitHub)) (
+	_ context.Context,
+	_ context.CancelFunc,
+	_ driver.Driver,
+	token string,
+) {
+	token = os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
 
 	ctx, cancel, drv := initDriver(
 		func() config.GitHub {
@@ -38,7 +44,11 @@ func beforeEachAuthenticated(configure ...func(*config.GitHub)) (context.Context
 
 // beforeEachAuthenticated returns the context and driver used for running
 // integration tests without an authenticated user.
-func beforeEachUnauthenticated(configure ...func(*config.GitHub)) (context.Context, context.CancelFunc, *Driver) {
+func beforeEachUnauthenticated(configure ...func(*config.GitHub)) (
+	context.Context,
+	context.CancelFunc,
+	driver.Driver,
+) {
 	return initDriver(
 		func() config.GitHub {
 			return config.GitHub{
@@ -55,7 +65,14 @@ func beforeEachUnauthenticated(configure ...func(*config.GitHub)) (context.Conte
 // calling each function in configure in order to mutate the config as desired.
 //
 // It is intended for use in the beforeEachXXX() helper functions.
-func initDriver(cfg func() config.GitHub, configure []func(*config.GitHub)) (context.Context, context.CancelFunc, *Driver) {
+func initDriver(
+	cfg func() config.GitHub,
+	configure []func(*config.GitHub),
+) (
+	context.Context,
+	context.CancelFunc,
+	driver.Driver,
+) {
 	if os.Getenv("GRIT_INTEGRATION_TEST_USE_GITHUB_API") == "" {
 		Skip("set GRIT_INTEGRATION_TEST_USE_GITHUB_API to enable tests that use the GitHub API")
 	}

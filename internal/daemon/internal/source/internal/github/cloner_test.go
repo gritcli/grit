@@ -5,7 +5,7 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/daemon/internal/config"
-	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/github"
+	"github.com/gritcli/grit/plugin/driver"
 	"github.com/gritcli/grit/plugin/vcs/gitvcs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -16,7 +16,7 @@ var _ = Describe("func Driver.NewCloner()", func() {
 		ctx       context.Context
 		cancel    context.CancelFunc
 		configure func(*config.GitHub)
-		drv       *Driver
+		drv       driver.Driver
 	)
 
 	BeforeEach(func() {
