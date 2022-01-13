@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/gritcli/grit/plugin/driver"
 )
 
 // A Driver performs implementation-specific repository operations for a
@@ -46,7 +47,7 @@ type Driver interface {
 		ctx context.Context,
 		query string,
 		logger logging.Logger,
-	) ([]Repo, error)
+	) ([]driver.RemoteRepo, error)
 
 	// NewBoundCloner returns a bound cloner that clones the repository with the
 	// given ID.

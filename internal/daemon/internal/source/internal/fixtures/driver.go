@@ -6,6 +6,7 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
+	"github.com/gritcli/grit/plugin/driver"
 )
 
 // DriverStub is a test implementation of the source.Driver interface.
@@ -13,7 +14,7 @@ type DriverStub struct {
 	InitFunc           func(context.Context, logging.Logger) error
 	RunFunc            func(context.Context, logging.Logger) error
 	StatusFunc         func(context.Context) (string, error)
-	ResolveFunc        func(context.Context, string, logging.Logger) ([]source.Repo, error)
+	ResolveFunc        func(context.Context, string, logging.Logger) ([]driver.RemoteRepo, error)
 	NewBoundClonerFunc func(context.Context, string, logging.Logger) (source.BoundCloner, string, error)
 }
 
@@ -53,7 +54,7 @@ func (s *DriverStub) Resolve(
 	ctx context.Context,
 	query string,
 	logger logging.Logger,
-) ([]source.Repo, error) {
+) ([]driver.RemoteRepo, error) {
 	if s.ResolveFunc != nil {
 		return s.ResolveFunc(ctx, query, logger)
 	}

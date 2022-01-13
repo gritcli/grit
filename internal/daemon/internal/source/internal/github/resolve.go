@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/daemon/internal/source"
+	"github.com/google/go-github/github"
+	"github.com/gritcli/grit/plugin/driver"
 )
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
@@ -14,19 +15,19 @@ func (d *Driver) Resolve(
 	ctx context.Context,
 	query string,
 	logger logging.Logger,
-) ([]source.Repo, error) {
+) ([]driver.RemoteRepo, error) {
 	ownerName, repoName, err := parseRepoName(query)
 	if err != nil {
 		return nil, nil
 	}
 
 	reposByOwner := d.cache.ReposByOwner()
-	var repos []source.Repo
+	var repos []*github.Repository
 
 	if ownerName == "" {
 		for _, reposByName := range reposByOwner {
 			if r, ok := reposByName[repoName]; ok {
-				repos = append(repos, convertRepo(r))
+				repos = append(repos, r)
 			}
 		}
 
@@ -46,7 +47,7 @@ func (d *Driver) Resolve(
 			)
 		}
 
-		return repos, nil
+		return toRemoteRepos(repos...), nil
 	}
 
 	if r, ok := reposByOwner[ownerName][repoName]; ok {
@@ -57,9 +58,7 @@ func (d *Driver) Resolve(
 			d.cache.CurrentUser().GetLogin(),
 		)
 
-		return []source.Repo{
-			convertRepo(r),
-		}, nil
+		return toRemoteRepos(r), nil
 	}
 
 	r, res, err := d.client.Repositories.Get(ctx, ownerName, repoName)
@@ -83,7 +82,5 @@ func (d *Driver) Resolve(
 		query,
 	)
 
-	return []source.Repo{
-		convertRepo(r),
-	}, nil
+	return toRemoteRepos(r), nil
 }
