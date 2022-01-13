@@ -37,11 +37,8 @@ var _ = Describe("func Driver.NewCloner()", func() {
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
-				SSHEndpoint:      "git@github.com:gritcli/test-public.git",
-				SSHKeyFile:       drv.Config.Git.SSHKeyFile,
-				SSHKeyPassphrase: drv.Config.Git.SSHKeyPassphrase,
-				HTTPEndpoint:     "https://github.com/gritcli/test-public.git",
-				PreferHTTP:       drv.Config.Git.PreferHTTP,
+				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
+				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
 			}))
 
 			Expect(dir).To(Equal("gritcli/test-public"))
@@ -49,8 +46,10 @@ var _ = Describe("func Driver.NewCloner()", func() {
 	})
 
 	When("authenticated", func() {
+		var token string
+
 		JustBeforeEach(func() {
-			ctx, cancel, drv = beforeEachAuthenticated(configure)
+			ctx, cancel, drv, token = beforeEachAuthenticated(configure)
 		})
 
 		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {
@@ -61,12 +60,9 @@ var _ = Describe("func Driver.NewCloner()", func() {
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
-				SSHEndpoint:      "git@github.com:gritcli/test-public.git",
-				SSHKeyFile:       drv.Config.Git.SSHKeyFile,
-				SSHKeyPassphrase: drv.Config.Git.SSHKeyPassphrase,
-				HTTPEndpoint:     "https://github.com/gritcli/test-public.git",
-				HTTPPassword:     drv.Config.Token,
-				PreferHTTP:       drv.Config.Git.PreferHTTP,
+				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
+				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
+				HTTPPassword: token,
 			}))
 
 			Expect(dir).To(Equal("gritcli/test-public"))

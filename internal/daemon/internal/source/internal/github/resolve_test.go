@@ -94,7 +94,7 @@ var _ = Describe("func Driver.Resolve()", func() {
 
 	When("authenticated", func() {
 		BeforeEach(func() {
-			ctx, cancel, drv = beforeEachAuthenticated()
+			ctx, cancel, drv, _ = beforeEachAuthenticated()
 		})
 
 		AfterEach(func() {

@@ -15,10 +15,11 @@ import (
 
 // beforeEachAuthenticated returns the context and driver used for running
 // integration tests with an authenticated user.
-func beforeEachAuthenticated(configure ...func(*config.GitHub)) (context.Context, context.CancelFunc, *Driver) {
-	return initDriver(
+func beforeEachAuthenticated(configure ...func(*config.GitHub)) (context.Context, context.CancelFunc, *Driver, string) {
+	token := os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
+
+	ctx, cancel, drv := initDriver(
 		func() config.GitHub {
-			token := os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
 
 			if token == "" {
 				Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
@@ -31,6 +32,8 @@ func beforeEachAuthenticated(configure ...func(*config.GitHub)) (context.Context
 		},
 		configure,
 	)
+
+	return ctx, cancel, drv, token
 }
 
 // beforeEachAuthenticated returns the context and driver used for running

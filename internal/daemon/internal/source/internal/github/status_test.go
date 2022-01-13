@@ -61,7 +61,7 @@ var _ = Describe("type Driver", func() {
 		})
 
 		JustBeforeEach(func() {
-			ctx, cancel, drv = beforeEachAuthenticated(configure)
+			ctx, cancel, drv, _ = beforeEachAuthenticated(configure)
 		})
 
 		AfterEach(func() {
