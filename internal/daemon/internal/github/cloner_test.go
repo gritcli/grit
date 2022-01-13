@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func Driver.NewCloner()", func() {
+var _ = Describe("func impl.NewCloner()", func() {
 	var (
 		ctx       context.Context
 		cancel    context.CancelFunc
@@ -23,13 +23,13 @@ var _ = Describe("func Driver.NewCloner()", func() {
 		configure = func(*config.GitHub) {}
 	})
 
-	AfterEach(func() {
-		cancel()
-	})
-
 	When("unauthenticated", func() {
 		JustBeforeEach(func() {
 			ctx, cancel, drv = beforeEachUnauthenticated(configure)
+		})
+
+		AfterEach(func() {
+			cancel()
 		})
 
 		It("returns a gitvcs.Cloner", func() {
@@ -50,6 +50,10 @@ var _ = Describe("func Driver.NewCloner()", func() {
 
 		JustBeforeEach(func() {
 			ctx, cancel, drv, token = beforeEachAuthenticated(configure)
+		})
+
+		AfterEach(func() {
+			cancel()
 		})
 
 		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {

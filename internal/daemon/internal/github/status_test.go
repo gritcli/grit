@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("type Driver", func() {
+var _ = Describe("func impl.Status()", func() {
 	var (
 		ctx       context.Context
 		cancel    context.CancelFunc
@@ -30,12 +30,10 @@ var _ = Describe("type Driver", func() {
 			cancel()
 		})
 
-		Describe("func Status()", func() {
-			It("indicates that the user is unauthenticated", func() {
-				status, err := drv.Status(ctx)
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(status).To(MatchRegexp(`unauthenticated, \d+ API requests remaining \(resets .+ from now\)`))
-			})
+		It("indicates that the user is unauthenticated", func() {
+			status, err := drv.Status(ctx)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(status).To(MatchRegexp(`unauthenticated, \d+ API requests remaining \(resets .+ from now\)`))
 		})
 
 		When("unauthenticated due to invalid token", func() {
@@ -45,12 +43,10 @@ var _ = Describe("type Driver", func() {
 				}
 			})
 
-			Describe("func Status()", func() {
-				It("indicates that the token is invalid", func() {
-					status, err := drv.Status(ctx)
-					Expect(err).ShouldNot(HaveOccurred())
-					Expect(status).To(Equal(`unauthenticated (invalid token)`))
-				})
+			It("indicates that the token is invalid", func() {
+				status, err := drv.Status(ctx)
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(status).To(Equal(`unauthenticated (invalid token)`))
 			})
 		})
 	})
@@ -68,12 +64,10 @@ var _ = Describe("type Driver", func() {
 			cancel()
 		})
 
-		Describe("func Status()", func() {
-			It("indicates that the user is authenticated", func() {
-				status, err := drv.Status(ctx)
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(status).To(MatchRegexp(`@jmalloc, \d+ API requests remaining \(resets .+ from now\)`))
-			})
+		It("indicates that the user is authenticated", func() {
+			status, err := drv.Status(ctx)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(status).To(MatchRegexp(`@jmalloc, \d+ API requests remaining \(resets .+ from now\)`))
 		})
 	})
 })

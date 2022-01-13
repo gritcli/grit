@@ -50,7 +50,7 @@ var (
 	}
 )
 
-var _ = Describe("func Driver.Resolve()", func() {
+var _ = Describe("func impl.Resolve()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
