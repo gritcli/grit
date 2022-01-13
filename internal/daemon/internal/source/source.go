@@ -1,5 +1,7 @@
 package source
 
+import "github.com/gritcli/grit/plugin/driver"
+
 // Source is a repository source.
 type Source struct {
 	// Name is the unique name for the repository source.
@@ -13,5 +15,5 @@ type Source struct {
 	CloneDir string
 
 	// Driver is the driver used to perform repository operations.
-	Driver Driver
+	Driver driver.Driver
 }

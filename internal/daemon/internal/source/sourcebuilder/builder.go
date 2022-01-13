@@ -6,6 +6,7 @@ import (
 	"github.com/gritcli/grit/internal/daemon/internal/config"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
 	"github.com/gritcli/grit/internal/daemon/internal/source/internal/github"
+	"github.com/gritcli/grit/plugin/driver"
 )
 
 // Builder builds source.Source values from Grit configuration.
@@ -50,7 +51,7 @@ func (b *Builder) FromSourceConfig(cfg config.Source) source.Source {
 // driverFactory is a config.SourceVisitor implementation that constructs
 // drivers based on source configurations.
 type driverFactory struct {
-	Driver source.Driver
+	Driver driver.Driver
 }
 
 func (f *driverFactory) VisitGitHubSource(s config.Source, cfg config.GitHub) {

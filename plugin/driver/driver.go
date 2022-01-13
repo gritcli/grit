@@ -1,10 +1,9 @@
-package source
+package driver
 
 import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/plugin/driver"
 )
 
 // A Driver performs implementation-specific repository operations for a
@@ -13,19 +12,19 @@ type Driver interface {
 	// Init initializes the driver.
 	//
 	// It is called before the daemon starts serving API requests. If an error
-	// is returned, the daemon fails to start.
+	// is returned, the daemon is stopped.
 	Init(ctx context.Context, logger logging.Logger) error
 
-	// Run performs any ongoing behavior required by the driver.
+	// Run performs any background processing required by the driver.
 	//
-	// It is called in its own goroutine after the driver is initialized, It
+	// It is called in its own goroutine after the driver is initialized. It
 	// should run until ctx is canceled or there is nothing left to do. The
 	// context is canceled when the daemon shuts down.
 	//
 	// If it returns an error before ctx is canceled, the daemon is stopped.
 	Run(ctx context.Context, logger logging.Logger) error
 
-	// Status returns a brief description of the status of the driver.
+	// Status returns a brief description of the current state of the driver.
 	//
 	// This may include information about the driver's ability to communicate
 	// with the remote server, the authenticated user, etc.
@@ -47,10 +46,9 @@ type Driver interface {
 		ctx context.Context,
 		query string,
 		logger logging.Logger,
-	) ([]driver.RemoteRepo, error)
+	) ([]RemoteRepo, error)
 
-	// NewCloner returns a bound cloner that clones the repository with the
-	// given ID.
+	// NewCloner returns a cloner that clones the repository with the given ID.
 	//
 	// id is the repository ID, as discovered by a prior call to Resolve().
 	//
@@ -61,5 +59,5 @@ type Driver interface {
 		ctx context.Context,
 		id string,
 		logger logging.Logger,
-	) (c driver.Cloner, dir string, err error)
+	) (c Cloner, dir string, err error)
 }

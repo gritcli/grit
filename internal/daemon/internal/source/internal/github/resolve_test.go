@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/daemon/internal/source"
 	"github.com/gritcli/grit/plugin/driver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -55,13 +54,13 @@ var _ = Describe("func Driver.Resolve()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
-		driver source.Driver
+		drv    driver.Driver
 		logger logging.DiscardLogger
 	)
 
 	When("unauthenticated", func() {
 		BeforeEach(func() {
-			ctx, cancel, driver = beforeEachUnauthenticated()
+			ctx, cancel, drv = beforeEachUnauthenticated()
 		})
 
 		AfterEach(func() {
@@ -69,25 +68,25 @@ var _ = Describe("func Driver.Resolve()", func() {
 		})
 
 		It("does not resolve unqualified names", func() {
-			repos, err := driver.Resolve(ctx, "grit", logger)
+			repos, err := drv.Resolve(ctx, "grit", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
 
 		It("resolves an exact match using the API", func() {
-			repos, err := driver.Resolve(ctx, gritPublicTestRepo.Name, logger)
+			repos, err := drv.Resolve(ctx, gritPublicTestRepo.Name, logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(ConsistOf(gritPublicTestRepo))
 		})
 
 		It("returns nothing for a qualified name that does not exist", func() {
-			repos, err := driver.Resolve(ctx, "gritcli/test-non-existant", logger)
+			repos, err := drv.Resolve(ctx, "gritcli/test-non-existant", logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
 
 		It("returns nothing for a qualified name that refers to a private repo", func() {
-			repos, err := driver.Resolve(ctx, gritPrivateTestRepo.Name, logger)
+			repos, err := drv.Resolve(ctx, gritPrivateTestRepo.Name, logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(BeEmpty())
 		})
@@ -95,7 +94,7 @@ var _ = Describe("func Driver.Resolve()", func() {
 
 	When("authenticated", func() {
 		BeforeEach(func() {
-			ctx, cancel, driver = beforeEachAuthenticated()
+			ctx, cancel, drv = beforeEachAuthenticated()
 		})
 
 		AfterEach(func() {
@@ -103,23 +102,23 @@ var _ = Describe("func Driver.Resolve()", func() {
 		})
 
 		It("ignores invalid names", func() {
-			repos, err := driver.Resolve(ctx, "has a space", logger)
+			repos, err := drv.Resolve(ctx, "has a space", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(BeEmpty())
 
-			repos, err = driver.Resolve(ctx, "owner has a space/repo", logger)
+			repos, err = drv.Resolve(ctx, "owner has a space/repo", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(BeEmpty())
 		})
 
 		It("resolves unqualified repo names using the cache", func() {
-			repos, err := driver.Resolve(ctx, "grit", logger)
+			repos, err := drv.Resolve(ctx, "grit", logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(gritRepo, gritV1Repo))
 		})
 
 		It("resolves an exact match using the cache", func() {
-			repos, err := driver.Resolve(ctx, gritPublicTestRepo.Name, logger)
+			repos, err := drv.Resolve(ctx, gritPublicTestRepo.Name, logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(gritPublicTestRepo))
 		})
@@ -131,13 +130,13 @@ var _ = Describe("func Driver.Resolve()", func() {
 			// grants read/write access to private repos. We currently use
 			// @jmalloc's access token in GHA, so this is not feasible. We need
 			// to setup a user specifically for testing this.
-			repos, err := driver.Resolve(ctx, gritPrivateTestRepo.Name, logger)
+			repos, err := drv.Resolve(ctx, gritPrivateTestRepo.Name, logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(repos).To(ConsistOf(gritPrivateTestRepo))
 		})
 
 		It("resolves an exact match using the API", func() {
-			repos, err := driver.Resolve(ctx, thirdPartyRepo.Name, logger)
+			repos, err := drv.Resolve(ctx, thirdPartyRepo.Name, logger)
 			skipIfRateLimited(err)
 			Expect(repos).To(ConsistOf(thirdPartyRepo))
 		})

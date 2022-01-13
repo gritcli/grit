@@ -8,8 +8,8 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/internal/daemon/internal/config"
-	"github.com/gritcli/grit/internal/daemon/internal/source"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/github"
+	"github.com/gritcli/grit/plugin/driver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -19,7 +19,7 @@ var _ = Describe("type Driver", func() {
 		ctx       context.Context
 		cancel    context.CancelFunc
 		configure func(*config.GitHub)
-		driver    source.Driver
+		drv       driver.Driver
 	)
 
 	When("unauthenticated", func() {
@@ -28,7 +28,7 @@ var _ = Describe("type Driver", func() {
 		})
 
 		JustBeforeEach(func() {
-			ctx, cancel, driver = beforeEachUnauthenticated(configure)
+			ctx, cancel, drv = beforeEachUnauthenticated(configure)
 		})
 
 		AfterEach(func() {
@@ -37,7 +37,7 @@ var _ = Describe("type Driver", func() {
 
 		Describe("func Status()", func() {
 			It("indicates that the user is unauthenticated", func() {
-				status, err := driver.Status(ctx)
+				status, err := drv.Status(ctx)
 				Expect(err).ShouldNot(HaveOccurred())
 				Expect(status).To(MatchRegexp(`unauthenticated, \d+ API requests remaining \(resets .+ from now\)`))
 			})
@@ -52,7 +52,7 @@ var _ = Describe("type Driver", func() {
 
 			Describe("func Status()", func() {
 				It("indicates that the token is invalid", func() {
-					status, err := driver.Status(ctx)
+					status, err := drv.Status(ctx)
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(status).To(Equal(`unauthenticated (invalid token)`))
 				})
@@ -66,7 +66,7 @@ var _ = Describe("type Driver", func() {
 		})
 
 		JustBeforeEach(func() {
-			ctx, cancel, driver = beforeEachAuthenticated(configure)
+			ctx, cancel, drv = beforeEachAuthenticated(configure)
 		})
 
 		AfterEach(func() {
@@ -75,7 +75,7 @@ var _ = Describe("type Driver", func() {
 
 		Describe("func Status()", func() {
 			It("indicates that the user is authenticated", func() {
-				status, err := driver.Status(ctx)
+				status, err := drv.Status(ctx)
 				Expect(err).ShouldNot(HaveOccurred())
 				Expect(status).To(MatchRegexp(`@jmalloc, \d+ API requests remaining \(resets .+ from now\)`))
 			})

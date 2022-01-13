@@ -14,7 +14,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Driver is an implementation of source.Driver that provides repositories from
+// Driver is an implementation of driver.Driver that provides repositories from
 // GitHub.com or a GitHub Enterprise Server installation.
 type Driver struct {
 	Config config.GitHub
