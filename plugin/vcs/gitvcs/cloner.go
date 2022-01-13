@@ -1,26 +1,34 @@
-package git
+package gitvcs
 
 import (
 	"context"
+	"errors"
 	"io"
+	"os"
 
 	"github.com/dogmatiq/dodeca/logging"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"github.com/gritcli/grit/internal/daemon/internal/config"
 )
 
-// BoundCloner is an implementation of source.BoundCloner that clones a Git
-// repository.
-type BoundCloner struct {
-	// Config is the Git configuration for the source that returned the cloner.
-	Config config.Git
-
+// Cloner is an implementation of driver.Cloner that clones a Git repository.
+type Cloner struct {
 	// SSHEndpoint is the URL used to clone the repository using the SSH
-	// protocol.
+	// protocol, if available.
 	SSHEndpoint string
+
+	// SSHKeyFile is the path to the private SSH key used to authenticate when
+	// using the SSH transport.
+	//
+	// If it is empty, the system's SSH agent is queried to determine which key
+	// to use.
+	SSHKeyFile string
+
+	// SSHKeyPassphrase is the passphrase used to decrypt the SSH private key,
+	// if any. It is ignored if SSHKeyFile is empty.
+	SSHKeyPassphrase string
 
 	// HTTPEndpoint is the URL used to clone the repository using the HTTP
 	// protocol.
@@ -31,10 +39,14 @@ type BoundCloner struct {
 
 	// HTTPPassword is the password to use when cloning via HTTP, if any.
 	HTTPPassword string
+
+	// PreferHTTP indicates that the HTTP protocol should be used in preference
+	// to SSH. By default SSH is preferred.
+	PreferHTTP bool
 }
 
 // Clone clones the repository into the given target directory.
-func (c *BoundCloner) Clone(
+func (c *Cloner) Clone(
 	ctx context.Context,
 	dir string,
 	logger logging.Logger,
@@ -56,17 +68,13 @@ func (c *BoundCloner) Clone(
 
 // cloneOptions returns the options to use when cloning the repository, based on
 // the configuration of the cloner.
-func (c *BoundCloner) cloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
-	h, err := useHTTP(
-		c.SSHEndpoint != "",
-		c.HTTPEndpoint != "",
-		c.Config,
-	)
+func (c *Cloner) cloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
+	useHTTP, err := c.useHTTP()
 	if err != nil {
 		return nil, err
 	}
 
-	if h {
+	if useHTTP {
 		return c.httpCloneOptions(logger)
 	}
 
@@ -75,7 +83,7 @@ func (c *BoundCloner) cloneOptions(logger logging.Logger) (*git.CloneOptions, er
 
 // sshCloneOptions returns options that clone the repository using the HTTP
 // protocol.
-func (c *BoundCloner) httpCloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
+func (c *Cloner) httpCloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
 	var auth *http.BasicAuth
 	if c.HTTPUsername != "" || c.HTTPPassword != "" {
 		auth = &http.BasicAuth{
@@ -93,13 +101,13 @@ func (c *BoundCloner) httpCloneOptions(logger logging.Logger) (*git.CloneOptions
 
 // sshCloneOptions returns options that clone the repository using the SSH
 // protocol.
-func (c *BoundCloner) sshCloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
+func (c *Cloner) sshCloneOptions(logger logging.Logger) (*git.CloneOptions, error) {
 	opts := &git.CloneOptions{
 		URL:      c.SSHEndpoint,
 		Progress: progressWriter(logger),
 	}
 
-	if c.Config.SSHKeyFile != "" {
+	if c.SSHKeyFile != "" {
 		ep, err := transport.NewEndpoint(c.SSHEndpoint)
 		if err != nil {
 			return nil, err
@@ -107,8 +115,8 @@ func (c *BoundCloner) sshCloneOptions(logger logging.Logger) (*git.CloneOptions,
 
 		publicKeys, err := ssh.NewPublicKeysFromFile(
 			ep.User,
-			c.Config.SSHKeyFile,
-			c.Config.SSHKeyPassphrase,
+			c.SSHKeyFile,
+			c.SSHKeyPassphrase,
 		)
 		if err != nil {
 			return nil, err
@@ -118,6 +126,42 @@ func (c *BoundCloner) sshCloneOptions(logger logging.Logger) (*git.CloneOptions,
 	}
 
 	return opts, nil
+}
+
+// useHTTP returns true if the HTTP protocol should be used to clone a
+// repository based on a set of configuration values.
+//
+// The algorithm favours SSH over HTTP unless the configuration specifically
+// indicates that HTTP is to be preferred.
+//
+// If it returns false, SSH should be used instead.
+func (c *Cloner) useHTTP() (bool, error) {
+	hasSSH := c.SSHEndpoint != ""
+	hasHTTP := c.HTTPEndpoint != ""
+
+	if !hasHTTP && !hasSSH {
+		return false, errors.New("neither the SSH nor HTTP protocol is available")
+	}
+
+	if hasHTTP && c.PreferHTTP {
+		return true, nil
+	}
+
+	if hasSSH {
+		if c.SSHKeyFile != "" {
+			return false, nil
+		}
+
+		if hasSSHAgent := os.Getenv("SSH_AUTH_SOCK") != ""; hasSSHAgent {
+			return false, nil
+		}
+	}
+
+	if hasHTTP {
+		return true, nil
+	}
+
+	return false, errors.New("SSH is the only available protocol but there is no SSH agent and no private key was provided")
 }
 
 // progressWriter returns the writer used to log the output from Git.

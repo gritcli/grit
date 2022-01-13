@@ -5,7 +5,7 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
-	"github.com/gritcli/grit/internal/daemon/internal/source/internal/git"
+	"github.com/gritcli/grit/plugin/vcs/gitvcs"
 )
 
 // NewBoundCloner returns a bound cloner that clones the repository with the
@@ -36,10 +36,12 @@ func (d *Driver) NewBoundCloner(
 		r.GetFullName(),
 	)
 
-	c := &git.BoundCloner{
-		Config:       d.Config.Git,
-		SSHEndpoint:  r.GetSSHURL(),
-		HTTPEndpoint: r.GetCloneURL(),
+	c := &gitvcs.Cloner{
+		SSHEndpoint:      r.GetSSHURL(),
+		SSHKeyFile:       d.Config.Git.SSHKeyFile,
+		SSHKeyPassphrase: d.Config.Git.SSHKeyPassphrase,
+		HTTPEndpoint:     r.GetCloneURL(),
+		PreferHTTP:       d.Config.Git.PreferHTTP,
 	}
 
 	if d.Config.Token != "" {

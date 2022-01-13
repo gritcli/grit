@@ -1,4 +1,4 @@
-package git_test
+package gitvcs_test
 
 import (
 	"reflect"

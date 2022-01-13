@@ -5,8 +5,8 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/daemon/internal/config"
-	"github.com/gritcli/grit/internal/daemon/internal/source/internal/git"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/github"
+	"github.com/gritcli/grit/plugin/vcs/gitvcs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -32,14 +32,16 @@ var _ = Describe("func Driver.NewBoundCloner()", func() {
 			ctx, cancel, driver = beforeEachUnauthenticated(configure)
 		})
 
-		It("returns a git.BoundCloner", func() {
+		It("returns a gitvcs.Cloner", func() {
 			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
-			Expect(cloner).To(Equal(&git.BoundCloner{
-				Config:       driver.Config.Git,
-				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
-				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
+			Expect(cloner).To(Equal(&gitvcs.Cloner{
+				SSHEndpoint:      "git@github.com:gritcli/test-public.git",
+				SSHKeyFile:       driver.Config.Git.SSHKeyFile,
+				SSHKeyPassphrase: driver.Config.Git.SSHKeyPassphrase,
+				HTTPEndpoint:     "https://github.com/gritcli/test-public.git",
+				PreferHTTP:       driver.Config.Git.PreferHTTP,
 			}))
 
 			Expect(dir).To(Equal("gritcli/test-public"))
@@ -58,11 +60,13 @@ var _ = Describe("func Driver.NewBoundCloner()", func() {
 			cloner, dir, err := driver.NewBoundCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
-			Expect(cloner).To(Equal(&git.BoundCloner{
-				Config:       driver.Config.Git,
-				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
-				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
-				HTTPPassword: driver.Config.Token,
+			Expect(cloner).To(Equal(&gitvcs.Cloner{
+				SSHEndpoint:      "git@github.com:gritcli/test-public.git",
+				SSHKeyFile:       driver.Config.Git.SSHKeyFile,
+				SSHKeyPassphrase: driver.Config.Git.SSHKeyPassphrase,
+				HTTPEndpoint:     "https://github.com/gritcli/test-public.git",
+				HTTPPassword:     driver.Config.Token,
+				PreferHTTP:       driver.Config.Git.PreferHTTP,
 			}))
 
 			Expect(dir).To(Equal("gritcli/test-public"))
