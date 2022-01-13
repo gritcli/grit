@@ -24,14 +24,14 @@ func (d *Driver) Init(
 		)
 	}
 
-	if isGitHubDotCom(d.Config) {
-		d.client = github.NewClient(httpClient)
-	} else {
+	if isEnterpriseServer(d.Config.Domain) {
 		var err error
 		d.client, err = github.NewEnterpriseClient(d.Config.Domain, "", httpClient)
 		if err != nil {
 			return err
 		}
+	} else {
+		d.client = github.NewClient(httpClient)
 	}
 
 	if d.Config.Token == "" {

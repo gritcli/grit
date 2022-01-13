@@ -16,7 +16,8 @@ type Driver struct {
 	cache  cache
 }
 
-// isGitHubDotCom returns true if domain is the domain for github.com.
-func isGitHubDotCom(cfg config.GitHub) bool {
-	return strings.EqualFold(cfg.Domain, "github.com")
+// isEnterpriseServer returns true if domain seems to refer to a GitHub
+// Enterprise Server installation.
+func isEnterpriseServer(domain string) bool {
+	return !strings.EqualFold(domain, "github.com")
 }
