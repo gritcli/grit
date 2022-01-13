@@ -2,8 +2,8 @@ package sourcebuilder_test
 
 import (
 	"github.com/gritcli/grit/internal/daemon/internal/config"
+	"github.com/gritcli/grit/internal/daemon/internal/github"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
-	"github.com/gritcli/grit/internal/daemon/internal/source/internal/github"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/sourcebuilder"
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/extensions/table"
