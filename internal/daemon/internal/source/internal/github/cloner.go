@@ -4,17 +4,16 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/daemon/internal/source"
+	"github.com/gritcli/grit/plugin/driver"
 	"github.com/gritcli/grit/plugin/vcs/gitvcs"
 )
 
-// NewCloner returns a bound cloner that clones the repository with the given
-// ID.
+// NewCloner returns a cloner that clones the repository with the given ID.
 func (d *Driver) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,
-) (source.BoundCloner, string, error) {
+) (driver.Cloner, string, error) {
 	intID, err := parseRepoID(id)
 	if err != nil {
 		return nil, "", err

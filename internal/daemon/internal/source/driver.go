@@ -61,5 +61,5 @@ type Driver interface {
 		ctx context.Context,
 		id string,
 		logger logging.Logger,
-	) (c BoundCloner, dir string, err error)
+	) (c driver.Cloner, dir string, err error)
 }

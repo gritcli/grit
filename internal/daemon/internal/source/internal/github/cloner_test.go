@@ -53,7 +53,7 @@ var _ = Describe("func Driver.NewCloner()", func() {
 			ctx, cancel, driver = beforeEachAuthenticated(configure)
 		})
 
-		It("returns a git.BoundCloner with the token as the HTTP password", func() {
+		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {
 			// TODO: https://github.com/gritcli/grit/issues/13
 			//
 			// Test with a private repository instead.

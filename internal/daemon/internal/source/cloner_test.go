@@ -10,15 +10,16 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	. "github.com/gritcli/grit/internal/daemon/internal/source"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/fixtures"
+	"github.com/gritcli/grit/plugin/driver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("type Cloner", func() {
 	var (
-		tempDir string
-		driver  *DriverStub
-		cloner  *Cloner
+		tempDir    string
+		driverStub *DriverStub
+		cloner     *Cloner
 	)
 
 	BeforeEach(func() {
@@ -26,14 +27,14 @@ var _ = Describe("type Cloner", func() {
 		tempDir, err = os.MkdirTemp("", "")
 		Expect(err).ShouldNot(HaveOccurred())
 
-		driver = &DriverStub{}
+		driverStub = &DriverStub{}
 
 		cloner = &Cloner{
 			Sources: List{
 				{
 					Name:     "<source>",
 					CloneDir: tempDir,
-					Driver:   driver,
+					Driver:   driverStub,
 				},
 			},
 			Logger: logging.SilentLogger,
@@ -48,12 +49,12 @@ var _ = Describe("type Cloner", func() {
 
 	Describe("func Clone()", func() {
 		It("returns the clone directory", func() {
-			driver.NewClonerFunc = func(
+			driverStub.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
-			) (BoundCloner, string, error) {
-				return &BoundClonerStub{
+			) (driver.Cloner, string, error) {
+				return &ClonerStub{
 					CloneFunc: func(
 						context.Context,
 						string,
@@ -79,12 +80,12 @@ var _ = Describe("type Cloner", func() {
 			err := os.Mkdir(dir, 0700)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			driver.NewClonerFunc = func(
+			driverStub.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
-			) (BoundCloner, string, error) {
-				return &BoundClonerStub{}, "existing-dir", nil
+			) (driver.Cloner, string, error) {
+				return &ClonerStub{}, "existing-dir", nil
 			}
 
 			_, err = cloner.Clone(
@@ -102,12 +103,12 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("returns an error if the directory can not be created", func() {
-			driver.NewClonerFunc = func(
+			driverStub.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
-			) (BoundCloner, string, error) {
-				return &BoundClonerStub{}, "\x00", nil
+			) (driver.Cloner, string, error) {
+				return &ClonerStub{}, "\x00", nil
 			}
 
 			_, err := cloner.Clone(
@@ -135,11 +136,11 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("returns an error if the driver returns an error", func() {
-			driver.NewClonerFunc = func(
+			driverStub.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
-			) (BoundCloner, string, error) {
+			) (driver.Cloner, string, error) {
 				return nil, "", errors.New("<error>")
 			}
 
@@ -153,12 +154,12 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("returns an error if the bound cloner returns an error", func() {
-			driver.NewClonerFunc = func(
+			driverStub.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
-			) (BoundCloner, string, error) {
-				return &BoundClonerStub{
+			) (driver.Cloner, string, error) {
+				return &ClonerStub{
 					CloneFunc: func(
 						context.Context,
 						string,
