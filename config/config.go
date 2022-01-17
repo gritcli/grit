@@ -9,11 +9,6 @@ type Config struct {
 	// Daemon is the configuration of the Grit daemon.
 	Daemon Daemon
 
-	// ClonesDefaults is the configuration that controls how Grit stores local
-	// repository clones across all sources. The values may be overridden on a
-	// per-source basis.
-	ClonesDefaults Clones
-
 	// Sources is the set of repository sources from which repositories can be
 	// cloned.
 	Sources []Source

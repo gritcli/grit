@@ -97,8 +97,7 @@ func (r *resolver) Normalize() error {
 // files.
 func (r *resolver) Assemble() (Config, error) {
 	cfg := Config{
-		Daemon:         assembleDaemonBlock(r.cfg.Daemon.Block),
-		ClonesDefaults: assembleClonesBlock(r.cfg.ClonesDefaults.Block),
+		Daemon: assembleDaemonBlock(r.cfg.Daemon.Block),
 	}
 
 	for _, s := range r.cfg.Sources {

@@ -13,9 +13,6 @@ var defaultConfig = Config{
 	Daemon: Daemon{
 		Socket: "~/grit/daemon.sock",
 	},
-	ClonesDefaults: Clones{
-		Dir: "~/grit",
-	},
 	Sources: []Source{
 		{
 			Name:    "github",
@@ -37,11 +34,6 @@ func init() {
 		panic(err)
 	}
 
-	defaultConfig.ClonesDefaults.Dir, err = homedir.Expand(defaultConfig.ClonesDefaults.Dir)
-	if err != nil {
-		panic(err)
-	}
-
 	for n, s := range defaultConfig.Sources {
 		s.Clones.Dir, err = homedir.Expand(s.Clones.Dir)
 		if err != nil {
@@ -55,13 +47,6 @@ func init() {
 // withDaemon returns a copy of cfg with a different daemon configuration.
 func withDaemon(cfg Config, d Daemon) Config {
 	cfg.Daemon = d
-	return cfg
-}
-
-// withClonesDefaults returns a copy of cfg with a different clones defaults
-// configuration.
-func withClonesDefaults(cfg Config, c Clones) Config {
-	cfg.ClonesDefaults = c
 	return cfg
 }
 
