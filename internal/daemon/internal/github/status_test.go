@@ -3,7 +3,7 @@ package github_test
 import (
 	"context"
 
-	"github.com/gritcli/grit/internal/daemon/internal/config"
+	. "github.com/gritcli/grit/internal/daemon/internal/github"
 	"github.com/gritcli/grit/plugin/driver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,15 +11,16 @@ import (
 
 var _ = Describe("func impl.Status()", func() {
 	var (
-		ctx       context.Context
-		cancel    context.CancelFunc
-		configure func(*config.GitHub)
-		drv       driver.Driver
+		ctx    context.Context
+		cancel context.CancelFunc
+		drv    driver.Driver
 	)
 
 	When("unauthenticated", func() {
+		var configure func(*Config)
+
 		BeforeEach(func() {
-			configure = func(*config.GitHub) {}
+			configure = func(*Config) {}
 		})
 
 		JustBeforeEach(func() {
@@ -38,7 +39,7 @@ var _ = Describe("func impl.Status()", func() {
 
 		When("unauthenticated due to invalid token", func() {
 			BeforeEach(func() {
-				configure = func(cfg *config.GitHub) {
+				configure = func(cfg *Config) {
 					cfg.Token = "<invalid-token>"
 				}
 			})
@@ -53,11 +54,7 @@ var _ = Describe("func impl.Status()", func() {
 
 	When("authenticated", func() {
 		BeforeEach(func() {
-			configure = func(*config.GitHub) {}
-		})
-
-		JustBeforeEach(func() {
-			ctx, cancel, drv, _ = beforeEachAuthenticated(configure)
+			ctx, cancel, drv, _ = beforeEachAuthenticated()
 		})
 
 		AfterEach(func() {

@@ -22,6 +22,10 @@ type Git struct {
 	PreferHTTP bool
 }
 
+// GitBlockExported temporarily exports the gitBlock type to help refactoring.
+// TODO: remove
+type GitBlockExported = gitBlock
+
 // gitBlock is the HCL schema for a "git" block
 type gitBlock struct {
 	SSHKey     *sshKeyBlock `hcl:"ssh_key,block"`

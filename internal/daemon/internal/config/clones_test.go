@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	. "github.com/gritcli/grit/internal/daemon/internal/config"
+	"github.com/gritcli/grit/internal/daemon/internal/registry"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -59,7 +60,10 @@ var _ = Describe("func Load() (global clones block)", func() {
 		)
 		defer cleanup()
 
-		cfg, err := Load(dir)
+		// TODO: don't test using built-ins
+		cfg, err := Load(dir, &registry.Registry{
+			Parent: &registry.BuiltIns,
+		})
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg.ClonesDefaults.Dir).To(Equal(
 			filepath.Join(dir, "relative/path/to/clones"),

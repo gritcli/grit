@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	. "github.com/gritcli/grit/internal/daemon/internal/config"
+	"github.com/gritcli/grit/internal/daemon/internal/registry"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -44,7 +45,10 @@ var _ = Describe("func Load()", func() {
 	)
 
 	It("returns the default configuration when passed a non-existent directory", func() {
-		cfg, err := Load("./does-not-exist")
+		// TODO: don't test using built-ins
+		cfg, err := Load("./does-not-exist", &registry.Registry{
+			Parent: &registry.BuiltIns,
+		})
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg).To(Equal(defaultConfig))
 	})
@@ -69,7 +73,10 @@ var _ = Describe("func Load()", func() {
 		err = os.WriteFile(filepath.Join(dir, ".dot.hcl"), []byte("<invalid config>"), 0600)
 		Expect(err).ShouldNot(HaveOccurred())
 
-		cfg, err := Load(dir)
+		// TODO: don't test using built-ins
+		cfg, err := Load(dir, &registry.Registry{
+			Parent: &registry.BuiltIns,
+		})
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg).To(Equal(defaultConfig))
 	})
@@ -101,7 +108,10 @@ func testLoadSuccess(configs []string, expect Config) {
 	dir, cleanup := makeConfigDir(configs...)
 	defer cleanup()
 
-	cfg, err := Load(dir)
+	// TODO: don't test using built-ins
+	cfg, err := Load(dir, &registry.Registry{
+		Parent: &registry.BuiltIns,
+	})
 	Expect(err).ShouldNot(HaveOccurred())
 	Expect(cfg).To(Equal(expect))
 }
@@ -121,7 +131,10 @@ func testLoadFailure(configs []string, expect string) {
 	dir, cleanup := makeConfigDir(configs...)
 	defer cleanup()
 
-	_, err := Load(dir)
+	// TODO: don't test using built-ins
+	_, err := Load(dir, &registry.Registry{
+		Parent: &registry.BuiltIns,
+	})
 	Expect(err).Should(HaveOccurred())
 
 	message := strings.ReplaceAll(err.Error(), dir, "<dir>")

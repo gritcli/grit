@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/gritcli/grit/internal/daemon/internal/registry"
+	"github.com/gritcli/grit/plugin/driver"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -20,14 +22,13 @@ import (
 // semantic errors such as duplicate definitions.
 //
 // 2. The "normalize" phase sets any optional values to their defaults, and
-// normalizes any values that may be specified in multiple ways. This phase
-// allows parts of the configuration to depend on other parts of the
-// configuration; care must be taken not to introduce circular dependencies
-// within the population logic.
+// normalizes any values that may be specified in multiple ways. It does NOT
+// inspect the driver-specific configuration values within "source" blocks.
 //
 // 2. The "assemble" phase produces a Config struct value from the merged
 // configuration.
 type resolver struct {
+	reg *registry.Registry
 	cfg unresolvedConfig
 }
 
@@ -52,7 +53,12 @@ func (r *resolver) Merge(filename string, c configFile) error {
 	}
 
 	for _, b := range c.SourceBlocks {
-		if err := mergeSourceBlock(&r.cfg, filename, b); err != nil {
+		if err := mergeSourceBlock(
+			r.reg,
+			&r.cfg,
+			filename,
+			b,
+		); err != nil {
 			return err
 		}
 	}
@@ -62,7 +68,7 @@ func (r *resolver) Merge(filename string, c configFile) error {
 
 // Normalize normalizes the configuration and populates it with default values.
 func (r *resolver) Normalize() error {
-	mergeDefaultSources(&r.cfg)
+	mergeDefaultSources(r.reg, &r.cfg)
 
 	if err := normalizeDaemonBlock(&r.cfg); err != nil {
 		return err
@@ -89,7 +95,7 @@ func (r *resolver) Normalize() error {
 
 // Assemble returns the file configuration assembled from the various source
 // files.
-func (r *resolver) Assemble() Config {
+func (r *resolver) Assemble() (Config, error) {
 	cfg := Config{
 		Daemon:         assembleDaemonBlock(r.cfg.Daemon.Block),
 		ClonesDefaults: assembleClonesBlock(r.cfg.ClonesDefaults.Block),
@@ -97,10 +103,12 @@ func (r *resolver) Assemble() Config {
 	}
 
 	for _, s := range r.cfg.Sources {
-		cfg.Sources = append(
-			cfg.Sources,
-			assembleSourceBlock(s.Block, s.DriverBlock),
-		)
+		src, err := assembleSourceBlock(r.cfg, s)
+		if err != nil {
+			return Config{}, err
+		}
+
+		cfg.Sources = append(cfg.Sources, src)
 	}
 
 	sort.Slice(
@@ -110,7 +118,7 @@ func (r *resolver) Assemble() Config {
 		},
 	)
 
-	return cfg
+	return cfg, nil
 }
 
 // unresolvedConfig is a configuration that is in the process of being resolved.
@@ -148,7 +156,7 @@ type unresolvedConfig struct {
 // as-yet-unresolved configuration.
 type unresolvedSource struct {
 	Block       sourceBlock
-	DriverBlock sourceDriverBlock
+	DriverBlock driver.ConfigSchema
 	File        string
 }
 

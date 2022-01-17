@@ -3,9 +3,10 @@ package config
 import (
 	"fmt"
 	"regexp"
-	"sort"
 	"strings"
 
+	"github.com/gritcli/grit/internal/daemon/internal/registry"
+	"github.com/gritcli/grit/plugin/driver"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 )
@@ -25,27 +26,7 @@ type Source struct {
 	Clones Clones
 
 	// Driver contains driver-specific configuration for this source.
-	Driver SourceDriver
-}
-
-// AcceptVisitor calls the appropriate method on v.
-func (s Source) AcceptVisitor(v SourceVisitor) {
-	s.Driver.acceptVisitor(s, v)
-}
-
-// SourceDriver is an interface for driver-specific configuration options for a
-// repository source.
-type SourceDriver interface {
-	// acceptVisitor calls the appropriate method on v.
-	acceptVisitor(s Source, v SourceVisitor)
-
-	// String returns a human-readable description of the configuration.
-	String() string
-}
-
-// SourceVisitor dispatches Source values to driver-specific logic.
-type SourceVisitor interface {
-	VisitGitHubSource(s Source, cfg GitHub)
+	Driver driver.Config
 }
 
 // sourceBlock is the HCL schema for a "source" block.
@@ -57,21 +38,16 @@ type sourceBlock struct {
 	DriverBlock hcl.Body     `hcl:",remain"` // parsed into a sourceDriverBlock, as per sourceDriverBlockFactory
 }
 
-// sourceDriverBlock is an interface for the HCL schema for driver-specific
-// attributes & sub-blocks of a "source" block.
-type sourceDriverBlock interface {
-	// Normalize normalizes the block in-place.
-	Normalize(cfg unresolvedConfig, s unresolvedSource) error
-
-	// Assemble converts the block into its configuration representation.
-	Assemble() SourceDriver
-}
-
 // sourceNameRegexp is a regular expression used to validate source names.
 var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
 
 // mergeSourceBlock merges b into cfg.
-func mergeSourceBlock(cfg *unresolvedConfig, filename string, b sourceBlock) error {
+func mergeSourceBlock(
+	reg *registry.Registry,
+	cfg *unresolvedConfig,
+	filename string,
+	b sourceBlock,
+) error {
 	if b.Name == "" {
 		return fmt.Errorf(
 			"%s: this file contains a 'source' block with an empty name",
@@ -98,24 +74,18 @@ func mergeSourceBlock(cfg *unresolvedConfig, filename string, b sourceBlock) err
 		}
 	}
 
-	newBlock, ok := sourceDriverBlockFactory[b.Driver]
+	d, ok := reg.SourceDriverByAlias(b.Driver)
 	if !ok {
-		var drivers []string
-		for n := range sourceDriverBlockFactory {
-			drivers = append(drivers, n)
-		}
-		sort.Strings(drivers)
-
 		return fmt.Errorf(
 			"%s: the '%s' source uses '%s' which is not supported, the supported drivers are: '%s'",
 			filename,
 			b.Name,
 			b.Driver,
-			strings.Join(drivers, "', '"),
+			strings.Join(reg.SourceDriverAliases(), "', '"),
 		)
 	}
 
-	driverBlock := newBlock()
+	driverBlock := d.NewConfigSchema()
 	if diag := gohcl.DecodeBody(b.DriverBlock, nil, driverBlock); diag.HasErrors() {
 		return diag
 	}
@@ -135,23 +105,28 @@ func mergeSourceBlock(cfg *unresolvedConfig, filename string, b sourceBlock) err
 
 // mergeDefaultSources merges any default sources into cfg, if it does not
 // already contain a source with the same name.
-func mergeDefaultSources(cfg *unresolvedConfig) {
+func mergeDefaultSources(
+	reg *registry.Registry,
+	cfg *unresolvedConfig,
+) {
 	if cfg.Sources == nil {
 		cfg.Sources = map[string]unresolvedSource{}
 	}
 
-	for n, newBody := range defaultSourceFactoryByName {
-		if cfg.Sources == nil {
-			cfg.Sources = map[string]unresolvedSource{}
-		} else if _, ok := cfg.Sources[n]; ok {
-			continue
-		}
+	for _, alias := range reg.SourceDriverAliases() {
+		reg, _ := reg.SourceDriverByAlias(alias)
 
-		cfg.Sources[n] = unresolvedSource{
-			Block: sourceBlock{
-				Name: n,
-			},
-			DriverBlock: newBody(),
+		for n, new := range reg.DefaultSources {
+			if _, ok := cfg.Sources[n]; ok {
+				continue
+			}
+
+			cfg.Sources[n] = unresolvedSource{
+				Block: sourceBlock{
+					Name: n,
+				},
+				DriverBlock: new(),
+			}
 		}
 	}
 }
@@ -164,8 +139,16 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 		s.Block.Enabled = &enabled
 	}
 
-	if err := s.DriverBlock.Normalize(cfg, *s); err != nil {
-		return fmt.Errorf(
+	return normalizeSourceSpecificClonesBlock(cfg, s)
+}
+
+// assembleSourceBlock converts b into its configuration representation.
+func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, error) {
+	rc := &resolveContext{cfg, s}
+
+	driverConfig, err := s.DriverBlock.Resolve(rc)
+	if err != nil {
+		return Source{}, fmt.Errorf(
 			"%s: the '%s' repository source is invalid: %w",
 			s.File,
 			s.Block.Name,
@@ -173,56 +156,33 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 		)
 	}
 
-	return normalizeSourceSpecificClonesBlock(cfg, s)
-}
-
-// assembleSourceBlock converts b into its configuration representation.
-func assembleSourceBlock(b sourceBlock, db sourceDriverBlock) Source {
 	return Source{
-		Name:    b.Name,
-		Enabled: *b.Enabled,
-		Clones:  assembleClonesBlock(*b.ClonesBlock),
-		Driver:  db.Assemble(),
-	}
+		Name:    s.Block.Name,
+		Enabled: *s.Block.Enabled,
+		Clones:  assembleClonesBlock(*s.Block.ClonesBlock),
+		Driver:  driverConfig,
+	}, nil
 }
 
-var (
-	// sourceDriverBlockFactory is a map of a source driver name to a function
-	// that returns a new, empty sourceDriverBlock for that driver.
-	sourceDriverBlockFactory = map[string]func() sourceDriverBlock{}
-
-	// defaultSourceFactoryByName is a map of a source name to a function that
-	// returns a new default source. These defaults are merged into any
-	// configuration that does not already contain a repository source with the
-	// same name.
-	defaultSourceFactoryByName = map[string]func() sourceDriverBlock{}
-)
-
-// registerSourceDriver registers a source driver, allowing its configuration to
-// be parsed.
-//
-// name is the name of the driver, which is given as the second "label" (HCL
-// terminology) on the "source" blocks within the configuration file.
-func registerSourceDriver(
-	name string,
-	newBlock func() sourceDriverBlock,
-) {
-	if _, ok := sourceDriverBlockFactory[name]; ok {
-		panic("source driver name already registered")
-	}
-
-	sourceDriverBlockFactory[name] = newBlock
+// resolveContext is an implementation of driver.ResolveContext.
+type resolveContext struct {
+	cfg unresolvedConfig
+	s   unresolvedSource
 }
 
-// registerDefaultSource registers a default source that is merged into every
-// configuration unless overridden by the user.
-func registerDefaultSource(
-	name string,
-	newBody func() sourceDriverBlock,
-) {
-	if _, ok := defaultSourceFactoryByName[name]; ok {
-		panic("default source name already registered")
+func (rc *resolveContext) ResolveVCSConfig(in, out interface{}) error {
+	switch out := out.(type) {
+	case *Git:
+		b := in.(*gitBlock)
+		if err := normalizeSourceSpecificGitBlock(rc.cfg, rc.s, &b); err != nil {
+			return err
+		}
+
+		*out = assembleGitBlock(*b)
+
+	default:
+		return fmt.Errorf("unsupported VCS config type (%T)", out)
 	}
 
-	defaultSourceFactoryByName[name] = newBody
+	return nil
 }

@@ -7,7 +7,6 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
-	"github.com/gritcli/grit/internal/daemon/internal/config"
 	. "github.com/gritcli/grit/internal/daemon/internal/github"
 	"github.com/gritcli/grit/plugin/driver"
 	. "github.com/onsi/ginkgo"
@@ -16,7 +15,7 @@ import (
 
 // beforeEachAuthenticated returns the context and driver used for running
 // integration tests with an authenticated user.
-func beforeEachAuthenticated(configure ...func(*config.GitHub)) (
+func beforeEachAuthenticated(configure ...func(*Config)) (
 	_ context.Context,
 	_ context.CancelFunc,
 	_ driver.Driver,
@@ -25,13 +24,12 @@ func beforeEachAuthenticated(configure ...func(*config.GitHub)) (
 	token = os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
 
 	ctx, cancel, drv := initDriver(
-		func() config.GitHub {
-
+		func() Config {
 			if token == "" {
 				Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
 			}
 
-			return config.GitHub{
+			return Config{
 				Domain: "github.com",
 				Token:  token,
 			}
@@ -42,16 +40,16 @@ func beforeEachAuthenticated(configure ...func(*config.GitHub)) (
 	return ctx, cancel, drv, token
 }
 
-// beforeEachAuthenticated returns the context and driver used for running
+// beforeEachUnauthenticated returns the context and driver used for running
 // integration tests without an authenticated user.
-func beforeEachUnauthenticated(configure ...func(*config.GitHub)) (
+func beforeEachUnauthenticated(configure ...func(*Config)) (
 	context.Context,
 	context.CancelFunc,
 	driver.Driver,
 ) {
 	return initDriver(
-		func() config.GitHub {
-			return config.GitHub{
+		func() Config {
+			return Config{
 				Domain: "github.com",
 			}
 		},
@@ -66,8 +64,8 @@ func beforeEachUnauthenticated(configure ...func(*config.GitHub)) (
 //
 // It is intended for use in the beforeEachXXX() helper functions.
 func initDriver(
-	cfg func() config.GitHub,
-	configure []func(*config.GitHub),
+	cfg func() Config,
+	configure []func(*Config),
 ) (
 	context.Context,
 	context.CancelFunc,
@@ -82,7 +80,7 @@ func initDriver(
 		fn(&c)
 	}
 
-	d := NewDriver(c)
+	d := c.NewDriver()
 
 	ctx, cancel := context.WithCancel(context.Background())
 

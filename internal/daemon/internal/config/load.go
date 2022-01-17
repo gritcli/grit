@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gritcli/grit/internal/daemon/internal/registry"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	homedir "github.com/mitchellh/go-homedir"
 )
@@ -12,13 +13,15 @@ import (
 //
 // If the directory doesn't exist or does not contain any configuration files,
 // then DefaultConfig is returned.
-func Load(dir string) (Config, error) {
+func Load(dir string, reg *registry.Registry) (Config, error) {
 	dir, err := homedir.Expand(dir)
 	if err != nil {
 		return Config{}, err
 	}
 
-	var r resolver
+	r := resolver{
+		reg: reg,
+	}
 
 	if err := loadDir(&r, dir); err != nil {
 		return Config{}, err
@@ -28,7 +31,7 @@ func Load(dir string) (Config, error) {
 		return Config{}, err
 	}
 
-	return r.Assemble(), nil
+	return r.Assemble()
 }
 
 // loadDir loads the configuration from all .hcl files in the given
