@@ -1,9 +1,6 @@
 package configtest
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/gritcli/grit/config"
@@ -11,6 +8,7 @@ import (
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/onsi/ginkgo/extensions/table"
 	"github.com/onsi/gomega"
+	"github.com/onsi/gomega/format"
 )
 
 // SourceDriverTest is a test that tests source driver configuration.
@@ -19,6 +17,7 @@ type SourceDriverTest = table.TableEntry
 // TestSourceDriver runs a series of tests
 func TestSourceDriver(
 	r sourcedriver.Registration,
+	zero sourcedriver.Config,
 	tests ...SourceDriverTest,
 ) {
 	table.DescribeTable(
@@ -30,7 +29,7 @@ func TestSourceDriver(
 			reg := &registry.Registry{}
 			reg.RegisterSourceDriver(r.Name, r)
 
-			dir, cleanup := makeConfigDir(content)
+			dir, cleanup := writeConfigs(content)
 			defer cleanup()
 
 			cfg, err := config.Load(dir, reg)
@@ -69,28 +68,14 @@ func SourceFailure(
 		description,
 		content,
 		func(dir string, cfg config.Config, err error) {
+			orig := format.TruncatedDiff
+			format.TruncatedDiff = false
+			defer func() {
+				format.TruncatedDiff = orig
+			}()
+
 			message := strings.ReplaceAll(err.Error(), dir, "<dir>")
 			gomega.Expect(message).To(gomega.Equal(expect))
 		},
 	)
-}
-
-// makeConfigDir makes a temporary config directory containing config files
-// containing the given configuration content.
-func makeConfigDir(configs ...string) (dir string, cleanup func()) {
-	dir, err := os.MkdirTemp("", "")
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-
-	for i, cfg := range configs {
-		err := os.WriteFile(
-			filepath.Join(dir, fmt.Sprintf("config-%d.hcl", i)),
-			[]byte(cfg),
-			0600,
-		)
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	}
-
-	return dir, func() {
-		os.RemoveAll(dir)
-	}
 }
