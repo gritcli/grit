@@ -32,7 +32,7 @@ type Source struct {
 // sourceBlock is the HCL schema for a "source" block.
 type sourceBlock struct {
 	Name        string       `hcl:",label"`
-	Driver      string       `hcl:",label"`
+	DriverAlias string       `hcl:",label"`
 	Enabled     *bool        `hcl:"enabled"`
 	ClonesBlock *clonesBlock `hcl:"clones,block"`
 	DriverBlock hcl.Body     `hcl:",remain"` // parsed into a sourceDriverBlock, as per sourceDriverBlockFactory
@@ -74,13 +74,13 @@ func mergeSourceBlock(
 		}
 	}
 
-	d, ok := reg.SourceDriverByAlias(b.Driver)
+	d, ok := reg.SourceDriverByAlias(b.DriverAlias)
 	if !ok {
 		return fmt.Errorf(
 			"%s: the '%s' source uses '%s' which is not supported, the supported drivers are: '%s'",
 			filename,
 			b.Name,
-			b.Driver,
+			b.DriverAlias,
 			strings.Join(reg.SourceDriverAliases(), "', '"),
 		)
 	}
