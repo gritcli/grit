@@ -4,10 +4,10 @@ import "github.com/hashicorp/hcl/v2"
 
 // fileSchema is HCL schema for a single configuration file.
 type fileSchema struct {
-	DaemonBlock         *daemonSchema  `hcl:"daemon,block"`
-	ClonesDefaultsBlock *clonesSchema  `hcl:"clones,block"`
-	VCSDefaultsBlocks   []vcsSchema    `hcl:"vcs,block"`
-	SourceBlocks        []sourceSchema `hcl:"source,block"`
+	Daemon         *daemonSchema  `hcl:"daemon,block"`
+	ClonesDefaults *clonesSchema  `hcl:"clones,block"`
+	VCSDefaults    []vcsSchema    `hcl:"vcs,block"`
+	Sources        []sourceSchema `hcl:"source,block"`
 }
 
 // daemonSchema is the HCL schema for a "daemon" block.

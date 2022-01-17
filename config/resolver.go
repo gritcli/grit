@@ -33,19 +33,19 @@ type resolver struct {
 
 // Merge merges the configuration from c.
 func (r *resolver) Merge(filename string, f fileSchema) error {
-	if f.DaemonBlock != nil {
-		if err := mergeDaemonBlock(&r.cfg, filename, *f.DaemonBlock); err != nil {
+	if f.Daemon != nil {
+		if err := mergeDaemonBlock(&r.cfg, filename, *f.Daemon); err != nil {
 			return err
 		}
 	}
 
-	if f.ClonesDefaultsBlock != nil {
-		if err := mergeClonesDefaultsBlock(&r.cfg, filename, *f.ClonesDefaultsBlock); err != nil {
+	if f.ClonesDefaults != nil {
+		if err := mergeClonesDefaultsBlock(&r.cfg, filename, *f.ClonesDefaults); err != nil {
 			return err
 		}
 	}
 
-	for _, b := range f.VCSDefaultsBlocks {
+	for _, b := range f.VCSDefaults {
 		if err := mergeVCSDefaultsBlock(
 			r.reg,
 			&r.cfg,
@@ -56,7 +56,7 @@ func (r *resolver) Merge(filename string, f fileSchema) error {
 		}
 	}
 
-	for _, b := range f.SourceBlocks {
+	for _, b := range f.Sources {
 		if err := mergeSourceBlock(
 			r.reg,
 			&r.cfg,
