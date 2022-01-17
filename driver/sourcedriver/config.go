@@ -11,14 +11,14 @@ package sourcedriver
 // When Grit parses a "source" block within a configuration, any unrecognized
 // attributes or blocks within that "source" block are parsed into this schema.
 type ConfigSchema interface {
-	// Resolve validates and normalizes the configuration to its runtime
-	// representation.
-	Resolve(ConfigResolutionContext) (Config, error)
+	// Normalize validates the configuration as parsed by this schema and
+	// normalizes it to a Config value.
+	Normalize(ConfigNormalizationContext) (Config, error)
 }
 
-// ConfigResolutionContext provides operations used to resolve a ConfigSchema to
-// a Config.
-type ConfigResolutionContext interface {
+// ConfigNormalizationContext provides operations used to normalize a
+// ConfigSchema.
+type ConfigNormalizationContext interface {
 	// ResolveVCSConfig resolves a driver-specific configuration block for one
 	// of the supported version control systems.
 	ResolveVCSConfig(in, out interface{}) error

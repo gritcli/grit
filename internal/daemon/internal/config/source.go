@@ -146,7 +146,7 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, error) {
 	rc := &resolveContext{cfg, s}
 
-	driverConfig, err := s.DriverBlock.Resolve(rc)
+	driverConfig, err := s.DriverBlock.Normalize(rc)
 	if err != nil {
 		return Source{}, fmt.Errorf(
 			"%s: the '%s' repository source is invalid: %w",

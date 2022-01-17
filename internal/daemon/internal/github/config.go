@@ -42,7 +42,9 @@ type configSchema struct {
 	Git    *config.GitBlockExported `hcl:"git,block"`
 }
 
-func (s *configSchema) Resolve(ctx sourcedriver.ConfigResolutionContext) (sourcedriver.Config, error) {
+func (s *configSchema) Normalize(
+	ctx sourcedriver.ConfigNormalizationContext,
+) (sourcedriver.Config, error) {
 	if s.Domain == "" {
 		s.Domain = "github.com"
 	}
