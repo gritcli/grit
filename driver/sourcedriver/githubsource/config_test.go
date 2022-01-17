@@ -32,7 +32,7 @@ var _ = Describe("type Config", func() {
 
 var _ = Describe("configuration integration", func() {
 	configtest.TestSourceDriver(
-		SourceDriverRegistration(),
+		Registration,
 		configtest.SourceSuccess(
 			"authentication token",
 			`source "github" "github" {

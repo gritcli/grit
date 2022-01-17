@@ -13,7 +13,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
-// Cloner is an implementation of driver.Cloner that clones a Git repository.
+// Cloner is an implementation of sourcedriver.Cloner that clones a Git
+// repository.
 type Cloner struct {
 	// SSHEndpoint is the URL used to clone the repository using the SSH
 	// protocol, if available.

@@ -7,7 +7,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 )
 
-// ClonerStub is a test implementation of the driver.Cloner interface.
+// ClonerStub is a test implementation of the sourcedriver.Cloner interface.
 type ClonerStub struct {
 	CloneFunc func(context.Context, string, logging.Logger) error
 }
