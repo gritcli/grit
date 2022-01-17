@@ -1,8 +1,8 @@
 package githubsource
 
 import (
-	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/driver/vcsdriver/gitvcs"
 )
 
 // Config contains configuration specific to the GitHub driver.
@@ -15,7 +15,7 @@ type Config struct {
 	Token string
 
 	// Git is the configuration that controls how Grit uses Git for this source.
-	Git config.Git
+	Git gitvcs.Config
 }
 
 // NewDriver constructs a new driver that uses this configuration.
@@ -38,9 +38,8 @@ func (c Config) DescribeSourceConfig() string {
 // configSchema is the HCL schema for a "source" block that uses the "github"
 // source driver.
 type configSchema struct {
-	Domain string                   `hcl:"domain,optional"`
-	Token  string                   `hcl:"token,optional"`
-	Git    *config.GitBlockExported `hcl:"git,block"`
+	Domain string `hcl:"domain,optional"`
+	Token  string `hcl:"token,optional"`
 }
 
 func (s *configSchema) Normalize(
@@ -55,7 +54,7 @@ func (s *configSchema) Normalize(
 		Token:  s.Token,
 	}
 
-	if err := ctx.ResolveVCSConfig(s.Git, &cfg.Git); err != nil {
+	if err := ctx.ResolveVCSConfig(&cfg.Git); err != nil {
 		return nil, err
 	}
 

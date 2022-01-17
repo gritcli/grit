@@ -13,6 +13,9 @@ package sourcedriver
 type ConfigSchema interface {
 	// Normalize validates the configuration as parsed by this schema and
 	// returns a normalized Config.
+	//
+	// The implementation must call ctx.ResolveVCSConfig() for each VCS driver
+	// that is supported.
 	Normalize(ctx ConfigNormalizeContext) (Config, error)
 }
 
@@ -34,7 +37,9 @@ type ConfigNormalizeContext interface {
 
 	// ResolveVCSConfig resolves a driver-specific configuration block for one
 	// of the supported version control systems.
-	ResolveVCSConfig(in, out interface{}) error
+	//
+	// cfg must be a pointer to a concrete implementation of vcsconfig.Config.
+	ResolveVCSConfig(cfg interface{}) error
 }
 
 // Config is an interface for driver-specific configuration options for a
