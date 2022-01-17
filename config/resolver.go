@@ -115,7 +115,6 @@ func (r *resolver) Normalize() error {
 // Assemble returns the file configuration assembled from the various source
 // files.
 func (r *resolver) Assemble() (Config, error) {
-
 	for _, s := range r.cfg.Sources {
 		src, err := assembleSourceBlock(r.cfg, s)
 		if err != nil {
