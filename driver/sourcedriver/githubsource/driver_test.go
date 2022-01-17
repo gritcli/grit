@@ -1,4 +1,4 @@
-package github_test
+package githubsource_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/gritcli/grit/internal/daemon/internal/github"
+	. "github.com/gritcli/grit/driver/sourcedriver/githubsource"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

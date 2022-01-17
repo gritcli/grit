@@ -1,9 +1,9 @@
-package github_test
+package githubsource_test
 
 import (
+	"github.com/gritcli/grit/config"
+	. "github.com/gritcli/grit/driver/sourcedriver/githubsource"
 	"github.com/gritcli/grit/internal/daemon/configtest"
-	"github.com/gritcli/grit/internal/daemon/internal/config"
-	. "github.com/gritcli/grit/internal/daemon/internal/github"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"

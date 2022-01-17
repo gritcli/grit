@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gritcli/grit/internal/daemon/internal/registry"
+	"github.com/gritcli/grit/registry"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	homedir "github.com/mitchellh/go-homedir"
 )

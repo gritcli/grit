@@ -3,16 +3,16 @@ package config_test
 import (
 	"path/filepath"
 
-	. "github.com/gritcli/grit/internal/daemon/internal/config"
-	"github.com/gritcli/grit/internal/daemon/internal/github"
-	"github.com/gritcli/grit/internal/daemon/internal/registry"
+	. "github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/driver/sourcedriver/githubsource"
+	"github.com/gritcli/grit/registry"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 )
 
 // TODO: don't test using built-ins
-type GitHub = github.Config
+type GitHub = githubsource.Config
 
 var _ = Describe("func Load() (git defaults block)", func() {
 	DescribeTable(

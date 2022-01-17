@@ -1,8 +1,8 @@
-package github
+package githubsource
 
 import (
+	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/internal/daemon/internal/config"
 )
 
 // Config contains configuration specific to the GitHub driver.

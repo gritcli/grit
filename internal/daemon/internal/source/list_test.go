@@ -1,8 +1,8 @@
 package source_test
 
 import (
+	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/internal/daemon/internal/config"
 	. "github.com/gritcli/grit/internal/daemon/internal/source"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/fixtures"
 	. "github.com/onsi/ginkgo"

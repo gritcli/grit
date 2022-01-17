@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gritcli/grit/internal/daemon/internal/config"
+	"github.com/gritcli/grit/config"
 )
 
 // List is a collection of sources.

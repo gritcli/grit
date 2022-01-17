@@ -1,4 +1,4 @@
-package github_test
+package githubsource_test
 
 import (
 	"reflect"

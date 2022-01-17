@@ -2,7 +2,7 @@ package deps
 
 import (
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/daemon/internal/config"
+	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
 )
 

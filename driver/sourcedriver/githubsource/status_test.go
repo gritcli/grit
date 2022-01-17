@@ -1,10 +1,10 @@
-package github_test
+package githubsource_test
 
 import (
 	"context"
 
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/gritcli/grit/internal/daemon/internal/github"
+	. "github.com/gritcli/grit/driver/sourcedriver/githubsource"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
