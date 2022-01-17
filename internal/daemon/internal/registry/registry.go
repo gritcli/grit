@@ -3,7 +3,7 @@ package registry
 import (
 	"sync"
 
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 )
 
 // BuiltIns is the registry of official drivers that ship with Grit.
@@ -14,5 +14,5 @@ type Registry struct {
 	Parent *Registry
 
 	m             sync.RWMutex
-	sourceByAlias map[string]driver.Registration
+	sourceByAlias map[string]sourcedriver.Registration
 }

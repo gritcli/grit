@@ -2,7 +2,7 @@ package github
 
 import (
 	"github.com/gritcli/grit/internal/daemon/internal/config"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 )
 
 // Config contains configuration specific to the GitHub driver.
@@ -19,7 +19,7 @@ type Config struct {
 }
 
 // NewDriver constructs a new driver that uses this configuration.
-func (c Config) NewDriver() driver.Driver {
+func (c Config) NewDriver() sourcedriver.Driver {
 	return &impl{config: c}
 }
 
@@ -42,7 +42,7 @@ type configSchema struct {
 	Git    *config.GitBlockExported `hcl:"git,block"`
 }
 
-func (s *configSchema) Resolve(ctx driver.ResolveContext) (driver.Config, error) {
+func (s *configSchema) Resolve(ctx sourcedriver.ConfigResolutionContext) (sourcedriver.Config, error) {
 	if s.Domain == "" {
 		s.Domain = "github.com"
 	}

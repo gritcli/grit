@@ -8,7 +8,7 @@ import (
 
 	"github.com/gritcli/grit/internal/daemon/internal/config"
 	"github.com/gritcli/grit/internal/daemon/internal/registry"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	"github.com/onsi/ginkgo/extensions/table"
 	"github.com/onsi/gomega"
 )
@@ -18,7 +18,7 @@ type SourceDriverTest = table.TableEntry
 
 // TestSourceDriver runs a series of tests
 func TestSourceDriver(
-	r driver.Registration,
+	r sourcedriver.Registration,
 	tests ...SourceDriverTest,
 ) {
 	table.DescribeTable(
@@ -45,7 +45,7 @@ func TestSourceDriver(
 func Success(
 	description string,
 	content string,
-	expect driver.Config,
+	expect sourcedriver.Config,
 ) SourceDriverTest {
 	return table.Entry(
 		description,

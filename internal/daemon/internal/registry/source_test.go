@@ -2,7 +2,7 @@ package registry_test
 
 import (
 	. "github.com/gritcli/grit/internal/daemon/internal/registry"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -16,7 +16,7 @@ var _ = Describe("type Registry", func() {
 
 	Describe("func RegisterSourceDriver()", func() {
 		It("registers the source with the given alias", func() {
-			expect := driver.Registration{
+			expect := sourcedriver.Registration{
 				Name:        "<name>",
 				Description: "<desc>",
 			}
@@ -29,7 +29,7 @@ var _ = Describe("type Registry", func() {
 		})
 
 		It("panics if the alias is already in use", func() {
-			d := driver.Registration{
+			d := sourcedriver.Registration{
 				Name:        "<name>",
 				Description: "<desc>",
 			}
@@ -51,7 +51,7 @@ var _ = Describe("type Registry", func() {
 
 	Describe("func SourceDriverAliases()", func() {
 		It("returns a sorted slice of aliases", func() {
-			d := driver.Registration{
+			d := sourcedriver.Registration{
 				Name:        "<name>",
 				Description: "<desc>",
 			}
@@ -71,14 +71,14 @@ var _ = Describe("type Registry", func() {
 	When("the registry has a parent", func() {
 		var (
 			parent           *Registry
-			sourceFromParent driver.Registration
+			sourceFromParent sourcedriver.Registration
 		)
 
 		BeforeEach(func() {
 			parent = &Registry{}
 			reg.Parent = parent
 
-			sourceFromParent = driver.Registration{
+			sourceFromParent = sourcedriver.Registration{
 				Name:        "<name from parent>",
 				Description: "<desc from parent>",
 			}
@@ -88,7 +88,7 @@ var _ = Describe("type Registry", func() {
 
 		Describe("func RegisterSourceDriver()", func() {
 			It("shadows a source with the same alias from the parent registry", func() {
-				expect := driver.Registration{
+				expect := sourcedriver.Registration{
 					Name:        "<name>",
 					Description: "<desc>",
 				}
@@ -111,7 +111,7 @@ var _ = Describe("type Registry", func() {
 
 		Describe("func SourceDriverAliases()", func() {
 			It("returns a sorted slice of aliases, including those from the parent", func() {
-				d := driver.Registration{
+				d := sourcedriver.Registration{
 					Name:        "<name>",
 					Description: "<desc>",
 				}

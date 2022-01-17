@@ -10,7 +10,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	. "github.com/gritcli/grit/internal/daemon/internal/source"
 	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/fixtures"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -53,7 +53,7 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (driver.Cloner, string, error) {
+			) (sourcedriver.Cloner, string, error) {
 				return &ClonerStub{
 					CloneFunc: func(
 						context.Context,
@@ -84,7 +84,7 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (driver.Cloner, string, error) {
+			) (sourcedriver.Cloner, string, error) {
 				return &ClonerStub{}, "existing-dir", nil
 			}
 
@@ -107,7 +107,7 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (driver.Cloner, string, error) {
+			) (sourcedriver.Cloner, string, error) {
 				return &ClonerStub{}, "\x00", nil
 			}
 
@@ -140,7 +140,7 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (driver.Cloner, string, error) {
+			) (sourcedriver.Cloner, string, error) {
 				return nil, "", errors.New("<error>")
 			}
 
@@ -158,7 +158,7 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (driver.Cloner, string, error) {
+			) (sourcedriver.Cloner, string, error) {
 				return &ClonerStub{
 					CloneFunc: func(
 						context.Context,

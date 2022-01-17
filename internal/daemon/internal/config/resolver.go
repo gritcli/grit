@@ -7,7 +7,7 @@ import (
 	"sort"
 
 	"github.com/gritcli/grit/internal/daemon/internal/registry"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -156,7 +156,7 @@ type unresolvedConfig struct {
 // as-yet-unresolved configuration.
 type unresolvedSource struct {
 	Block       sourceBlock
-	DriverBlock driver.ConfigSchema
+	DriverBlock sourcedriver.ConfigSchema
 	File        string
 }
 

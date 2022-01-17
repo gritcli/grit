@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/internal/daemon/internal/registry"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 )
 
 // impl is an implementation of driver.Driver that provides repositories from
@@ -24,15 +24,15 @@ func isEnterpriseServer(domain string) bool {
 
 // SourceDriverRegistration returns the registration information for the GitHub
 // source driver.
-func SourceDriverRegistration() driver.Registration {
-	return driver.Registration{
+func SourceDriverRegistration() sourcedriver.Registration {
+	return sourcedriver.Registration{
 		Name:        "github",
 		Description: "Use repositories from GitHub.com or GitHub Enterprise Server.",
-		NewConfigSchema: func() driver.ConfigSchema {
+		NewConfigSchema: func() sourcedriver.ConfigSchema {
 			return &configSchema{}
 		},
-		DefaultSources: map[string]func() driver.ConfigSchema{
-			"github": func() driver.ConfigSchema {
+		DefaultSources: map[string]func() sourcedriver.ConfigSchema{
+			"github": func() sourcedriver.ConfigSchema {
 				return &configSchema{
 					Domain: "github.com",
 				}

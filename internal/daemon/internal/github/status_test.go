@@ -4,7 +4,7 @@ import (
 	"context"
 
 	. "github.com/gritcli/grit/internal/daemon/internal/github"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -13,7 +13,7 @@ var _ = Describe("func impl.Status()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
-		drv    driver.Driver
+		drv    sourcedriver.Driver
 	)
 
 	When("unauthenticated", func() {

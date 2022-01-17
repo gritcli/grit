@@ -8,7 +8,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
 	. "github.com/gritcli/grit/internal/daemon/internal/github"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -18,7 +18,7 @@ import (
 func beforeEachAuthenticated(configure ...func(*Config)) (
 	_ context.Context,
 	_ context.CancelFunc,
-	_ driver.Driver,
+	_ sourcedriver.Driver,
 	token string,
 ) {
 	token = os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
@@ -45,7 +45,7 @@ func beforeEachAuthenticated(configure ...func(*Config)) (
 func beforeEachUnauthenticated(configure ...func(*Config)) (
 	context.Context,
 	context.CancelFunc,
-	driver.Driver,
+	sourcedriver.Driver,
 ) {
 	return initDriver(
 		func() Config {
@@ -69,7 +69,7 @@ func initDriver(
 ) (
 	context.Context,
 	context.CancelFunc,
-	driver.Driver,
+	sourcedriver.Driver,
 ) {
 	if os.Getenv("GRIT_INTEGRATION_TEST_USE_GITHUB_API") == "" {
 		Skip("set GRIT_INTEGRATION_TEST_USE_GITHUB_API to enable tests that use the GitHub API")

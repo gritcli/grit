@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 )
 
 // parseRepoID parses a repo ID from its string form (as used by the source
@@ -58,12 +58,12 @@ func parseRepoName(name string) (ownerName, repoName string, err error) {
 }
 
 // toRemoteRepos converts multiple github.Repository to a slice of
-// driver.RemoteRepo.
-func toRemoteRepos(repos ...*github.Repository) []driver.RemoteRepo {
-	remotes := make([]driver.RemoteRepo, len(repos))
+// sourcedriver.RemoteRepo.
+func toRemoteRepos(repos ...*github.Repository) []sourcedriver.RemoteRepo {
+	remotes := make([]sourcedriver.RemoteRepo, len(repos))
 
 	for i, r := range repos {
-		remotes[i] = driver.RemoteRepo{
+		remotes[i] = sourcedriver.RemoteRepo{
 			ID:          strconv.FormatInt(r.GetID(), 10),
 			Name:        r.GetFullName(),
 			Description: r.GetDescription(),

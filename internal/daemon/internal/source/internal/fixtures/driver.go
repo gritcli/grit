@@ -5,18 +5,18 @@ import (
 	"errors"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 )
 
-// DriverConfigStub is a test implementation of the driver.Config interface.
+// DriverConfigStub is a test implementation of the sourcedriver.Config interface.
 type DriverConfigStub struct {
-	NewDriverFunc func() driver.Driver
+	NewDriverFunc func() sourcedriver.Driver
 	StringFunc    func() string
 }
 
 // NewDriver returns s.NewDriverFunc() if s.NewDriverFunc is non-nil; otherwise
 // it returns a new DriverStub.
-func (s *DriverConfigStub) NewDriver() driver.Driver {
+func (s *DriverConfigStub) NewDriver() sourcedriver.Driver {
 	if s.NewDriverFunc != nil {
 		return s.NewDriverFunc()
 	}
@@ -34,13 +34,13 @@ func (s *DriverConfigStub) String() string {
 	return "<driver config stub>"
 }
 
-// DriverStub is a test implementation of the driver.Driver interface.
+// DriverStub is a test implementation of the sourcedriver.Driver interface.
 type DriverStub struct {
 	InitFunc      func(context.Context, logging.Logger) error
 	RunFunc       func(context.Context, logging.Logger) error
 	StatusFunc    func(context.Context) (string, error)
-	ResolveFunc   func(context.Context, string, logging.Logger) ([]driver.RemoteRepo, error)
-	NewClonerFunc func(context.Context, string, logging.Logger) (driver.Cloner, string, error)
+	ResolveFunc   func(context.Context, string, logging.Logger) ([]sourcedriver.RemoteRepo, error)
+	NewClonerFunc func(context.Context, string, logging.Logger) (sourcedriver.Cloner, string, error)
 }
 
 // Init calls s.InitFunc(ctx, logger) if s.InitFunc is non-nil; otherwise it
@@ -79,7 +79,7 @@ func (s *DriverStub) Resolve(
 	ctx context.Context,
 	query string,
 	logger logging.Logger,
-) ([]driver.RemoteRepo, error) {
+) ([]sourcedriver.RemoteRepo, error) {
 	if s.ResolveFunc != nil {
 		return s.ResolveFunc(ctx, query, logger)
 	}
@@ -93,7 +93,7 @@ func (s *DriverStub) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,
-) (c driver.Cloner, dir string, err error) {
+) (c sourcedriver.Cloner, dir string, err error) {
 	if s.NewClonerFunc != nil {
 		return s.NewClonerFunc(ctx, id, logger)
 	}

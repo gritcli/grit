@@ -4,34 +4,34 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var (
-	gritRepo = driver.RemoteRepo{
+	gritRepo = sourcedriver.RemoteRepo{
 		ID:          "397822937",
 		Name:        "gritcli/grit",
 		Description: "Manage your local Git clones.",
 		WebURL:      "https://github.com/gritcli/grit",
 	}
 
-	gritPublicTestRepo = driver.RemoteRepo{
+	gritPublicTestRepo = sourcedriver.RemoteRepo{
 		ID:          "446260684",
 		Name:        "gritcli/test-public",
 		Description: "Used to test that Grit works with public GitHub repositories.",
 		WebURL:      "https://github.com/gritcli/test-public",
 	}
 
-	gritPrivateTestRepo = driver.RemoteRepo{
+	gritPrivateTestRepo = sourcedriver.RemoteRepo{
 		ID:          "445039240",
 		Name:        "gritcli/test-private",
 		Description: "Used to test that Grit works with private GitHub repositories.",
 		WebURL:      "https://github.com/gritcli/test-private",
 	}
 
-	gritV1Repo = driver.RemoteRepo{
+	gritV1Repo = sourcedriver.RemoteRepo{
 		ID:          "85247932",
 		Name:        "jmalloc/grit",
 		Description: "Keep track of your local Git clones.",
@@ -42,7 +42,7 @@ var (
 	// to. The CI process currently uses a GitHub personal access token
 	// belonging to @jmalloc, who presumably would never be granted access to
 	// anything in the "google" organization ;)
-	thirdPartyRepo = driver.RemoteRepo{
+	thirdPartyRepo = sourcedriver.RemoteRepo{
 		ID:          "10270722",
 		Name:        "google/go-github",
 		Description: "Go library for accessing the GitHub API",
@@ -54,7 +54,7 @@ var _ = Describe("func impl.Resolve()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
-		drv    driver.Driver
+		drv    sourcedriver.Driver
 		logger logging.DiscardLogger
 	)
 

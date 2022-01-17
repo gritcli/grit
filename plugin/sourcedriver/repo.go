@@ -1,4 +1,4 @@
-package driver
+package sourcedriver
 
 // RemoteRepo is a reference to a remote repository provided by a source.
 type RemoteRepo struct {

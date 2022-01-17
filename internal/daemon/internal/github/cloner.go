@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	"github.com/gritcli/grit/plugin/vcs/gitvcs"
 )
 
@@ -13,7 +13,7 @@ func (d *impl) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,
-) (driver.Cloner, string, error) {
+) (sourcedriver.Cloner, string, error) {
 	intID, err := parseRepoID(id)
 	if err != nil {
 		return nil, "", err

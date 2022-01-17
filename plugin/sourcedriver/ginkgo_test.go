@@ -1,4 +1,4 @@
-package driver_test
+package sourcedriver_test
 
 import (
 	"reflect"

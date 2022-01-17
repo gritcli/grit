@@ -6,7 +6,7 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 )
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
@@ -15,7 +15,7 @@ func (d *impl) Resolve(
 	ctx context.Context,
 	query string,
 	logger logging.Logger,
-) ([]driver.RemoteRepo, error) {
+) ([]sourcedriver.RemoteRepo, error) {
 	ownerName, repoName, err := parseRepoName(query)
 	if err != nil {
 		return nil, nil

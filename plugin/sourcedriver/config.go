@@ -1,4 +1,4 @@
-package driver
+package sourcedriver
 
 // ConfigSchema is an interface for parsing driver-specific configuration within
 // a "source" block in a Grit configuration file.
@@ -13,12 +13,12 @@ package driver
 type ConfigSchema interface {
 	// Resolve validates and normalizes the configuration to its runtime
 	// representation.
-	Resolve(ResolveContext) (Config, error)
+	Resolve(ConfigResolutionContext) (Config, error)
 }
 
-// ResolveContext provides information relevant when resolving a
-// DriverConfigSchema value.
-type ResolveContext interface {
+// ConfigResolutionContext provides operations used to resolve a ConfigSchema to
+// a Config.
+type ConfigResolutionContext interface {
 	// ResolveVCSConfig resolves a driver-specific configuration block for one
 	// of the supported version control systems.
 	ResolveVCSConfig(in, out interface{}) error

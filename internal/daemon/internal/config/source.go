@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gritcli/grit/internal/daemon/internal/registry"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 )
@@ -26,7 +26,7 @@ type Source struct {
 	Clones Clones
 
 	// Driver contains driver-specific configuration for this source.
-	Driver driver.Config
+	Driver sourcedriver.Config
 }
 
 // sourceBlock is the HCL schema for a "source" block.

@@ -3,11 +3,11 @@ package registry
 import (
 	"sort"
 
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 )
 
 // RegisterSourceDriver adds a source driver to the registry.
-func (r *Registry) RegisterSourceDriver(alias string, d driver.Registration) {
+func (r *Registry) RegisterSourceDriver(alias string, d sourcedriver.Registration) {
 	r.m.Lock()
 	defer r.m.Unlock()
 
@@ -16,14 +16,14 @@ func (r *Registry) RegisterSourceDriver(alias string, d driver.Registration) {
 	}
 
 	if r.sourceByAlias == nil {
-		r.sourceByAlias = map[string]driver.Registration{}
+		r.sourceByAlias = map[string]sourcedriver.Registration{}
 	}
 
 	r.sourceByAlias[alias] = d
 }
 
 // SourceDriverByAlias returns the source driver with the given alias.
-func (r *Registry) SourceDriverByAlias(alias string) (driver.Registration, bool) {
+func (r *Registry) SourceDriverByAlias(alias string) (sourcedriver.Registration, bool) {
 	r.m.RLock()
 	d, ok := r.sourceByAlias[alias]
 	r.m.RUnlock()
@@ -36,7 +36,7 @@ func (r *Registry) SourceDriverByAlias(alias string) (driver.Registration, bool)
 		return r.Parent.SourceDriverByAlias(alias)
 	}
 
-	return driver.Registration{}, false
+	return sourcedriver.Registration{}, false
 }
 
 // SourceDriverAliases returns the aliases of all registered drivers.

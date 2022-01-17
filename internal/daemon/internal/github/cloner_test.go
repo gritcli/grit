@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/plugin/driver"
+	"github.com/gritcli/grit/plugin/sourcedriver"
 	"github.com/gritcli/grit/plugin/vcs/gitvcs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,7 +14,7 @@ var _ = Describe("func impl.NewCloner()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
-		drv    driver.Driver
+		drv    sourcedriver.Driver
 	)
 
 	When("unauthenticated", func() {

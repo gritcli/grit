@@ -1,4 +1,4 @@
-package driver
+package sourcedriver
 
 import (
 	"context"
@@ -6,8 +6,10 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 )
 
-// A Driver performs implementation-specific repository operations for a
-// repository source.
+// A Driver is an interface for an implementation of a "source driver".
+//
+// A source driver provides the provider-specific implementation that a source
+// uses to communicate with the service that provides the repositories.
 type Driver interface {
 	// Init initializes the driver.
 	//
