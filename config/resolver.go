@@ -99,7 +99,6 @@ func (r *resolver) Assemble() (Config, error) {
 	cfg := Config{
 		Daemon:         assembleDaemonBlock(r.cfg.Daemon.Block),
 		ClonesDefaults: assembleClonesBlock(r.cfg.ClonesDefaults.Block),
-		GitDefaults:    assembleGitBlock(r.cfg.GitDefaults.Block),
 	}
 
 	for _, s := range r.cfg.Sources {

@@ -14,11 +14,6 @@ type Config struct {
 	// per-source basis.
 	ClonesDefaults Clones
 
-	// GitDefaults is the configuration that controls how Grit uses Git across
-	// all sources. Repository sources that use Git may allow these settings to
-	// be overridden.
-	GitDefaults Git
-
 	// Sources is the set of repository sources from which repositories can be
 	// cloned.
 	Sources []Source

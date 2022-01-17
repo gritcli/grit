@@ -1,14 +1,10 @@
 package config_test
 
 import (
-	"path/filepath"
-
 	. "github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver/githubsource"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
-	. "github.com/onsi/gomega"
 )
 
 // TODO: don't test using built-ins
@@ -28,9 +24,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 				}`,
 			},
 			withSource(
-				withGitDefaults(defaultConfig, Git{
-					SSHKeyFile: "/path/to/key",
-				}),
+				defaultConfig,
 				Source{
 					Name:    "github",
 					Enabled: true,
@@ -57,10 +51,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 				}`,
 			},
 			withSource(
-				withGitDefaults(defaultConfig, Git{
-					SSHKeyFile:       "/path/to/key",
-					SSHKeyPassphrase: "<passphrase>",
-				}),
+				defaultConfig,
 				Source{
 					Name:    "github",
 					Enabled: true,
@@ -94,9 +85,7 @@ var _ = Describe("func Load() (git defaults block)", func() {
 				}`,
 			},
 			withSource(
-				withGitDefaults(defaultConfig, Git{
-					PreferHTTP: true,
-				}),
+				defaultConfig,
 				Source{
 					Name:    "github",
 					Enabled: true,
@@ -137,24 +126,4 @@ var _ = Describe("func Load() (git defaults block)", func() {
 			`<dir>/config-0.hcl:2,14-14: Missing required argument; The argument "file" is required, but no definition was found.`,
 		),
 	)
-
-	It("resolves the SSH key path relative to the config directory", func() {
-		dir, cleanup := makeConfigDir(
-			`git {
-				ssh_key {
-					file = "relative/path/to/key"
-				}
-			}`,
-		)
-		defer cleanup()
-
-		// TODO: don't test using built-ins
-		cfg, err := Load(dir, &registry.Registry{
-			Parent: &registry.BuiltIns,
-		})
-		Expect(err).ShouldNot(HaveOccurred())
-		Expect(cfg.GitDefaults.SSHKeyFile).To(Equal(
-			filepath.Join(dir, "relative/path/to/key"),
-		))
-	})
 })

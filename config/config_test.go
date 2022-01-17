@@ -65,13 +65,6 @@ func withClonesDefaults(cfg Config, c Clones) Config {
 	return cfg
 }
 
-// withGitDefaults returns a copy of cfg with a different git defaults
-// configuration.
-func withGitDefaults(cfg Config, g Git) Config {
-	cfg.GitDefaults = g
-	return cfg
-}
-
 // withSource returns a copy of cfg with an additional repository source.
 func withSource(cfg Config, src Source) Config {
 	prev := cfg.Sources
