@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 )
 
-var _ = Describe("func Load() (global clones block)", func() {
+var _ = Context("resolving clones configuration", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,
@@ -89,7 +89,7 @@ var _ = Describe("func Load() (global clones block)", func() {
 				`clones {}`,
 				`clones {}`,
 			},
-			`<dir>/config-1.hcl: a 'clones' defaults block is already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: the clones configuration is already defined in <dir>/config-0.hcl`,
 		),
 	)
 })

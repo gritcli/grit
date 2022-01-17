@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("resolve daemon configuration", func() {
+var _ = Context("resolving daemon configuration", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,

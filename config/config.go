@@ -42,8 +42,8 @@ type Source struct {
 	Driver sourcedriver.Config
 }
 
-// Clones is the configuration that controls how Grit stores local repository
-// clones.
+// Clones is the configuration that controls how Grit stores local clones of
+// remote repositories.
 type Clones struct {
 	// Dir is the path to the directory in which local clones are kept.
 	Dir string

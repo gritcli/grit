@@ -16,15 +16,24 @@ type resolver struct {
 	reg *registry.Registry
 	cfg unresolvedConfig
 
+	// output is the configuration that is built by the resolver.
+	output Config
+
 	// currentFile is the name of the file currently being merged.
 	currentFile string
 
-	// daemonFile is the name of the file containing the daemon block that was
-	// merged into the configuration. It is empty if no daemon block has yet
+	// daemonFile is the name of the file containing the "daemon" block that was
+	// merged into the configuration. It is empty if no "daemon" block has yet
 	// been merged.
 	daemonFile string
 
-	output Config
+	// rootClonesFile is the name of the file containing the top-level
+	// "clones" block that was first encountered. It is empty if no "clones"
+	// block has been parsed yet.
+	rootClonesFile string
+
+	// rootClones is the clones configuration parsed from rootClonesFile.
+	rootClones Clones
 }
 
 // Merge merges the configuration from c.
@@ -41,7 +50,7 @@ func (r *resolver) Merge(filename string, f fileSchema) error {
 	}
 
 	if f.ClonesDefaults != nil {
-		if err := mergeClonesDefaultsBlock(&r.cfg, filename, *f.ClonesDefaults); err != nil {
+		if err := r.mergeRootClones(*f.ClonesDefaults); err != nil {
 			return err
 		}
 	}
@@ -73,18 +82,23 @@ func (r *resolver) Merge(filename string, f fileSchema) error {
 
 // Normalize normalizes the configuration and populates it with default values.
 func (r *resolver) Normalize() error {
+	if err := r.populateDaemonDefaults(&r.output.Daemon); err != nil {
+		return err
+	}
+
+	if err := r.populateRootClonesDefaults(&r.rootClones); err != nil {
+		return err
+	}
+
 	if err := mergeImplicitVCSDefaults(r.reg, &r.cfg); err != nil {
 		return err
 	}
 
 	mergeImplicitSources(r.reg, &r.cfg)
 
-	if err := normalizeClonesDefaultsBlock(&r.cfg); err != nil {
-		return err
-	}
-
 	for k, s := range r.cfg.Sources {
 		if err := normalizeSourceBlock(
+			r,
 			r.reg,
 			r.cfg,
 			&s,
@@ -101,9 +115,6 @@ func (r *resolver) Normalize() error {
 // Assemble returns the file configuration assembled from the various source
 // files.
 func (r *resolver) Assemble() (Config, error) {
-	if err := r.populateDaemonDefaults(&r.output.Daemon); err != nil {
-		return Config{}, err
-	}
 
 	for _, s := range r.cfg.Sources {
 		src, err := assembleSourceBlock(r.cfg, s)
@@ -126,14 +137,6 @@ func (r *resolver) Assemble() (Config, error) {
 
 // unresolvedConfig is a configuration that is in the process of being resolved.
 type unresolvedConfig struct {
-	// ClonesDefaults contains information about the first (root-level) "clones"
-	// defaults block found within the configuration files. Only one of the
-	// loaded files may contain a "clones" defaults block.
-	ClonesDefaults struct {
-		Block clonesSchema
-		File  string
-	}
-
 	// VCSDefaults contains information about the "vcs" blocks within the
 	// configuration files.
 	VCSDefaults map[string]unresolvedVCS

@@ -117,6 +117,7 @@ func mergeImplicitSources(
 // normalizeSourceBlock normalizes cfg.Sources and populates them with
 // default values.
 func normalizeSourceBlock(
+	r *resolver,
 	reg *registry.Registry,
 	cfg unresolvedConfig,
 	s *unresolvedSource,
@@ -126,7 +127,7 @@ func normalizeSourceBlock(
 		s.Block.Enabled = &enabled
 	}
 
-	if err := normalizeSourceSpecificClonesBlock(cfg, s); err != nil {
+	if err := normalizeSourceSpecificClonesBlock(r, cfg, s); err != nil {
 		return err
 	}
 
