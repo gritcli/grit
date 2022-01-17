@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/plugin/sourcedriver"
-	"github.com/gritcli/grit/plugin/vcsdriver/gitvcs"
+	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/driver/vcsdriver/gitvcs"
 )
 
 // NewCloner returns a cloner that clones the repository with the given ID.

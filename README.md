@@ -90,13 +90,13 @@ Each source is identified by a unique name. There are several built-in sources:
 Additionally, user-defined sources can be configured to consume repositories
 from self-hosted VCS systems.
 
-### Driver
+### Source Driver
 
-A driver integrates Grit with a specific kind of [source](#source). It
+A source driver integrates Grit with a specific kind of [source](#source). It
 encapsulates all of the communication with the remote source, such as API calls
 and VCS operations.
 
-Grit ships with several built-in drivers:
+Grit ships with several built-in source drivers:
 
 - [ ] `bitbucket` for [BitBucket Cloud, BitBucket Server and BitBucket Data Center](https://bitbucket.org/product/guides/getting-started/overview#bitbucket-software-hosting-options)
 - [ ] `gitea` for [Gitea](https://gitea.io)
@@ -104,8 +104,8 @@ Grit ships with several built-in drivers:
 - [ ] `gitlab` for [GitLab.com](https://gitlab.com/explore) and [Self-managed GitLab](https://about.gitlab.com/install/)
 - [ ] `gogs` for [Gogs](https://gogs.io)
 
-Additionally, custom drivers can be implemented via plugins. There is no
-requirement that a driver use Git as its underlying VCS.
+Additionally, custom drivers can be implemented as plugins. There is no
+requirement that a source driver use Git as its underlying VCS.
 
 ## Configuration
 

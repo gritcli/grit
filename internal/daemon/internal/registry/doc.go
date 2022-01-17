@@ -1,3 +1,3 @@
 // Package registry provides functionality for registering and discovering
-// plugin implementations.
+// driver implementations.
 package registry

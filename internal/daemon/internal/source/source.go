@@ -1,6 +1,6 @@
 package source
 
-import "github.com/gritcli/grit/plugin/sourcedriver"
+import "github.com/gritcli/grit/driver/sourcedriver"
 
 // Source is a repository source.
 type Source struct {

@@ -3,7 +3,7 @@ package registry
 import (
 	"sync"
 
-	"github.com/gritcli/grit/plugin/sourcedriver"
+	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
 // BuiltIns is the registry of official drivers that ship with Grit.

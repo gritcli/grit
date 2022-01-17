@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/plugin/sourcedriver"
+	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
 // DriverConfigStub is a test implementation of the sourcedriver.Config interface.
