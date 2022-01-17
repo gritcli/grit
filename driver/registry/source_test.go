@@ -23,21 +23,21 @@ var _ = Describe("type Registry", func() {
 
 			reg.RegisterSourceDriver("<alias>", expect)
 
-			d, ok := reg.SourceDriverByAlias("<alias>")
+			r, ok := reg.SourceDriverByAlias("<alias>")
 			Expect(ok).To(BeTrue())
-			Expect(d).To(Equal(expect))
+			Expect(r).To(Equal(expect))
 		})
 
 		It("panics if the alias is already in use", func() {
-			d := sourcedriver.Registration{
+			r := sourcedriver.Registration{
 				Name:        "<name>",
 				Description: "<desc>",
 			}
 
-			reg.RegisterSourceDriver("<alias>", d)
+			reg.RegisterSourceDriver("<alias>", r)
 
 			Expect(func() {
-				reg.RegisterSourceDriver("<alias>", d)
+				reg.RegisterSourceDriver("<alias>", r)
 			}).To(PanicWith("alias is already in use"))
 		})
 	})
@@ -51,14 +51,14 @@ var _ = Describe("type Registry", func() {
 
 	Describe("func SourceDriverAliases()", func() {
 		It("returns a sorted slice of aliases", func() {
-			d := sourcedriver.Registration{
+			r := sourcedriver.Registration{
 				Name:        "<name>",
 				Description: "<desc>",
 			}
 
-			reg.RegisterSourceDriver("<b>", d)
-			reg.RegisterSourceDriver("<c>", d)
-			reg.RegisterSourceDriver("<a>", d)
+			reg.RegisterSourceDriver("<b>", r)
+			reg.RegisterSourceDriver("<c>", r)
+			reg.RegisterSourceDriver("<a>", r)
 
 			Expect(reg.SourceDriverAliases()).To(Equal([]string{
 				"<a>",
@@ -70,20 +70,20 @@ var _ = Describe("type Registry", func() {
 
 	When("the registry has a parent", func() {
 		var (
-			parent           *Registry
-			sourceFromParent sourcedriver.Registration
+			parent     *Registry
+			fromParent sourcedriver.Registration
 		)
 
 		BeforeEach(func() {
 			parent = &Registry{}
 			reg.Parent = parent
 
-			sourceFromParent = sourcedriver.Registration{
+			fromParent = sourcedriver.Registration{
 				Name:        "<name from parent>",
 				Description: "<desc from parent>",
 			}
 
-			parent.RegisterSourceDriver("<alias>", sourceFromParent)
+			parent.RegisterSourceDriver("<alias>", fromParent)
 		})
 
 		Describe("func RegisterSourceDriver()", func() {
@@ -95,36 +95,36 @@ var _ = Describe("type Registry", func() {
 
 				reg.RegisterSourceDriver("<alias>", expect)
 
-				d, ok := reg.SourceDriverByAlias("<alias>")
+				r, ok := reg.SourceDriverByAlias("<alias>")
 				Expect(ok).To(BeTrue())
-				Expect(d).To(Equal(expect))
+				Expect(r).To(Equal(expect))
 			})
 		})
 
 		Describe("func SourceDriverByAlias()", func() {
 			It("falls back to the parent", func() {
-				d, ok := reg.SourceDriverByAlias("<alias>")
+				r, ok := reg.SourceDriverByAlias("<alias>")
 				Expect(ok).To(BeTrue())
-				Expect(d).To(Equal(sourceFromParent))
+				Expect(r).To(Equal(fromParent))
 			})
 		})
 
 		Describe("func SourceDriverAliases()", func() {
 			It("returns a sorted slice of aliases, including those from the parent", func() {
-				d := sourcedriver.Registration{
+				r := sourcedriver.Registration{
 					Name:        "<name>",
 					Description: "<desc>",
 				}
 
-				reg.RegisterSourceDriver("<alias>", d) // ensure no dupes with parent
+				reg.RegisterSourceDriver("<alias>", r) // ensure no dupes with parent
 
-				reg.RegisterSourceDriver("<b>", d)
-				reg.RegisterSourceDriver("<c>", d)
-				reg.RegisterSourceDriver("<a>", d)
+				reg.RegisterSourceDriver("<b>", r)
+				reg.RegisterSourceDriver("<c>", r)
+				reg.RegisterSourceDriver("<a>", r)
 
-				parent.RegisterSourceDriver("<parent b>", d)
-				parent.RegisterSourceDriver("<parent c>", d)
-				parent.RegisterSourceDriver("<parent a>", d)
+				parent.RegisterSourceDriver("<parent b>", r)
+				parent.RegisterSourceDriver("<parent c>", r)
+				parent.RegisterSourceDriver("<parent a>", r)
 
 				Expect(reg.SourceDriverAliases()).To(Equal([]string{
 					"<a>",

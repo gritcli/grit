@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/driver/vcsdriver"
 )
 
 // BuiltIns is the registry of official drivers that ship with Grit.
@@ -15,4 +16,5 @@ type Registry struct {
 
 	m             sync.RWMutex
 	sourceByAlias map[string]sourcedriver.Registration
+	vcsByAlias    map[string]vcsdriver.Registration
 }
