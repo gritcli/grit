@@ -5,7 +5,7 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/plugin/sourcedriver"
-	"github.com/gritcli/grit/plugin/vcs/gitvcs"
+	"github.com/gritcli/grit/plugin/vcsdriver/gitvcs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
