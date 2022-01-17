@@ -3,6 +3,8 @@ package githubsource_test
 import (
 	"github.com/gritcli/grit/driver/configtest"
 	. "github.com/gritcli/grit/driver/sourcedriver/githubsource"
+	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/driver/vcsdriver/gitvcs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -33,6 +35,9 @@ var _ = Describe("type configSchema", func() {
 	configtest.TestSourceDriver(
 		Registration,
 		Config{},
+		[]vcsdriver.Registration{
+			gitvcs.Registration,
+		},
 		configtest.SourceSuccess(
 			"authentication token",
 			`source "github" "github" {

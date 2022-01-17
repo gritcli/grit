@@ -6,6 +6,7 @@ import (
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/onsi/ginkgo/extensions/table"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
@@ -18,6 +19,7 @@ type SourceDriverTest = table.TableEntry
 func TestSourceDriver(
 	r sourcedriver.Registration,
 	zero sourcedriver.Config,
+	deps []vcsdriver.Registration,
 	tests ...SourceDriverTest,
 ) {
 	table.DescribeTable(
@@ -28,6 +30,10 @@ func TestSourceDriver(
 		) {
 			reg := &registry.Registry{}
 			reg.RegisterSourceDriver(r.Name, r)
+
+			for _, d := range deps {
+				reg.RegisterVCSDriver(d.Name, d)
+			}
 
 			dir, cleanup := writeConfigs(content)
 			defer cleanup()
