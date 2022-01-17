@@ -40,9 +40,9 @@ func TestSourceDriver(
 	)
 }
 
-// Success returns a test that tests a source driver configuration that is
+// SourceSuccess returns a test that tests a source driver configuration that is
 // expected to pass.
-func Success(
+func SourceSuccess(
 	description string,
 	content string,
 	expect sourcedriver.Config,
@@ -58,9 +58,9 @@ func Success(
 	)
 }
 
-// Failure returns a test that tests a source driver configuration that is
+// SourceFailure returns a test that tests a source driver configuration that is
 // expected to fail.
-func Failure(
+func SourceFailure(
 	description string,
 	content string,
 	expect string,

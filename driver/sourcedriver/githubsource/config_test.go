@@ -2,8 +2,8 @@ package githubsource_test
 
 import (
 	"github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/driver/configtest"
 	. "github.com/gritcli/grit/driver/sourcedriver/githubsource"
-	"github.com/gritcli/grit/internal/daemon/configtest"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -33,7 +33,7 @@ var _ = Describe("type Config", func() {
 var _ = Describe("configuration integration", func() {
 	configtest.TestSourceDriver(
 		SourceDriverRegistration(),
-		configtest.Success(
+		configtest.SourceSuccess(
 			"authentication token",
 			`source "github" "github" {
 				token = "<token>"
@@ -43,7 +43,7 @@ var _ = Describe("configuration integration", func() {
 				Token:  "<token>",
 			},
 		),
-		configtest.Success(
+		configtest.SourceSuccess(
 			"github enterprise server",
 			`source "github" "github" {
 				domain = "github.example.com"
@@ -52,7 +52,7 @@ var _ = Describe("configuration integration", func() {
 				Domain: "github.example.com",
 			},
 		),
-		configtest.Success(
+		configtest.SourceSuccess(
 			"explicit SSH key",
 			`source "github" "github" {
 				git {
@@ -68,7 +68,7 @@ var _ = Describe("configuration integration", func() {
 				},
 			},
 		),
-		configtest.Success(
+		configtest.SourceSuccess(
 			"explicit SSH key with passphrase",
 			`source "github" "github" {
 				git {
@@ -86,7 +86,7 @@ var _ = Describe("configuration integration", func() {
 				},
 			},
 		),
-		configtest.Success(
+		configtest.SourceSuccess(
 			"does not inherit default passphrase when SSH key is specified explicitly",
 			`git {
 				ssh_key {
@@ -110,7 +110,7 @@ var _ = Describe("configuration integration", func() {
 				},
 			},
 		),
-		configtest.Success(
+		configtest.SourceSuccess(
 			"explicitly prefer SSH",
 			`source "github" "github" {
 				git {
@@ -124,7 +124,7 @@ var _ = Describe("configuration integration", func() {
 				},
 			},
 		),
-		configtest.Success(
+		configtest.SourceSuccess(
 			"explicitly prefer HTTP",
 			`source "github" "github" {
 				git {
@@ -138,7 +138,7 @@ var _ = Describe("configuration integration", func() {
 				},
 			},
 		),
-		configtest.Failure(
+		configtest.SourceFailure(
 			`explicit SSH passphrase without key file`,
 			`source "github" "github" {
 				git {
