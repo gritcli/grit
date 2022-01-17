@@ -8,6 +8,32 @@ import (
 	"github.com/gritcli/grit/plugin/driver"
 )
 
+// DriverConfigStub is a test implementation of the driver.Config interface.
+type DriverConfigStub struct {
+	NewDriverFunc func() driver.Driver
+	StringFunc    func() string
+}
+
+// NewDriver returns s.NewDriverFunc() if s.NewDriverFunc is non-nil; otherwise
+// it returns a new DriverStub.
+func (s *DriverConfigStub) NewDriver() driver.Driver {
+	if s.NewDriverFunc != nil {
+		return s.NewDriverFunc()
+	}
+
+	return &DriverStub{}
+}
+
+// s.DriverConfigStub returns s.StringFunc() if s.StringFunc is non-nil;
+// otherwise it returns a fixed string.
+func (s *DriverConfigStub) String() string {
+	if s.StringFunc != nil {
+		return s.StringFunc()
+	}
+
+	return "<driver config stub>"
+}
+
 // DriverStub is a test implementation of the driver.Driver interface.
 type DriverStub struct {
 	InitFunc      func(context.Context, logging.Logger) error
