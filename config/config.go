@@ -18,6 +18,6 @@ type Config struct {
 type configFile struct {
 	DaemonBlock         *daemonBlock  `hcl:"daemon,block"`
 	ClonesDefaultsBlock *clonesBlock  `hcl:"clones,block"`
-	GitDefaultsBlock    *gitBlock     `hcl:"git,block"`
+	VCSDefaultsBlocks   []vcsBlock    `hcl:"vcs,block"`
 	SourceBlocks        []sourceBlock `hcl:"source,block"`
 }

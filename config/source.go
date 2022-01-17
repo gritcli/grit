@@ -2,11 +2,13 @@ package config
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 )
@@ -35,7 +37,17 @@ type sourceBlock struct {
 	DriverAlias string       `hcl:",label"`
 	Enabled     *bool        `hcl:"enabled"`
 	ClonesBlock *clonesBlock `hcl:"clones,block"`
-	DriverBlock hcl.Body     `hcl:",remain"` // parsed into a sourceDriverBlock, as per sourceDriverBlockFactory
+	VCSBlocks   []vcsBlock   `hcl:"vcs,block"`
+	DriverBlock hcl.Body     `hcl:",remain"`
+}
+
+// unresolvedSource contains information about a "source" block within an
+// as-yet-unresolved configuration.
+type unresolvedSource struct {
+	Block       sourceBlock
+	DriverBlock sourcedriver.ConfigSchema
+	VCSConfigs  map[string]vcsdriver.Config
+	File        string
 }
 
 // sourceNameRegexp is a regular expression used to validate source names.
@@ -74,7 +86,7 @@ func mergeSourceBlock(
 		}
 	}
 
-	d, ok := reg.SourceDriverByAlias(b.DriverAlias)
+	r, ok := reg.SourceDriverByAlias(b.DriverAlias)
 	if !ok {
 		return fmt.Errorf(
 			"%s: the '%s' source uses '%s' which is not supported, the supported drivers are: '%s'",
@@ -85,7 +97,7 @@ func mergeSourceBlock(
 		)
 	}
 
-	driverBlock := d.NewConfigSchema()
+	driverBlock := r.NewConfigSchema()
 	if diag := gohcl.DecodeBody(b.DriverBlock, nil, driverBlock); diag.HasErrors() {
 		return diag
 	}
@@ -95,9 +107,9 @@ func mergeSourceBlock(
 	}
 
 	cfg.Sources[b.Name] = unresolvedSource{
-		File:        filename,
 		Block:       b,
 		DriverBlock: driverBlock,
+		File:        filename,
 	}
 
 	return nil
@@ -133,18 +145,26 @@ func mergeDefaultSources(
 
 // normalizeSourceBlock normalizes cfg.Sources and populates them with
 // default values.
-func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
+func normalizeSourceBlock(
+	reg *registry.Registry,
+	cfg unresolvedConfig,
+	s *unresolvedSource,
+) error {
 	if s.Block.Enabled == nil {
 		enabled := true
 		s.Block.Enabled = &enabled
 	}
 
-	return normalizeSourceSpecificClonesBlock(cfg, s)
+	if err := normalizeSourceSpecificClonesBlock(cfg, s); err != nil {
+		return err
+	}
+
+	return normalizeSourceSpecificVCSBlocks(reg, cfg, s)
 }
 
 // assembleSourceBlock converts b into its configuration representation.
 func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, error) {
-	nc := &normalizationContext{cfg, s}
+	nc := &sourceNormalizationContext{cfg, s}
 
 	driverConfig, err := s.DriverBlock.Normalize(nc)
 	if err != nil {
@@ -164,30 +184,43 @@ func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, erro
 	}, nil
 }
 
-// normalizationContext is an implementation of
+// sourceNormalizationContext is an implementation of
 // sourcedriver.ConfigNormalizationContext.
-type normalizationContext struct {
+type sourceNormalizationContext struct {
 	cfg unresolvedConfig
 	s   unresolvedSource
 }
 
-func (c *normalizationContext) NormalizePath(p *string) error {
+func (c *sourceNormalizationContext) NormalizePath(p *string) error {
+	// TODO: make resolution relative to the config directory, so that it's
+	// always available.
 	return normalizePath(c.s.File, p)
 }
 
-func (c *normalizationContext) ResolveVCSConfig(in, out interface{}) error {
-	switch out := out.(type) {
-	case *Git:
-		b := in.(*gitBlock)
-		if err := normalizeSourceSpecificGitBlock(c.cfg, c.s, &b); err != nil {
-			return err
+func (c *sourceNormalizationContext) ResolveVCSConfig(cfg interface{}) error {
+	elem := reflect.ValueOf(cfg).Elem()
+
+	for _, d := range c.s.VCSConfigs {
+		v := reflect.ValueOf(d)
+
+		if v.Type().AssignableTo(
+			elem.Type(),
+		) {
+			elem.Set(v)
+			return nil
 		}
-
-		*out = assembleGitBlock(*b)
-
-	default:
-		return fmt.Errorf("unsupported VCS config type (%T)", out)
 	}
 
-	return nil
+	for _, d := range c.cfg.VCSDefaults {
+		v := reflect.ValueOf(d.DriverConfig)
+
+		if v.Type().AssignableTo(
+			elem.Type(),
+		) {
+			elem.Set(v)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unsupported VCS config type (%s)", elem.Type())
 }

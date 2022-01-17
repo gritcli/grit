@@ -1,3 +1,2 @@
-// Package gitvcs provides utilities for implementing drivers that use the Git
-// version control system.
+// Package gitvcs is a VCS driver that integrates Grit with Git.
 package gitvcs

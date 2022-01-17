@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	. "github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/config/internal/fixtures"
 	"github.com/gritcli/grit/driver/registry"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -108,10 +109,7 @@ func testLoadSuccess(configs []string, expect Config) {
 	dir, cleanup := makeConfigDir(configs...)
 	defer cleanup()
 
-	// TODO: don't test using built-ins
-	cfg, err := Load(dir, &registry.Registry{
-		Parent: &registry.BuiltIns,
-	})
+	cfg, err := Load(dir, newRegistry())
 	Expect(err).ShouldNot(HaveOccurred())
 	Expect(cfg).To(Equal(expect))
 }
@@ -131,12 +129,26 @@ func testLoadFailure(configs []string, expect string) {
 	dir, cleanup := makeConfigDir(configs...)
 	defer cleanup()
 
-	// TODO: don't test using built-ins
-	_, err := Load(dir, &registry.Registry{
-		Parent: &registry.BuiltIns,
-	})
+	_, err := Load(dir, newRegistry())
 	Expect(err).Should(HaveOccurred())
 
 	message := strings.ReplaceAll(err.Error(), dir, "<dir>")
 	Expect(message).To(Equal(expect))
+}
+
+// newRegistry returns the registry to use for Load() tests.
+func newRegistry() *registry.Registry {
+	reg := &registry.Registry{}
+
+	reg.RegisterSourceDriver(
+		fixtures.SourceRegistration.Name,
+		fixtures.SourceRegistration,
+	)
+
+	reg.RegisterVCSDriver(
+		fixtures.VCSRegistration.Name,
+		fixtures.VCSRegistration,
+	)
+
+	return reg
 }

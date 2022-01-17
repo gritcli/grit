@@ -47,40 +47,32 @@ type configSchema struct {
 		File       string `hcl:"file"`
 		Passphrase string `hcl:"passphrase,optional"`
 	} `hcl:"ssh_key,block"`
-	PreferHTTP *bool `hcl:"prefer_http"` // pointer allows detection of absence vs explicit false
+	PreferHTTP *bool `hcl:"prefer_http"`
 }
 
 func (s *configSchema) NormalizeDefaults(
 	ctx vcsdriver.ConfigNormalizeContext,
 ) (vcsdriver.Config, error) {
-	cfg := Config{
-		PreferHTTP: *s.PreferHTTP,
-	}
-
-	if s.SSHKey != nil {
-		cfg.SSHKeyFile = s.SSHKey.File
-		cfg.SSHKeyPassphrase = s.SSHKey.Passphrase
-
-		if err := ctx.NormalizePath(&cfg.SSHKeyFile); err != nil {
-			return nil, err
-		}
-	}
-
-	return cfg, nil
+	return s.normalize(ctx, Config{})
 }
 
 func (s *configSchema) NormalizeSourceSpecific(
 	ctx vcsdriver.ConfigNormalizeContext,
 	def vcsdriver.Config,
 ) (vcsdriver.Config, error) {
-	cfg := def.(Config)
+	return s.normalize(ctx, def.(Config))
+}
 
+func (s *configSchema) normalize(
+	ctx vcsdriver.ConfigNormalizeContext,
+	cfg Config,
+) (Config, error) {
 	if s.SSHKey != nil {
 		cfg.SSHKeyFile = s.SSHKey.File
 		cfg.SSHKeyPassphrase = s.SSHKey.Passphrase
 
 		if err := ctx.NormalizePath(&cfg.SSHKeyFile); err != nil {
-			return nil, err
+			return Config{}, err
 		}
 	}
 

@@ -2,6 +2,7 @@ package config_test
 
 import (
 	. "github.com/gritcli/grit/config"
+	. "github.com/gritcli/grit/config/internal/fixtures"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 )
@@ -13,47 +14,57 @@ var _ = Describe("func Load() (source blocks)", func() {
 		Entry(
 			"explicitly enabled source",
 			[]string{
-				`source "github" "github" {
+				`source "test_source" "test_source_driver" {
 					enabled = true
 				}`,
 			},
-			defaultConfig,
-		),
-		Entry(
-			"explicitly disabled source",
-			[]string{
-				`source "github" "github" {
-					enabled = false
-				}`,
-			},
 			withSource(defaultConfig, Source{
-				Name:    "github",
-				Enabled: false,
+				Name:    "test_source",
+				Enabled: true,
 				Clones: Clones{
-					Dir: "~/grit/github",
+					Dir: "~/grit/test_source",
 				},
-				Driver: GitHub{
-					Domain: "github.com",
+				Driver: SourceConfigStub{
+					Value:     "<default>",
+					VCSConfig: VCSConfigStub{Value: "<default>"},
 				},
 			}),
 		),
 		Entry(
-			"explicit clone directory",
+			"explicitly disabled source",
 			[]string{
-				`source "github" "github" {
-					clones {
-						dir = "/path/to/clones"
-					}
+				`source "test_source" "test_source_driver" {
+					enabled = false
 				}`,
 			},
 			withSource(defaultConfig, Source{
-				Name:    "github",
+				Name:    "test_source",
+				Enabled: false,
+				Clones: Clones{
+					Dir: "~/grit/test_source",
+				},
+				Driver: SourceConfigStub{
+					Value:     "<default>",
+					VCSConfig: VCSConfigStub{Value: "<default>"},
+				},
+			}),
+		),
+		Entry(
+			"driver-specific configuration",
+			[]string{
+				`source "test_source" "test_source_driver" {
+					value = "<explicit>"
+				}`,
+			},
+			withSource(defaultConfig, Source{
+				Name:    "test_source",
 				Enabled: true,
 				Clones: Clones{
-					Dir: "/path/to/clones",
+					Dir: "~/grit/test_source",
 				},
-				Driver: GitHub{
-					Domain: "github.com",
+				Driver: SourceConfigStub{
+					Value:     "<explicit>",
+					VCSConfig: VCSConfigStub{Value: "<default>"},
 				},
 			}),
 		),
@@ -65,44 +76,44 @@ var _ = Describe("func Load() (source blocks)", func() {
 		Entry(
 			`empty source name`,
 			[]string{
-				`source "" "github" {}`,
+				`source "" "test_source_driver" {}`,
 			},
 			`<dir>/config-0.hcl: this file contains a 'source' block with an empty name`,
 		),
 		Entry(
 			`invalid source name`,
 			[]string{
-				`source "<invalid>" "github" {}`,
+				`source "<invalid>" "test_source_driver" {}`,
 			},
 			`<dir>/config-0.hcl: the '<invalid>' source has an invalid name, source names must contain only alpha-numeric characters and underscores`,
 		),
 		Entry(
 			`duplicate source names`,
 			[]string{
-				`source "my_company" "github" {}`,
-				`source "my_company" "github" {}`,
+				`source "test_source" "test_source_driver" {}`,
+				`source "test_source" "test_source_driver" {}`,
 			},
-			`<dir>/config-1.hcl: a source named 'my_company' is already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: a source named 'test_source' is already defined in <dir>/config-0.hcl`,
 		),
 		Entry(
 			`duplicate source names (case-insensitive)`,
 			[]string{
-				`source "my_company" "github" {}`,
-				`source "MY_COMPANY" "github" {}`,
+				`source "test_source" "test_source_driver" {}`,
+				`source "TEST_SOURCE" "test_source_driver" {}`,
 			},
-			`<dir>/config-1.hcl: a source named 'my_company' is already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: a source named 'test_source' is already defined in <dir>/config-0.hcl`,
 		),
 		Entry(
 			`unrecognized source driver`,
 			[]string{
-				`source "my_source" "<unrecognized>" {}`,
+				`source "test_source" "<unrecognized>" {}`,
 			},
-			`<dir>/config-0.hcl: the 'my_source' source uses '<unrecognized>' which is not supported, the supported drivers are: 'github'`,
+			`<dir>/config-0.hcl: the 'test_source' source uses '<unrecognized>' which is not supported, the supported drivers are: 'test_source_driver'`,
 		),
 		Entry(
 			`source with a well-structured, but invalid body`,
 			[]string{
-				`source "github" "github" {
+				`source "test_source" "test_source_driver" {
 					unrecognized = true
 				}`,
 			},

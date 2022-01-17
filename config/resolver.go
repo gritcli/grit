@@ -7,7 +7,6 @@ import (
 	"sort"
 
 	"github.com/gritcli/grit/driver/registry"
-	"github.com/gritcli/grit/driver/sourcedriver"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -46,10 +45,19 @@ func (r *resolver) Merge(filename string, c configFile) error {
 		}
 	}
 
-	if c.GitDefaultsBlock != nil {
-		if err := mergeGitDefaultsBlock(&r.cfg, filename, *c.GitDefaultsBlock); err != nil {
+	for _, b := range c.VCSDefaultsBlocks {
+		if err := mergeVCSDefaultsBlock(
+			r.reg,
+			&r.cfg,
+			filename,
+			b,
+		); err != nil {
 			return err
 		}
+	}
+
+	if err := mergeImplicitVCSDefaults(r.reg, &r.cfg); err != nil {
+		return err
 	}
 
 	for _, b := range c.SourceBlocks {
@@ -78,12 +86,12 @@ func (r *resolver) Normalize() error {
 		return err
 	}
 
-	if err := normalizeGitDefaultsBlock(&r.cfg); err != nil {
-		return err
-	}
-
 	for k, s := range r.cfg.Sources {
-		if err := normalizeSourceBlock(r.cfg, &s); err != nil {
+		if err := normalizeSourceBlock(
+			r.reg,
+			r.cfg,
+			&s,
+		); err != nil {
 			return err
 		}
 
@@ -137,25 +145,13 @@ type unresolvedConfig struct {
 		File  string
 	}
 
-	// GitDefaults contains information about the first (root-level) "git"
-	// defaults block found within the configuration files. Only one of the
-	// loaded files may contain a "git" defaults block.
-	GitDefaults struct {
-		Block gitBlock
-		File  string
-	}
+	// VCSDefaults contains information about the "vcs" blocks within the
+	// configuration files.
+	VCSDefaults map[string]unresolvedVCS
 
-	// Sources contains information about a "source" block within the
+	// Sources contains information about the "source" blocks within the
 	// configuration files.
 	Sources map[string]unresolvedSource
-}
-
-// unresolvedSource contains information about a "source" block within an
-// as-yet-unresolved configuration.
-type unresolvedSource struct {
-	Block       sourceBlock
-	DriverBlock sourcedriver.ConfigSchema
-	File        string
 }
 
 // normalizePath normalizes the path *p relative to the config file that
@@ -168,6 +164,8 @@ type unresolvedSource struct {
 // directory of the given filename.
 //
 // It does nothing if p is nil or *p is empty.
+//
+// It panics if *p is relative and filename is empty.
 func normalizePath(filename string, p *string) error {
 	if p == nil || *p == "" {
 		return nil
@@ -177,15 +175,28 @@ func normalizePath(filename string, p *string) error {
 
 	n, err := homedir.Expand(n)
 	if err != nil {
-		return fmt.Errorf(
-			"%s: unable to expand %s with the user's home directory: %w",
-			filename,
+		err = fmt.Errorf(
+			"unable to expand %s with the user's home directory: %w",
 			n,
 			err,
 		)
+
+		if filename != "" {
+			err = fmt.Errorf(
+				"%s: %w",
+				filename,
+				err,
+			)
+		}
+
+		return err
 	}
 
 	if !filepath.IsAbs(n) {
+		if filename == "" {
+			panic("cannot resolve relative path outside of configuration file")
+		}
+
 		dir := filepath.Dir(filename)
 
 		if !filepath.IsAbs(dir) {

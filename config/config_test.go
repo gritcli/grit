@@ -13,18 +13,6 @@ var defaultConfig = Config{
 	Daemon: Daemon{
 		Socket: "~/grit/daemon.sock",
 	},
-	Sources: []Source{
-		{
-			Name:    "github",
-			Enabled: true,
-			Clones: Clones{
-				Dir: "~/grit/github",
-			},
-			Driver: GitHub{
-				Domain: "github.com",
-			},
-		},
-	},
 }
 
 func init() {

@@ -1,3 +1,4 @@
-// Package githubsource provides a driver that uses GitHub.com or a GitHub
-// Enterprise Server installation.
+// Package githubsource is a source driver that integrates Grit with GitHub.
+//
+// It supports GitHub.com and GitHub Enterprise Server installations.
 package githubsource
