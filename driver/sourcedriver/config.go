@@ -19,6 +19,19 @@ type ConfigSchema interface {
 // ConfigNormalizeContext provides operations used to normalize a
 // ConfigSchema.
 type ConfigNormalizeContext interface {
+	// NormalizePath normalizes a filesystem encountered within the
+	// configuration.
+	//
+	// If *p begins with a tilde (~), it is resolved relative to the user's home
+	// directory.
+	//
+	// If *p is a relative path, it is resolved to an absolute path relative to
+	// the directory containing the configuration file that is currently being
+	// parsed.
+	//
+	// It does nothing if p is nil or *p is empty.
+	NormalizePath(p *string) error
+
 	// ResolveVCSConfig resolves a driver-specific configuration block for one
 	// of the supported version control systems.
 	ResolveVCSConfig(in, out interface{}) error

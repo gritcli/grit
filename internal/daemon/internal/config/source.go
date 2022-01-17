@@ -144,9 +144,9 @@ func normalizeSourceBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 
 // assembleSourceBlock converts b into its configuration representation.
 func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, error) {
-	rc := &resolveContext{cfg, s}
+	nc := &normalizationContext{cfg, s}
 
-	driverConfig, err := s.DriverBlock.Normalize(rc)
+	driverConfig, err := s.DriverBlock.Normalize(nc)
 	if err != nil {
 		return Source{}, fmt.Errorf(
 			"%s: the '%s' repository source is invalid: %w",
@@ -164,17 +164,22 @@ func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, erro
 	}, nil
 }
 
-// resolveContext is an implementation of driver.ResolveContext.
-type resolveContext struct {
+// normalizationContext is an implementation of
+// sourcedriver.ConfigNormalizationContext.
+type normalizationContext struct {
 	cfg unresolvedConfig
 	s   unresolvedSource
 }
 
-func (rc *resolveContext) ResolveVCSConfig(in, out interface{}) error {
+func (c *normalizationContext) NormalizePath(p *string) error {
+	return normalizePath(c.s.File, p)
+}
+
+func (c *normalizationContext) ResolveVCSConfig(in, out interface{}) error {
 	switch out := out.(type) {
 	case *Git:
 		b := in.(*gitBlock)
-		if err := normalizeSourceSpecificGitBlock(rc.cfg, rc.s, &b); err != nil {
+		if err := normalizeSourceSpecificGitBlock(c.cfg, c.s, &b); err != nil {
 			return err
 		}
 
