@@ -10,8 +10,8 @@ import (
 
 // DriverConfigStub is a test implementation of the sourcedriver.Config interface.
 type DriverConfigStub struct {
-	NewDriverFunc func() sourcedriver.Driver
-	StringFunc    func() string
+	NewDriverFunc            func() sourcedriver.Driver
+	DescribeSourceConfigFunc func() string
 }
 
 // NewDriver returns s.NewDriverFunc() if s.NewDriverFunc is non-nil; otherwise
@@ -24,11 +24,11 @@ func (s *DriverConfigStub) NewDriver() sourcedriver.Driver {
 	return &DriverStub{}
 }
 
-// s.DriverConfigStub returns s.StringFunc() if s.StringFunc is non-nil;
+// DescribeSourceConfig returns s.StringFunc() if s.StringFunc is non-nil;
 // otherwise it returns a fixed string.
-func (s *DriverConfigStub) String() string {
-	if s.StringFunc != nil {
-		return s.StringFunc()
+func (s *DriverConfigStub) DescribeSourceConfig() string {
+	if s.DescribeSourceConfigFunc != nil {
+		return s.DescribeSourceConfigFunc()
 	}
 
 	return "<driver config stub>"

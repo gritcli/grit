@@ -23,8 +23,9 @@ func (c Config) NewDriver() sourcedriver.Driver {
 	return &impl{config: c}
 }
 
-// String returns a human-readable description of the configuration.
-func (c Config) String() string {
+// DescribeSourceConfig returns a human-readable description of the
+// configuration.
+func (c Config) DescribeSourceConfig() string {
 	desc := c.Domain
 
 	if isEnterpriseServer(c.Domain) {

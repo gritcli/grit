@@ -12,8 +12,8 @@ package sourcedriver
 // attributes or blocks within that "source" block are parsed into this schema.
 type ConfigSchema interface {
 	// Normalize validates the configuration as parsed by this schema and
-	// normalizes it to a Config value.
-	Normalize(ConfigNormalizeContext) (Config, error)
+	// returns a normalized Config.
+	Normalize(ctx ConfigNormalizeContext) (Config, error)
 }
 
 // ConfigNormalizeContext provides operations used to normalize a
@@ -30,6 +30,7 @@ type Config interface {
 	// NewDriver constructs a new driver that uses this configuration.
 	NewDriver() Driver
 
-	// String returns a human-readable description of the configuration.
-	String() string
+	// DescribeSourceConfig returns a human-readable description of the
+	// configuration.
+	DescribeSourceConfig() string
 }

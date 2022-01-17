@@ -10,11 +10,11 @@ import (
 )
 
 var _ = Describe("type Config", func() {
-	Describe("func String()", func() {
+	Describe("func DescribeSourceConfig()", func() {
 		DescribeTable(
 			"it describes the source",
 			func(cfg Config, expect string) {
-				Expect(cfg.String()).To(Equal(expect))
+				Expect(cfg.DescribeSourceConfig()).To(Equal(expect))
 			},
 			Entry(
 				"github.com",

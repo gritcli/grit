@@ -23,7 +23,7 @@ func NewList(sources []config.Source) List {
 			list,
 			Source{
 				Name:        cfg.Name,
-				Description: cfg.Driver.String(),
+				Description: cfg.Driver.DescribeSourceConfig(),
 				CloneDir:    cfg.Clones.Dir,
 				Driver:      cfg.Driver.NewDriver(),
 			},
