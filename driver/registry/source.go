@@ -7,7 +7,7 @@ import (
 )
 
 // RegisterSourceDriver adds a source driver to the registry.
-func (r *Registry) RegisterSourceDriver(alias string, d sourcedriver.Registration) {
+func (r *Registry) RegisterSourceDriver(alias string, reg sourcedriver.Registration) {
 	r.m.Lock()
 	defer r.m.Unlock()
 
@@ -19,17 +19,17 @@ func (r *Registry) RegisterSourceDriver(alias string, d sourcedriver.Registratio
 		r.sourceByAlias = map[string]sourcedriver.Registration{}
 	}
 
-	r.sourceByAlias[alias] = d
+	r.sourceByAlias[alias] = reg
 }
 
 // SourceDriverByAlias returns the source driver with the given alias.
 func (r *Registry) SourceDriverByAlias(alias string) (sourcedriver.Registration, bool) {
 	r.m.RLock()
-	d, ok := r.sourceByAlias[alias]
+	reg, ok := r.sourceByAlias[alias]
 	r.m.RUnlock()
 
 	if ok {
-		return d, true
+		return reg, true
 	}
 
 	if r.Parent != nil {
@@ -39,27 +39,35 @@ func (r *Registry) SourceDriverByAlias(alias string) (sourcedriver.Registration,
 	return sourcedriver.Registration{}, false
 }
 
-// SourceDriverAliases returns the aliases of all registered drivers.
-func (r *Registry) SourceDriverAliases() []string {
-	uniq := map[string]struct{}{}
+// SourceDrivers returns all of the registered source drivers.
+func (r *Registry) SourceDrivers() map[string]sourcedriver.Registration {
+	drivers := map[string]sourcedriver.Registration{}
 
 	populate := func(r *Registry) {
 		r.m.RLock()
 		defer r.m.RUnlock()
 
-		for alias := range r.sourceByAlias {
-			uniq[alias] = struct{}{}
+		for alias, reg := range r.sourceByAlias {
+			drivers[alias] = reg
 		}
 	}
-
-	populate(r)
 
 	if r.Parent != nil {
 		populate(r.Parent)
 	}
 
-	aliases := make([]string, 0, len(uniq))
-	for alias := range uniq {
+	populate(r)
+
+	return drivers
+}
+
+// SourceDriverAliases returns a sorted slice containing the aliases of all
+// registered source drivers.
+func (r *Registry) SourceDriverAliases() []string {
+	drivers := r.SourceDrivers()
+	aliases := make([]string, 0, len(drivers))
+
+	for alias := range drivers {
 		aliases = append(aliases, alias)
 	}
 

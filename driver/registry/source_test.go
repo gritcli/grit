@@ -109,6 +109,28 @@ var _ = Describe("type Registry", func() {
 			})
 		})
 
+		Describe("func SourceDrivers()", func() {
+			It("returns a map of alias to driver registration, including those from the parent", func() {
+				override := sourcedriver.Registration{
+					Name:        "<override>",
+					Description: "<desc>",
+				}
+
+				other := sourcedriver.Registration{
+					Name:        "<other>",
+					Description: "<desc>",
+				}
+
+				reg.RegisterSourceDriver("<alias>", override)
+				reg.RegisterSourceDriver("<other>", other)
+
+				Expect(reg.SourceDrivers()).To(Equal(map[string]sourcedriver.Registration{
+					"<alias>": override,
+					"<other>": other,
+				}))
+			})
+		})
+
 		Describe("func SourceDriverAliases()", func() {
 			It("returns a sorted slice of aliases, including those from the parent", func() {
 				r := sourcedriver.Registration{

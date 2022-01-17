@@ -109,6 +109,28 @@ var _ = Describe("type Registry", func() {
 			})
 		})
 
+		Describe("func VCSDrivers()", func() {
+			It("returns a map of alias to driver registration, including those from the parent", func() {
+				override := vcsdriver.Registration{
+					Name:        "<override>",
+					Description: "<desc>",
+				}
+
+				other := vcsdriver.Registration{
+					Name:        "<other>",
+					Description: "<desc>",
+				}
+
+				reg.RegisterVCSDriver("<alias>", override)
+				reg.RegisterVCSDriver("<other>", other)
+
+				Expect(reg.VCSDrivers()).To(Equal(map[string]vcsdriver.Registration{
+					"<alias>": override,
+					"<other>": other,
+				}))
+			})
+		})
+
 		Describe("func VCSDriverAliases()", func() {
 			It("returns a sorted slice of aliases, including those from the parent", func() {
 				r := vcsdriver.Registration{

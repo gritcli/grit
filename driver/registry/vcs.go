@@ -7,7 +7,7 @@ import (
 )
 
 // RegisterVCSDriver adds a VCS driver to the registry.
-func (r *Registry) RegisterVCSDriver(alias string, v vcsdriver.Registration) {
+func (r *Registry) RegisterVCSDriver(alias string, reg vcsdriver.Registration) {
 	r.m.Lock()
 	defer r.m.Unlock()
 
@@ -19,17 +19,17 @@ func (r *Registry) RegisterVCSDriver(alias string, v vcsdriver.Registration) {
 		r.vcsByAlias = map[string]vcsdriver.Registration{}
 	}
 
-	r.vcsByAlias[alias] = v
+	r.vcsByAlias[alias] = reg
 }
 
 // VCSDriverByAlias returns the VCS driver with the given alias.
 func (r *Registry) VCSDriverByAlias(alias string) (vcsdriver.Registration, bool) {
 	r.m.RLock()
-	d, ok := r.vcsByAlias[alias]
+	reg, ok := r.vcsByAlias[alias]
 	r.m.RUnlock()
 
 	if ok {
-		return d, true
+		return reg, true
 	}
 
 	if r.Parent != nil {
@@ -39,27 +39,35 @@ func (r *Registry) VCSDriverByAlias(alias string) (vcsdriver.Registration, bool)
 	return vcsdriver.Registration{}, false
 }
 
-// VCSDriverAliases returns the aliases of all registered drivers.
-func (r *Registry) VCSDriverAliases() []string {
-	uniq := map[string]struct{}{}
+// VCSDrivers returns all of the registered vcs drivers.
+func (r *Registry) VCSDrivers() map[string]vcsdriver.Registration {
+	drivers := map[string]vcsdriver.Registration{}
 
 	populate := func(r *Registry) {
 		r.m.RLock()
 		defer r.m.RUnlock()
 
-		for alias := range r.vcsByAlias {
-			uniq[alias] = struct{}{}
+		for alias, reg := range r.vcsByAlias {
+			drivers[alias] = reg
 		}
 	}
-
-	populate(r)
 
 	if r.Parent != nil {
 		populate(r.Parent)
 	}
 
-	aliases := make([]string, 0, len(uniq))
-	for alias := range uniq {
+	populate(r)
+
+	return drivers
+}
+
+// VCSDriverAliases returns a sorted slice containing the aliases of all
+// registered VCS drivers.
+func (r *Registry) VCSDriverAliases() []string {
+	drivers := r.VCSDrivers()
+	aliases := make([]string, 0, len(drivers))
+
+	for alias := range drivers {
 		aliases = append(aliases, alias)
 	}
 
