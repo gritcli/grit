@@ -56,10 +56,6 @@ func (r *resolver) Merge(filename string, c configFile) error {
 		}
 	}
 
-	if err := mergeImplicitVCSDefaults(r.reg, &r.cfg); err != nil {
-		return err
-	}
-
 	for _, b := range c.SourceBlocks {
 		if err := mergeSourceBlock(
 			r.reg,
@@ -76,7 +72,11 @@ func (r *resolver) Merge(filename string, c configFile) error {
 
 // Normalize normalizes the configuration and populates it with default values.
 func (r *resolver) Normalize() error {
-	mergeDefaultSources(r.reg, &r.cfg)
+	if err := mergeImplicitVCSDefaults(r.reg, &r.cfg); err != nil {
+		return err
+	}
+
+	mergeImplicitSources(r.reg, &r.cfg)
 
 	if err := normalizeDaemonBlock(&r.cfg); err != nil {
 		return err

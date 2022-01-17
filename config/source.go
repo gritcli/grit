@@ -115,9 +115,9 @@ func mergeSourceBlock(
 	return nil
 }
 
-// mergeDefaultSources merges any default sources into cfg, if it does not
+// mergeImplicitSources merges any implicit sources into cfg, if it does not
 // already contain a source with the same name.
-func mergeDefaultSources(
+func mergeImplicitSources(
 	reg *registry.Registry,
 	cfg *unresolvedConfig,
 ) {
@@ -128,7 +128,7 @@ func mergeDefaultSources(
 	for _, alias := range reg.SourceDriverAliases() {
 		reg, _ := reg.SourceDriverByAlias(alias)
 
-		for n, new := range reg.DefaultSources {
+		for n, new := range reg.ImplicitSources {
 			if _, ok := cfg.Sources[n]; ok {
 				continue
 			}
