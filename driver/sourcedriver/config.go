@@ -13,12 +13,12 @@ package sourcedriver
 type ConfigSchema interface {
 	// Normalize validates the configuration as parsed by this schema and
 	// normalizes it to a Config value.
-	Normalize(ConfigNormalizationContext) (Config, error)
+	Normalize(ConfigNormalizeContext) (Config, error)
 }
 
-// ConfigNormalizationContext provides operations used to normalize a
+// ConfigNormalizeContext provides operations used to normalize a
 // ConfigSchema.
-type ConfigNormalizationContext interface {
+type ConfigNormalizeContext interface {
 	// ResolveVCSConfig resolves a driver-specific configuration block for one
 	// of the supported version control systems.
 	ResolveVCSConfig(in, out interface{}) error

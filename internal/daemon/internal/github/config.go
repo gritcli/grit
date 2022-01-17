@@ -43,7 +43,7 @@ type configSchema struct {
 }
 
 func (s *configSchema) Normalize(
-	ctx sourcedriver.ConfigNormalizationContext,
+	ctx sourcedriver.ConfigNormalizeContext,
 ) (sourcedriver.Config, error) {
 	if s.Domain == "" {
 		s.Domain = "github.com"
