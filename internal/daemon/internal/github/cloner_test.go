@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/gritcli/grit/internal/daemon/internal/config"
 	"github.com/gritcli/grit/plugin/driver"
 	"github.com/gritcli/grit/plugin/vcs/gitvcs"
 	. "github.com/onsi/ginkgo"
@@ -13,19 +12,14 @@ import (
 
 var _ = Describe("func impl.NewCloner()", func() {
 	var (
-		ctx       context.Context
-		cancel    context.CancelFunc
-		configure func(*config.GitHub)
-		drv       driver.Driver
+		ctx    context.Context
+		cancel context.CancelFunc
+		drv    driver.Driver
 	)
 
-	BeforeEach(func() {
-		configure = func(*config.GitHub) {}
-	})
-
 	When("unauthenticated", func() {
-		JustBeforeEach(func() {
-			ctx, cancel, drv = beforeEachUnauthenticated(configure)
+		BeforeEach(func() {
+			ctx, cancel, drv = beforeEachUnauthenticated()
 		})
 
 		AfterEach(func() {
@@ -48,8 +42,8 @@ var _ = Describe("func impl.NewCloner()", func() {
 	When("authenticated", func() {
 		var token string
 
-		JustBeforeEach(func() {
-			ctx, cancel, drv, token = beforeEachAuthenticated(configure)
+		BeforeEach(func() {
+			ctx, cancel, drv, token = beforeEachAuthenticated()
 		})
 
 		AfterEach(func() {
