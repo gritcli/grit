@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/registry"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 )

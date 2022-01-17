@@ -1,8 +1,8 @@
 package registry_test
 
 import (
+	. "github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/gritcli/grit/registry"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

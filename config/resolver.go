@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/registry"
 	homedir "github.com/mitchellh/go-homedir"
 )
 

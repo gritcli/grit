@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
+	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/registry"
 )
 
 // impl is an implementation of driver.Driver that provides repositories from

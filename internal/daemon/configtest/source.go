@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/registry"
 	"github.com/onsi/ginkgo/extensions/table"
 	"github.com/onsi/gomega"
 )

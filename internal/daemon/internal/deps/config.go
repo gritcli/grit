@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/registry"
+	"github.com/gritcli/grit/driver/registry"
 )
 
 func init() {
