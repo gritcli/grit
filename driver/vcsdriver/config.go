@@ -24,8 +24,9 @@ type ConfigSchema interface {
 	// NormalizeSourceSpecific validates the configuration as parsed by this
 	// schema within a "source" block and returns a normalized Config.
 	//
-	// defaults is the result of a prior call to NormalizeDefaults().
-	NormalizeSourceSpecific(ctx ConfigNormalizeContext, defaults Config) (Config, error)
+	// def is the default configuration for this VCS, as returned by
+	// NormalizeDefaults().
+	NormalizeSourceSpecific(ctx ConfigNormalizeContext, def Config) (Config, error)
 }
 
 // ConfigNormalizeContext provides operations used to normalize a

@@ -69,11 +69,11 @@ func (s *configSchema) NormalizeDefaults(
 	return cfg, nil
 }
 
-func (s *configSchema) NormalizeForSource(
+func (s *configSchema) NormalizeSourceSpecific(
 	ctx vcsdriver.ConfigNormalizeContext,
-	defaults vcsdriver.Config,
+	def vcsdriver.Config,
 ) (vcsdriver.Config, error) {
-	cfg := defaults.(Config)
+	cfg := def.(Config)
 
 	if s.SSHKey != nil {
 		cfg.SSHKeyFile = s.SSHKey.File
