@@ -12,29 +12,30 @@ import (
 
 // A resolver flattens multiple configuration files into a single coherent
 // configuration.
-//
-// Resolution is performed in three distinct phases:
-//
-// 1. The "merge" phase enumerates the content of the parsed files to produce a
-// single consistent view of the configuration as though it were contained in a
-// single file. This phase is responsible for basic validation and detecting
-// semantic errors such as duplicate definitions.
-//
-// 2. The "normalize" phase sets any optional values to their defaults, and
-// normalizes any values that may be specified in multiple ways. It does NOT
-// inspect the driver-specific configuration values within "source" blocks.
-//
-// 2. The "assemble" phase produces a Config struct value from the merged
-// configuration.
 type resolver struct {
 	reg *registry.Registry
 	cfg unresolvedConfig
+
+	// currentFile is the name of the file currently being merged.
+	currentFile string
+
+	// daemonFile is the name of the file containing the daemon block that was
+	// merged into the configuration. It is empty if no daemon block has yet
+	// been merged.
+	daemonFile string
+
+	output Config
 }
 
 // Merge merges the configuration from c.
 func (r *resolver) Merge(filename string, f fileSchema) error {
+	r.currentFile = filename
+	defer func() {
+		r.currentFile = ""
+	}()
+
 	if f.Daemon != nil {
-		if err := mergeDaemonBlock(&r.cfg, filename, *f.Daemon); err != nil {
+		if err := r.mergeDaemon(*f.Daemon); err != nil {
 			return err
 		}
 	}
@@ -78,10 +79,6 @@ func (r *resolver) Normalize() error {
 
 	mergeImplicitSources(r.reg, &r.cfg)
 
-	if err := normalizeDaemonBlock(&r.cfg); err != nil {
-		return err
-	}
-
 	if err := normalizeClonesDefaultsBlock(&r.cfg); err != nil {
 		return err
 	}
@@ -104,8 +101,8 @@ func (r *resolver) Normalize() error {
 // Assemble returns the file configuration assembled from the various source
 // files.
 func (r *resolver) Assemble() (Config, error) {
-	cfg := Config{
-		Daemon: Daemon(r.cfg.Daemon.Block),
+	if err := r.populateDaemonDefaults(&r.output.Daemon); err != nil {
+		return Config{}, err
 	}
 
 	for _, s := range r.cfg.Sources {
@@ -114,29 +111,21 @@ func (r *resolver) Assemble() (Config, error) {
 			return Config{}, err
 		}
 
-		cfg.Sources = append(cfg.Sources, src)
+		r.output.Sources = append(r.output.Sources, src)
 	}
 
 	sort.Slice(
-		cfg.Sources,
+		r.output.Sources,
 		func(i, j int) bool {
-			return cfg.Sources[i].Name < cfg.Sources[j].Name
+			return r.output.Sources[i].Name < r.output.Sources[j].Name
 		},
 	)
 
-	return cfg, nil
+	return r.output, nil
 }
 
 // unresolvedConfig is a configuration that is in the process of being resolved.
 type unresolvedConfig struct {
-	// Daemon contains information about the first "daemon" block found within
-	// the configuration files. Only one of the loaded files may contain a
-	// "daemon" block.
-	Daemon struct {
-		Block daemonSchema
-		File  string
-	}
-
 	// ClonesDefaults contains information about the first (root-level) "clones"
 	// defaults block found within the configuration files. Only one of the
 	// loaded files may contain a "clones" defaults block.

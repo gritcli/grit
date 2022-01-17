@@ -10,12 +10,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func Load() (daemon block)", func() {
+var _ = Describe("resolve daemon configuration", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,
 		Entry(
-			"non-standard daemon socket",
+			"explicit daemon socket",
 			[]string{
 				`daemon {
 					socket = "/path/to/socket"
@@ -36,7 +36,7 @@ var _ = Describe("func Load() (daemon block)", func() {
 				`daemon {}`,
 				`daemon {}`,
 			},
-			`<dir>/config-1.hcl: a 'daemon' block is already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: the daemon configuration is already defined in <dir>/config-0.hcl`,
 		),
 	)
 
