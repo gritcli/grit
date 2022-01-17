@@ -63,12 +63,12 @@ func loadDir(r *resolver, dir string) error {
 
 		filename := filepath.Join(dir, name)
 
-		var c configFile
-		if err := hclsimple.DecodeFile(filename, nil, &c); err != nil {
+		var f fileSchema
+		if err := hclsimple.DecodeFile(filename, nil, &f); err != nil {
 			return err
 		}
 
-		if err := r.Merge(filename, c); err != nil {
+		if err := r.Merge(filename, f); err != nil {
 			return err
 		}
 	}

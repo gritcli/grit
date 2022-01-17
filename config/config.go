@@ -1,7 +1,10 @@
 package config
 
-// DefaultDirectory is the default directory to search for Grit configuration
-// files.
+import (
+	"github.com/gritcli/grit/driver/sourcedriver"
+)
+
+// DefaultDirectory is the default directory to search for configuration files.
 const DefaultDirectory = "~/.config/grit"
 
 // Config contains an entire Grit configuration.
@@ -14,10 +17,34 @@ type Config struct {
 	Sources []Source
 }
 
-// configFile is HCL schema for a single configuration file.
-type configFile struct {
-	DaemonBlock         *daemonBlock  `hcl:"daemon,block"`
-	ClonesDefaultsBlock *clonesBlock  `hcl:"clones,block"`
-	VCSDefaultsBlocks   []vcsBlock    `hcl:"vcs,block"`
-	SourceBlocks        []sourceBlock `hcl:"source,block"`
+// Daemon holds the configuration for the Grit daemon.
+type Daemon struct {
+	// Socket is the path of the Unix socket used for communication between
+	// the Grit CLI and the Grit daemon (via gRPC).
+	Socket string
+}
+
+// Source is the configuration for a source of repositories.
+type Source struct {
+	// Name is a short identifier for the source. Each source in the
+	// configuration has a unique name. Names are case-insensitive.
+	Name string
+
+	// Enabled is true if the source is enabled. Disabled sources are not used
+	// when searching for repositories to be cloned.
+	Enabled bool
+
+	// Clones is the configuration that controls how Grit stores local
+	// repository clones for this source.
+	Clones Clones
+
+	// Driver contains driver-specific configuration for this source.
+	Driver sourcedriver.Config
+}
+
+// Clones is the configuration that controls how Grit stores local repository
+// clones.
+type Clones struct {
+	// Dir is the path to the directory in which local clones are kept.
+	Dir string
 }

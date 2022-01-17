@@ -32,20 +32,20 @@ type resolver struct {
 }
 
 // Merge merges the configuration from c.
-func (r *resolver) Merge(filename string, c configFile) error {
-	if c.DaemonBlock != nil {
-		if err := mergeDaemonBlock(&r.cfg, filename, *c.DaemonBlock); err != nil {
+func (r *resolver) Merge(filename string, f fileSchema) error {
+	if f.DaemonBlock != nil {
+		if err := mergeDaemonBlock(&r.cfg, filename, *f.DaemonBlock); err != nil {
 			return err
 		}
 	}
 
-	if c.ClonesDefaultsBlock != nil {
-		if err := mergeClonesDefaultsBlock(&r.cfg, filename, *c.ClonesDefaultsBlock); err != nil {
+	if f.ClonesDefaultsBlock != nil {
+		if err := mergeClonesDefaultsBlock(&r.cfg, filename, *f.ClonesDefaultsBlock); err != nil {
 			return err
 		}
 	}
 
-	for _, b := range c.VCSDefaultsBlocks {
+	for _, b := range f.VCSDefaultsBlocks {
 		if err := mergeVCSDefaultsBlock(
 			r.reg,
 			&r.cfg,
@@ -56,7 +56,7 @@ func (r *resolver) Merge(filename string, c configFile) error {
 		}
 	}
 
-	for _, b := range c.SourceBlocks {
+	for _, b := range f.SourceBlocks {
 		if err := mergeSourceBlock(
 			r.reg,
 			&r.cfg,
@@ -105,7 +105,7 @@ func (r *resolver) Normalize() error {
 // files.
 func (r *resolver) Assemble() (Config, error) {
 	cfg := Config{
-		Daemon: assembleDaemonBlock(r.cfg.Daemon.Block),
+		Daemon: Daemon(r.cfg.Daemon.Block),
 	}
 
 	for _, s := range r.cfg.Sources {
@@ -133,7 +133,7 @@ type unresolvedConfig struct {
 	// the configuration files. Only one of the loaded files may contain a
 	// "daemon" block.
 	Daemon struct {
-		Block daemonBlock
+		Block daemonSchema
 		File  string
 	}
 
@@ -141,7 +141,7 @@ type unresolvedConfig struct {
 	// defaults block found within the configuration files. Only one of the
 	// loaded files may contain a "clones" defaults block.
 	ClonesDefaults struct {
-		Block clonesBlock
+		Block clonesSchema
 		File  string
 	}
 

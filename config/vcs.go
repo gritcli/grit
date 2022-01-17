@@ -6,36 +6,23 @@ import (
 
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/vcsdriver"
-	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 )
 
-// VCS configuration for a specific version control system.
-type VCS struct {
-	// Driver contains driver-specific configuration for this VCS.
-	DriverConfig vcsdriver.Config
-}
-
-// vcsBlock is the HCL schema for a "vcs" block.
-type vcsBlock struct {
-	DriverAlias string   `hcl:",label"`
-	DriverBlock hcl.Body `hcl:",remain"`
-}
-
 type unresolvedVCS struct {
-	Block        vcsBlock
+	Block        vcsSchema
 	DriverConfig vcsdriver.Config
 	File         string
 }
 
-// mergeVCSDefaultsBlock merges b into cfg.
+// mergeVCSDefaultsBlock merges a "vcs" block into the configuration.
 func mergeVCSDefaultsBlock(
 	reg *registry.Registry,
 	cfg *unresolvedConfig,
 	filename string,
-	b vcsBlock,
+	vcs vcsSchema,
 ) error {
-	if b.DriverAlias == "" {
+	if vcs.DriverAlias == "" {
 		return fmt.Errorf(
 			"%s: this file contains a 'vcs' block with an empty driver alias",
 			filename,
@@ -43,7 +30,7 @@ func mergeVCSDefaultsBlock(
 	}
 
 	for _, s := range cfg.VCSDefaults {
-		if strings.EqualFold(s.Block.DriverAlias, b.DriverAlias) {
+		if strings.EqualFold(s.Block.DriverAlias, vcs.DriverAlias) {
 			return fmt.Errorf(
 				"%s: defaults for the '%s' version control system are already defined in %s",
 				filename,
@@ -53,18 +40,18 @@ func mergeVCSDefaultsBlock(
 		}
 	}
 
-	r, ok := reg.VCSDriverByAlias(b.DriverAlias)
+	r, ok := reg.VCSDriverByAlias(vcs.DriverAlias)
 	if !ok {
 		return fmt.Errorf(
 			"%s: the '%s' version control system is not supported, the supported drivers are: '%s'",
 			filename,
-			b.DriverAlias,
+			vcs.DriverAlias,
 			strings.Join(reg.VCSDriverAliases(), "', '"),
 		)
 	}
 
 	driverBlock := r.NewConfigSchema()
-	if diag := gohcl.DecodeBody(b.DriverBlock, nil, driverBlock); diag.HasErrors() {
+	if diag := gohcl.DecodeBody(vcs.Body, nil, driverBlock); diag.HasErrors() {
 		return diag
 	}
 
@@ -74,7 +61,7 @@ func mergeVCSDefaultsBlock(
 		return fmt.Errorf(
 			"%s: the default '%s' configuration is invalid: %w",
 			filename,
-			b.DriverAlias,
+			vcs.DriverAlias,
 			err,
 		)
 	}
@@ -83,8 +70,8 @@ func mergeVCSDefaultsBlock(
 		cfg.VCSDefaults = map[string]unresolvedVCS{}
 	}
 
-	cfg.VCSDefaults[b.DriverAlias] = unresolvedVCS{
-		Block:        b,
+	cfg.VCSDefaults[vcs.DriverAlias] = unresolvedVCS{
+		Block:        vcs,
 		DriverConfig: vcsConfig,
 		File:         filename,
 	}
@@ -160,7 +147,7 @@ func normalizeSourceSpecificVCSBlocks(
 		}
 
 		driverBlock := r.NewConfigSchema()
-		if diag := gohcl.DecodeBody(b.DriverBlock, nil, driverBlock); diag.HasErrors() {
+		if diag := gohcl.DecodeBody(b.Body, nil, driverBlock); diag.HasErrors() {
 			return diag
 		}
 

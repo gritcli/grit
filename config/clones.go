@@ -7,20 +7,12 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
-// Clones is the configuration that controls how Grit stores local repository
-// clones.
-type Clones struct {
-	// Dir is the path to the directory in which local clones are kept.
-	Dir string
-}
-
-// clonesBlock is the HCL schema for a "clones" block
-type clonesBlock struct {
-	Dir string `hcl:"dir,optional"`
-}
-
 // mergeClonesDefaultsBlock merges b into cfg.
-func mergeClonesDefaultsBlock(cfg *unresolvedConfig, filename string, b clonesBlock) error {
+func mergeClonesDefaultsBlock(
+	cfg *unresolvedConfig,
+	filename string,
+	clones clonesSchema,
+) error {
 	if cfg.ClonesDefaults.File != "" {
 		return fmt.Errorf(
 			"%s: a 'clones' defaults block is already defined in %s",
@@ -30,7 +22,7 @@ func mergeClonesDefaultsBlock(cfg *unresolvedConfig, filename string, b clonesBl
 	}
 
 	cfg.ClonesDefaults.File = filename
-	cfg.ClonesDefaults.Block = b
+	cfg.ClonesDefaults.Block = clones
 
 	return nil
 }
@@ -56,7 +48,7 @@ func normalizeClonesDefaultsBlock(cfg *unresolvedConfig) error {
 // configuration.
 func normalizeSourceSpecificClonesBlock(cfg unresolvedConfig, s *unresolvedSource) error {
 	if s.Block.ClonesBlock == nil {
-		s.Block.ClonesBlock = &clonesBlock{}
+		s.Block.ClonesBlock = &clonesSchema{}
 	}
 
 	if s.Block.ClonesBlock.Dir == "" {
@@ -74,9 +66,4 @@ func normalizeSourceSpecificClonesBlock(cfg unresolvedConfig, s *unresolvedSourc
 	}
 
 	return nil
-}
-
-// assembleClonesBlock converts b into its configuration representation.
-func assembleClonesBlock(b clonesBlock) Clones {
-	return Clones(b)
 }

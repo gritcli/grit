@@ -9,42 +9,13 @@ import (
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
-	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 )
-
-// Source represents a repository source defined in the configuration.
-type Source struct {
-	// Name is a short identifier for the source. Each source in the
-	// configuration has a unique name. Names are case-insensitive.
-	Name string
-
-	// Enabled is true if the source is enabled. Disabled sources are not used
-	// when searching for repositories to be cloned.
-	Enabled bool
-
-	// Clones is the configuration that controls how Grit stores local
-	// repository clones for this source.
-	Clones Clones
-
-	// Driver contains driver-specific configuration for this source.
-	Driver sourcedriver.Config
-}
-
-// sourceBlock is the HCL schema for a "source" block.
-type sourceBlock struct {
-	Name        string       `hcl:",label"`
-	DriverAlias string       `hcl:",label"`
-	Enabled     *bool        `hcl:"enabled"`
-	ClonesBlock *clonesBlock `hcl:"clones,block"`
-	VCSBlocks   []vcsBlock   `hcl:"vcs,block"`
-	DriverBlock hcl.Body     `hcl:",remain"`
-}
 
 // unresolvedSource contains information about a "source" block within an
 // as-yet-unresolved configuration.
 type unresolvedSource struct {
-	Block       sourceBlock
+	Block       sourceSchema
 	DriverBlock sourcedriver.ConfigSchema
 	VCSConfigs  map[string]vcsdriver.Config
 	File        string
@@ -53,30 +24,30 @@ type unresolvedSource struct {
 // sourceNameRegexp is a regular expression used to validate source names.
 var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
 
-// mergeSourceBlock merges b into cfg.
+// mergeSourceBlock merges a "source" block into the configuration.
 func mergeSourceBlock(
 	reg *registry.Registry,
 	cfg *unresolvedConfig,
 	filename string,
-	b sourceBlock,
+	src sourceSchema,
 ) error {
-	if b.Name == "" {
+	if src.Name == "" {
 		return fmt.Errorf(
 			"%s: this file contains a 'source' block with an empty name",
 			filename,
 		)
 	}
 
-	if !sourceNameRegexp.MatchString(b.Name) {
+	if !sourceNameRegexp.MatchString(src.Name) {
 		return fmt.Errorf(
 			"%s: the '%s' source has an invalid name, source names must contain only alpha-numeric characters and underscores",
 			filename,
-			b.Name,
+			src.Name,
 		)
 	}
 
 	for _, s := range cfg.Sources {
-		if strings.EqualFold(s.Block.Name, b.Name) {
+		if strings.EqualFold(s.Block.Name, src.Name) {
 			return fmt.Errorf(
 				"%s: a source named '%s' is already defined in %s",
 				filename,
@@ -86,19 +57,19 @@ func mergeSourceBlock(
 		}
 	}
 
-	r, ok := reg.SourceDriverByAlias(b.DriverAlias)
+	r, ok := reg.SourceDriverByAlias(src.DriverAlias)
 	if !ok {
 		return fmt.Errorf(
 			"%s: the '%s' source uses '%s' which is not supported, the supported drivers are: '%s'",
 			filename,
-			b.Name,
-			b.DriverAlias,
+			src.Name,
+			src.DriverAlias,
 			strings.Join(reg.SourceDriverAliases(), "', '"),
 		)
 	}
 
 	driverBlock := r.NewConfigSchema()
-	if diag := gohcl.DecodeBody(b.DriverBlock, nil, driverBlock); diag.HasErrors() {
+	if diag := gohcl.DecodeBody(src.DriverBlock, nil, driverBlock); diag.HasErrors() {
 		return diag
 	}
 
@@ -106,8 +77,8 @@ func mergeSourceBlock(
 		cfg.Sources = map[string]unresolvedSource{}
 	}
 
-	cfg.Sources[b.Name] = unresolvedSource{
-		Block:       b,
+	cfg.Sources[src.Name] = unresolvedSource{
+		Block:       src,
 		DriverBlock: driverBlock,
 		File:        filename,
 	}
@@ -134,7 +105,7 @@ func mergeImplicitSources(
 			}
 
 			cfg.Sources[n] = unresolvedSource{
-				Block: sourceBlock{
+				Block: sourceSchema{
 					Name: n,
 				},
 				DriverBlock: new(),
@@ -179,7 +150,7 @@ func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, erro
 	return Source{
 		Name:    s.Block.Name,
 		Enabled: *s.Block.Enabled,
-		Clones:  assembleClonesBlock(*s.Block.ClonesBlock),
+		Clones:  Clones(*s.Block.ClonesBlock),
 		Driver:  driverConfig,
 	}, nil
 }

@@ -7,20 +7,12 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
-// Daemon holds the configuration for the Grit daemon.
-type Daemon struct {
-	// Socket is the path of the Unix socket used for communication between
-	// the Grit CLI and the Grit daemon (via gRPC).
-	Socket string
-}
-
-// daemonBlock is the HCL schema for a "daemon" block.
-type daemonBlock struct {
-	Socket string `hcl:"socket,optional"`
-}
-
-// mergeDaemonBlock merges b into cfg.
-func mergeDaemonBlock(cfg *unresolvedConfig, filename string, b daemonBlock) error {
+// mergeDaemonBlock merges a "daemon" block into the configuration.
+func mergeDaemonBlock(
+	cfg *unresolvedConfig,
+	filename string,
+	daemon daemonSchema,
+) error {
 	if cfg.Daemon.File != "" {
 		return fmt.Errorf(
 			"%s: a 'daemon' block is already defined in %s",
@@ -30,7 +22,7 @@ func mergeDaemonBlock(cfg *unresolvedConfig, filename string, b daemonBlock) err
 	}
 
 	cfg.Daemon.File = filename
-	cfg.Daemon.Block = b
+	cfg.Daemon.Block = daemon
 
 	return nil
 }
@@ -50,9 +42,4 @@ func normalizeDaemonBlock(cfg *unresolvedConfig) error {
 	cfg.Daemon.Block.Socket = dir
 
 	return nil
-}
-
-// assembleDaemonBlock converts b into its configuration representation.
-func assembleDaemonBlock(b daemonBlock) Daemon {
-	return Daemon(b)
 }
