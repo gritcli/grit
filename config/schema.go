@@ -6,17 +6,29 @@ import "github.com/hashicorp/hcl/v2"
 type fileSchema struct {
 	// Daemon is the configuratio for the Grit daemon.
 	//
-	// It is optional, but if present can only be specified in one file.
+	// It is optional, but if present can only be specified once across all of
+	// the loaded configuration files.
 	Daemon *daemonSchema `hcl:"daemon,block"`
 
-	// GlobalClones is the global (non-source-specific) configuration for how
-	// Grit stores local repository clones.
+	// GlobalClones is the global configuration for how Grit stores local
+	// repository clones.
 	//
-	// It is optional, but if present can only be specified in one file.
+	// This configuration may be overridden on a source-by-source basis.
+	//
+	// It is optional, but if present can only be specified once across all of
+	// the loaded configuration files.
 	GlobalClones *clonesSchema `hcl:"clones,block"`
 
-	VCSDefaults []vcsSchema    `hcl:"vcs,block"`
-	Sources     []sourceSchema `hcl:"source,block"`
+	// GlobalVCSs is the global configuration for how Grit uses a specific
+	// version-control system.
+	//
+	// This configuration may be overridden on a source-by-source basis.
+	//
+	// Configuration for any given VCS driver may only be specified once across
+	// all of the loaded configuration files.
+	GlobalVCSs []vcsSchema `hcl:"vcs,block"`
+
+	Sources []sourceSchema `hcl:"source,block"`
 }
 
 // daemonSchema is the HCL schema for a "daemon" block.
@@ -40,8 +52,13 @@ type clonesSchema struct {
 
 // vcsSchema is the HCL schema for a "vcs" block.
 type vcsSchema struct {
-	DriverAlias string   `hcl:",label"`
-	Body        hcl.Body `hcl:",remain"`
+	// Driver is the name (or alias) of the VCS driver that this configuration
+	// applies to.
+	Driver string `hcl:",label"`
+
+	// Body is the VCS-driver-specific configuration. The schema is defined by
+	// the driver.
+	Body hcl.Body `hcl:",remain"`
 }
 
 // sourceSchema is the HCL schema for a "source" block.

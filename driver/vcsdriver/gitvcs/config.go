@@ -50,7 +50,7 @@ type configSchema struct {
 	PreferHTTP *bool `hcl:"prefer_http"`
 }
 
-func (s *configSchema) NormalizeDefaults(
+func (s *configSchema) NormalizeGlobals(
 	ctx vcsdriver.ConfigNormalizeContext,
 ) (vcsdriver.Config, error) {
 	return s.normalize(ctx, Config{})

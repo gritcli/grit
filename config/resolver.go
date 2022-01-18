@@ -7,14 +7,18 @@ import (
 	"sort"
 
 	"github.com/gritcli/grit/driver/registry"
+	"github.com/gritcli/grit/driver/vcsdriver"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
 // A resolver flattens multiple configuration files into a single coherent
 // configuration.
 type resolver struct {
-	reg *registry.Registry
-	cfg unresolvedConfig
+	// configDir is the directory containing the configuration files to load.
+	configDir string
+
+	registry *registry.Registry
+	cfg      unresolvedConfig
 
 	// output is the configuration that is built by the resolver.
 	output Config
@@ -33,6 +37,14 @@ type resolver struct {
 
 	// globalClones is the clones configuration parsed from globalClonesFile.
 	globalClones Clones
+
+	// globalVCSFiles is a map of VCS driver name to the file containing the
+	// global configuration for that driver.
+	globalVCSFiles map[string]string
+
+	// globalVCSs is a map of VCS driver name to the global configuration for
+	// that driver.
+	globalVCSs map[string]vcsdriver.Config
 }
 
 // Merge merges the configuration from c.
@@ -54,20 +66,15 @@ func (r *resolver) Merge(filename string, f fileSchema) error {
 		}
 	}
 
-	for _, b := range f.VCSDefaults {
-		if err := mergeVCSDefaultsBlock(
-			r.reg,
-			&r.cfg,
-			filename,
-			b,
-		); err != nil {
+	for _, vcs := range f.GlobalVCSs {
+		if err := r.mergeGlobalVCS(vcs); err != nil {
 			return err
 		}
 	}
 
 	for _, b := range f.Sources {
 		if err := mergeSourceBlock(
-			r.reg,
+			r.registry,
 			&r.cfg,
 			filename,
 			b,
@@ -81,24 +88,24 @@ func (r *resolver) Merge(filename string, f fileSchema) error {
 
 // Normalize normalizes the configuration and populates it with default values.
 func (r *resolver) Normalize() error {
-	if err := r.populateDaemonDefaults(&r.output.Daemon); err != nil {
+	if err := r.populateDaemonDefaults(); err != nil {
 		return err
 	}
 
-	if err := r.populateGlobalClonesDefaults(&r.globalClones); err != nil {
+	if err := r.populateGlobalClonesDefaults(); err != nil {
 		return err
 	}
 
-	if err := mergeImplicitVCSDefaults(r.reg, &r.cfg); err != nil {
+	if err := r.populateImplicitGlobalVCSs(); err != nil {
 		return err
 	}
 
-	mergeImplicitSources(r.reg, &r.cfg)
+	mergeImplicitSources(r.registry, &r.cfg)
 
 	for k, s := range r.cfg.Sources {
 		if err := normalizeSourceBlock(
 			r,
-			r.reg,
+			r.registry,
 			r.cfg,
 			&s,
 		); err != nil {
@@ -115,7 +122,7 @@ func (r *resolver) Normalize() error {
 // files.
 func (r *resolver) Assemble() (Config, error) {
 	for _, s := range r.cfg.Sources {
-		src, err := assembleSourceBlock(r.cfg, s)
+		src, err := assembleSourceBlock(r, r.cfg, s)
 		if err != nil {
 			return Config{}, err
 		}
@@ -135,10 +142,6 @@ func (r *resolver) Assemble() (Config, error) {
 
 // unresolvedConfig is a configuration that is in the process of being resolved.
 type unresolvedConfig struct {
-	// VCSDefaults contains information about the "vcs" blocks within the
-	// configuration files.
-	VCSDefaults map[string]unresolvedVCS
-
 	// Sources contains information about the "source" blocks within the
 	// configuration files.
 	Sources map[string]unresolvedSource
@@ -204,4 +207,53 @@ func normalizePath(filename string, p *string) error {
 	*p = filepath.Clean(n)
 
 	return nil
+}
+
+// normalizeContext is a (partial) implementation of the ConfigNormalizeContext
+// interface from the sourcedriver and vcsdriver packages.
+type normalizeContext struct {
+	// configDir is the directory containing the config files being loaded.
+	configDir string
+}
+
+// NormalizePath resolves *p to an absolute path relative to the configuration
+// directory. It supports expanding leading tilde (~) to the user's home
+// directory.
+//
+// It does not require the referenced path to exist, and hence does not resolve
+// symlinks, etc.
+//
+// It does nothing if p is nil or *p is empty.
+func (n *normalizeContext) NormalizePath(p *string) error {
+	if p == nil || *p == "" {
+		return nil
+	}
+
+	result, err := homedir.Expand(*p)
+	if err != nil {
+		return err
+	}
+
+	if !filepath.IsAbs(result) {
+		baseDir, err := n.baseDir()
+		if err != nil {
+			return err
+		}
+
+		result = filepath.Join(baseDir, result)
+	}
+
+	*p = filepath.Clean(result)
+
+	return nil
+}
+
+// baseDir returns the directory against which relative paths are resolved.
+func (n *normalizeContext) baseDir() (string, error) {
+	if filepath.IsAbs(n.configDir) {
+		return n.configDir, nil
+	}
+
+	cwd, err := os.Getwd()
+	return filepath.Join(cwd, n.configDir), err
 }

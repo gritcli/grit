@@ -7,12 +7,12 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 )
 
-var _ = Describe("func Load() (vcs blocks)", func() {
+var _ = Context("resolving VCS configuration", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,
 		Entry(
-			"sources inherit the default VCS configuration",
+			"sources inherit the global VCS configuration",
 			[]string{
 				`vcs "test_vcs_driver" {
 					value = "<explicit>"
@@ -54,10 +54,10 @@ var _ = Describe("func Load() (vcs blocks)", func() {
 			}),
 		),
 		Entry(
-			"sources can override the default VCS configuration",
+			"sources can override the global VCS configuration",
 			[]string{
 				`vcs "test_vcs_driver" {
-					value = "<explicit default>"
+					value = "<explicit global>"
 				}
 
 				source "test_source" "test_source_driver" {
@@ -74,7 +74,7 @@ var _ = Describe("func Load() (vcs blocks)", func() {
 				},
 				Driver: SourceConfigStub{
 					Value:     "<default>",
-					VCSConfig: VCSConfigStub{Value: "<explicit default><override>"},
+					VCSConfig: VCSConfigStub{Value: "<explicit global><override>"},
 				},
 			}),
 		),
@@ -88,22 +88,22 @@ var _ = Describe("func Load() (vcs blocks)", func() {
 			[]string{
 				`vcs "" {}`,
 			},
-			`<dir>/config-0.hcl: this file contains a 'vcs' block with an empty driver alias`,
+			`<dir>/config-0.hcl: global VCS configurations must provide a driver name`,
 		),
 		Entry(
-			`duplicate VCS defaults configuration`,
+			`duplicate global VCS configuration`,
 			[]string{
 				`vcs "test_vcs_driver" {}`,
 				`vcs "test_vcs_driver" {}`,
 			},
-			`<dir>/config-1.hcl: defaults for the 'test_vcs_driver' version control system are already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: global configuration for the 'test_vcs_driver' version control system is already defined in <dir>/config-0.hcl`,
 		),
 		Entry(
 			`unrecognized VCS alias`,
 			[]string{
 				`vcs "<unrecognized>" {}`,
 			},
-			`<dir>/config-0.hcl: the '<unrecognized>' version control system is not supported, the supported drivers are: 'test_vcs_driver'`,
+			`<dir>/config-0.hcl: the '<unrecognized>' version control system is not supported, the supported VCS drivers are: 'test_vcs_driver'`,
 		),
 		Entry(
 			`VCS defaults with a well-structured, but invalid body`,

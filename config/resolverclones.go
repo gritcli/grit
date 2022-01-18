@@ -29,9 +29,9 @@ func (r *resolver) mergeGlobalClones(s clonesSchema) error {
 	return nil
 }
 
-// populateGlobalClonesDefaults populates c with default values.
-func (r *resolver) populateGlobalClonesDefaults(c *Clones) error {
-	if c.Dir == "" {
+// populateGlobalClonesDefaults populates r.globalClones with default values.
+func (r *resolver) populateGlobalClonesDefaults() error {
+	if r.globalClones.Dir == "" {
 		h, err := homedir.Dir()
 		if err != nil {
 			return fmt.Errorf(
@@ -40,7 +40,7 @@ func (r *resolver) populateGlobalClonesDefaults(c *Clones) error {
 			)
 		}
 
-		c.Dir = filepath.Join(h, "grit")
+		r.globalClones.Dir = filepath.Join(h, "grit")
 	}
 
 	return nil

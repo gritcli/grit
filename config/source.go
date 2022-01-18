@@ -131,13 +131,15 @@ func normalizeSourceBlock(
 		return err
 	}
 
-	return normalizeSourceSpecificVCSBlocks(reg, cfg, s)
+	return normalizeSourceSpecificVCSBlocks(r, cfg, s)
 }
 
 // assembleSourceBlock converts b into its configuration representation.
-func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, error) {
-	nc := &sourceNormalizationContext{cfg, s}
+func assembleSourceBlock(r *resolver, cfg unresolvedConfig, s unresolvedSource) (Source, error) {
+	nc := &sourceNormalizationContext{r.globalVCSs, cfg, s}
 
+	// TODO: fail if Normalize() does not call nc.ResolveVCSConfig() for every
+	// type of VCS config specified on this source.
 	driverConfig, err := s.DriverBlock.Normalize(nc)
 	if err != nil {
 		return Source{}, fmt.Errorf(
@@ -159,8 +161,9 @@ func assembleSourceBlock(cfg unresolvedConfig, s unresolvedSource) (Source, erro
 // sourceNormalizationContext is an implementation of
 // sourcedriver.ConfigNormalizationContext.
 type sourceNormalizationContext struct {
-	cfg unresolvedConfig
-	s   unresolvedSource
+	globalVCSs map[string]vcsdriver.Config
+	cfg        unresolvedConfig
+	s          unresolvedSource
 }
 
 func (c *sourceNormalizationContext) NormalizePath(p *string) error {
@@ -170,29 +173,39 @@ func (c *sourceNormalizationContext) NormalizePath(p *string) error {
 }
 
 func (c *sourceNormalizationContext) ResolveVCSConfig(cfg interface{}) error {
+	// TODO: validate that cfg is a pointer-to-impl to provide a better error
+	// message.
 	elem := reflect.ValueOf(cfg).Elem()
 
-	for _, d := range c.s.VCSConfigs {
-		v := reflect.ValueOf(d)
+	if c.resolveVCSConfig(c.s.VCSConfigs, elem) {
+		return nil
+	}
 
-		if v.Type().AssignableTo(
-			elem.Type(),
-		) {
+	if c.resolveVCSConfig(c.globalVCSs, elem) {
+		return nil
+	}
+
+	return fmt.Errorf(
+		"none of the supported VCS drivers provided a config of type %s",
+		elem.Type(),
+	)
+}
+
+// resolveVCSConfig assigns a value from configs to elem, if possible.
+func (c *sourceNormalizationContext) resolveVCSConfig(
+	configs map[string]vcsdriver.Config,
+	elem reflect.Value,
+) bool {
+	t := elem.Type()
+
+	for _, cfg := range configs {
+		v := reflect.ValueOf(cfg)
+
+		if v.Type().AssignableTo(t) {
 			elem.Set(v)
-			return nil
+			return true
 		}
 	}
 
-	for _, d := range c.cfg.VCSDefaults {
-		v := reflect.ValueOf(d.DriverConfig)
-
-		if v.Type().AssignableTo(
-			elem.Type(),
-		) {
-			elem.Set(v)
-			return nil
-		}
-	}
-
-	return fmt.Errorf("unsupported VCS config type (%s)", elem.Type())
+	return false
 }

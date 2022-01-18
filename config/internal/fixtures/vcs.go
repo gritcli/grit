@@ -25,9 +25,9 @@ type VCSConfigSchemaStub struct {
 	Value string `hcl:"value,optional"`
 }
 
-// NormalizeDefaults validates the configuration as parsed by this schema at the
-// "top-level" of a Grit configuration, and returns a normalized Config.
-func (s *VCSConfigSchemaStub) NormalizeDefaults(
+// NormalizeGlobals validates the global configuration as parsed by this schema,
+// and returns a normalized Config.
+func (s *VCSConfigSchemaStub) NormalizeGlobals(
 	ctx vcsdriver.ConfigNormalizeContext,
 ) (vcsdriver.Config, error) {
 	cfg := VCSConfigStub{
@@ -45,9 +45,9 @@ func (s *VCSConfigSchemaStub) NormalizeDefaults(
 // within a "source" block and returns a normalized Config.
 func (s *VCSConfigSchemaStub) NormalizeSourceSpecific(
 	ctx vcsdriver.ConfigNormalizeContext,
-	def vcsdriver.Config,
+	g vcsdriver.Config,
 ) (vcsdriver.Config, error) {
-	cfg := def.(VCSConfigStub)
+	cfg := g.(VCSConfigStub)
 
 	if s.Value != "" {
 		cfg.Value += s.Value

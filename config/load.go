@@ -20,7 +20,8 @@ func Load(dir string, reg *registry.Registry) (Config, error) {
 	}
 
 	r := resolver{
-		reg: reg,
+		configDir: dir,
+		registry:  reg,
 	}
 
 	if err := loadDir(&r, dir); err != nil {

@@ -11,22 +11,23 @@ package vcsdriver
 // When Grit parses a "vcs" block within a configuration, any unrecognized
 // attributes or blocks within that "vcs" block are parsed into this schema.
 type ConfigSchema interface {
-	// NormalizeDefaults validates the configuration as parsed by this schema at
-	// the "top-level" of a Grit configuration, and returns a normalized Config.
+	// NormalizeGlobals validates the global configuration as parsed by this
+	// schema, and returns a normalized Config.
 	//
-	// VCS configuration that appears at the "top-level" of the configuration is
-	// used to set the defaults used by any source driver that uses this VCS.
+	// The "global" VCS configuration is a "vcs" block that appears at the
+	// "top-level" of a configuration file. Such global configuration informs
+	// the source-specific VCS configuration.
 	//
 	// If there is no "vcs" block for this driver at the top-level of the Grit
 	// configuration, the method is called on a zero-value ConfigSchema.
-	NormalizeDefaults(ctx ConfigNormalizeContext) (Config, error)
+	NormalizeGlobals(ctx ConfigNormalizeContext) (Config, error)
 
 	// NormalizeSourceSpecific validates the configuration as parsed by this
 	// schema within a "source" block and returns a normalized Config.
 	//
-	// def is the default configuration for this VCS, as returned by
-	// NormalizeDefaults().
-	NormalizeSourceSpecific(ctx ConfigNormalizeContext, def Config) (Config, error)
+	// g is the global configuration for this VCS, as returned by
+	// NormalizeGlobals().
+	NormalizeSourceSpecific(ctx ConfigNormalizeContext, g Config) (Config, error)
 }
 
 // ConfigNormalizeContext provides operations used to normalize a

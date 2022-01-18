@@ -29,9 +29,9 @@ func (r *resolver) mergeDaemon(s daemonSchema) error {
 	return nil
 }
 
-// populateDaemonDefaults populates d with default values.
-func (r *resolver) populateDaemonDefaults(d *Daemon) error {
-	if d.Socket == "" {
+// populateDaemonDefaults populates r.output.Daemon with default values.
+func (r *resolver) populateDaemonDefaults() error {
+	if r.output.Daemon.Socket == "" {
 		s, err := homedir.Expand(api.DefaultSocket)
 		if err != nil {
 			return fmt.Errorf(
@@ -40,7 +40,7 @@ func (r *resolver) populateDaemonDefaults(d *Daemon) error {
 			)
 		}
 
-		d.Socket = s
+		r.output.Daemon.Socket = s
 	}
 
 	return nil
