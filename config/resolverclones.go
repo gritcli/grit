@@ -7,16 +7,13 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
-// mergeRootClones merges s into the configuration.
-//
-// s is a "clones" block at the top-level of the current file (that is, not
-// within a "source" block).
-func (r *resolver) mergeRootClones(s clonesSchema) error {
-	if r.rootClonesFile != "" {
+// mergeGlobalClones merges s into the configuration.
+func (r *resolver) mergeGlobalClones(s clonesSchema) error {
+	if r.globalClonesFile != "" {
 		return fmt.Errorf(
-			"%s: the clones configuration is already defined in %s",
+			"%s: the global clones configuration is already defined in %s",
 			r.currentFile,
-			r.rootClonesFile,
+			r.globalClonesFile,
 		)
 	}
 
@@ -26,14 +23,14 @@ func (r *resolver) mergeRootClones(s clonesSchema) error {
 		return err
 	}
 
-	r.rootClonesFile = r.currentFile
-	r.rootClones = c
+	r.globalClonesFile = r.currentFile
+	r.globalClones = c
 
 	return nil
 }
 
-// populateRootClonesDefaults populates c with default values.
-func (r *resolver) populateRootClonesDefaults(c *Clones) error {
+// populateGlobalClonesDefaults populates c with default values.
+func (r *resolver) populateGlobalClonesDefaults(c *Clones) error {
 	if c.Dir == "" {
 		h, err := homedir.Dir()
 		if err != nil {
@@ -58,7 +55,7 @@ func normalizeSourceSpecificClonesBlock(r *resolver, cfg unresolvedConfig, s *un
 
 	if s.Block.ClonesBlock.Dir == "" {
 		s.Block.ClonesBlock.Dir = filepath.Join(
-			r.rootClones.Dir,
+			r.globalClones.Dir,
 			s.Block.Name,
 		)
 	} else {

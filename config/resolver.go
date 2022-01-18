@@ -27,13 +27,12 @@ type resolver struct {
 	// been merged.
 	daemonFile string
 
-	// rootClonesFile is the name of the file containing the top-level
-	// "clones" block that was first encountered. It is empty if no "clones"
-	// block has been parsed yet.
-	rootClonesFile string
+	// globalClonesFile is the name of the file containing the global clones
+	// configuration. It is empty if no global clones block has been parsed yet.
+	globalClonesFile string
 
-	// rootClones is the clones configuration parsed from rootClonesFile.
-	rootClones Clones
+	// globalClones is the clones configuration parsed from globalClonesFile.
+	globalClones Clones
 }
 
 // Merge merges the configuration from c.
@@ -49,8 +48,8 @@ func (r *resolver) Merge(filename string, f fileSchema) error {
 		}
 	}
 
-	if f.ClonesDefaults != nil {
-		if err := r.mergeRootClones(*f.ClonesDefaults); err != nil {
+	if f.GlobalClones != nil {
+		if err := r.mergeGlobalClones(*f.GlobalClones); err != nil {
 			return err
 		}
 	}
@@ -86,7 +85,7 @@ func (r *resolver) Normalize() error {
 		return err
 	}
 
-	if err := r.populateRootClonesDefaults(&r.rootClones); err != nil {
+	if err := r.populateGlobalClonesDefaults(&r.globalClones); err != nil {
 		return err
 	}
 

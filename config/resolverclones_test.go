@@ -89,7 +89,7 @@ var _ = Context("resolving clones configuration", func() {
 				`clones {}`,
 				`clones {}`,
 			},
-			`<dir>/config-1.hcl: the clones configuration is already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: the global clones configuration is already defined in <dir>/config-0.hcl`,
 		),
 	)
 })
