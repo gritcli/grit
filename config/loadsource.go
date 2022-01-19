@@ -26,7 +26,7 @@ type intermediateSource struct {
 }
 
 // mergeSource merges s into the configuration.
-func (r *resolver) mergeSource(file string, s sourceSchema) error {
+func (l *loader) mergeSource(file string, s sourceSchema) error {
 	if s.Name == "" {
 		return fmt.Errorf(
 			"%s: source configurations must provide a name",
@@ -44,7 +44,7 @@ func (r *resolver) mergeSource(file string, s sourceSchema) error {
 
 	lowerName := strings.ToLower(s.Name)
 
-	if existingSource, ok := r.sources[lowerName]; ok {
+	if existingSource, ok := l.sources[lowerName]; ok {
 		return fmt.Errorf(
 			"%s: the '%s' source conflicts with a source of the same name in %s (source names are case-insensitive)",
 			file,
@@ -61,14 +61,14 @@ func (r *resolver) mergeSource(file string, s sourceSchema) error {
 		)
 	}
 
-	reg, ok := r.registry.SourceDriverByAlias(s.Driver)
+	reg, ok := l.Registry.SourceDriverByAlias(s.Driver)
 	if !ok {
 		return fmt.Errorf(
 			"%s: the '%s' source uses an unrecognized driver ('%s'), the supported source drivers are '%s'",
 			file,
 			s.Name,
 			s.Driver,
-			strings.Join(r.registry.SourceDriverAliases(), "', '"),
+			strings.Join(l.Registry.SourceDriverAliases(), "', '"),
 		)
 	}
 
@@ -85,16 +85,16 @@ func (r *resolver) mergeSource(file string, s sourceSchema) error {
 	}
 
 	for _, v := range s.VCSs {
-		if err := r.mergeSourceSpecificVCS(&i, v); err != nil {
+		if err := l.mergeSourceSpecificVCS(&i, v); err != nil {
 			return err
 		}
 	}
 
-	if r.sources == nil {
-		r.sources = map[string]intermediateSource{}
+	if l.sources == nil {
+		l.sources = map[string]intermediateSource{}
 	}
 
-	r.sources[lowerName] = i
+	l.sources[lowerName] = i
 
 	return nil
 }
@@ -104,16 +104,16 @@ func (r *resolver) mergeSource(file string, s sourceSchema) error {
 //
 // Any implicit source with a name that has already been defined in the
 // configuration files is ignored.
-func (r *resolver) populateImplicitSources() {
-	for _, reg := range r.registry.SourceDrivers() {
+func (l *loader) populateImplicitSources() {
+	for _, reg := range l.Registry.SourceDrivers() {
 		for name, newSchema := range reg.ImplicitSources {
 			lowerName := strings.ToLower(name)
 
-			if _, ok := r.sources[lowerName]; ok {
+			if _, ok := l.sources[lowerName]; ok {
 				continue
 			}
 
-			r.sources[lowerName] = intermediateSource{
+			l.sources[lowerName] = intermediateSource{
 				Schema: sourceSchema{
 					Name:   name,
 					Driver: reg.Name,
@@ -125,20 +125,20 @@ func (r *resolver) populateImplicitSources() {
 }
 
 // finalizeSource returns a source built from its intermediate representation.
-func (r *resolver) finalizeSource(i intermediateSource) (Source, error) {
-	clones, err := r.finalizeSourceSpecificClones(i, i.Schema.Clones)
+func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
+	clones, err := l.finalizeSourceSpecificClones(i, i.Schema.Clones)
 	if err != nil {
 		return Source{}, err
 	}
 
-	sourceVCSs, err := r.finalizeSourceSpecificVCSs(i)
+	sourceVCSs, err := l.finalizeSourceSpecificVCSs(i)
 	if err != nil {
 		return Source{}, err
 	}
 
 	nc := &sourceNormalizeContext{
-		resolver:   r,
-		globalVCSs: r.globalVCSs,
+		loader:     l,
+		globalVCSs: l.globalVCSs,
 		sourceVCSs: sourceVCSs,
 	}
 
@@ -168,13 +168,13 @@ func (r *resolver) finalizeSource(i intermediateSource) (Source, error) {
 // sourceNormalizeContext is an implementation of
 // sourcedriver.ConfigNormalizeContext.
 type sourceNormalizeContext struct {
-	resolver   *resolver
+	loader     *loader
 	globalVCSs map[string]vcsdriver.Config
 	sourceVCSs map[string]vcsdriver.Config
 }
 
 func (nc *sourceNormalizeContext) NormalizePath(p *string) error {
-	return nc.resolver.normalizePath(p)
+	return nc.loader.normalizePath(p)
 }
 
 func (nc *sourceNormalizeContext) ResolveVCSConfig(cfg interface{}) error {

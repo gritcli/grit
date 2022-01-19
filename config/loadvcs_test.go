@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 )
 
-var _ = Context("resolving VCS configuration", func() {
+var _ = Describe("func Load() (VCS configuration)", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,

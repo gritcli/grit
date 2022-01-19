@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 )
 
-var _ = Context("resolving source configuration", func() {
+var _ = Describe("func Load() (source configuration)", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,

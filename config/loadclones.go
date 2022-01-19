@@ -8,30 +8,30 @@ import (
 )
 
 // mergeGlobalClones merges s into the configuration.
-func (r *resolver) mergeGlobalClones(file string, s clonesSchema) error {
-	if r.globalClonesFile != "" {
+func (l *loader) mergeGlobalClones(file string, s clonesSchema) error {
+	if l.globalClonesFile != "" {
 		return fmt.Errorf(
 			"%s: the global clones configuration is already defined in %s",
 			file,
-			r.globalClonesFile,
+			l.globalClonesFile,
 		)
 	}
 
 	cfg := Clones(s)
 
-	if err := r.normalizePath(&cfg.Dir); err != nil {
+	if err := l.normalizePath(&cfg.Dir); err != nil {
 		return err
 	}
 
-	r.globalClonesFile = file
-	r.globalClones = cfg
+	l.globalClonesFile = file
+	l.globalClones = cfg
 
 	return nil
 }
 
-// populateGlobalClonesDefaults populates r.globalClones with default values.
-func (r *resolver) populateGlobalClonesDefaults() error {
-	if r.globalClones.Dir == "" {
+// populateGlobalClonesDefaults populates l.globalClones with default values.
+func (l *loader) populateGlobalClonesDefaults() error {
+	if l.globalClones.Dir == "" {
 		h, err := homedir.Dir()
 		if err != nil {
 			return fmt.Errorf(
@@ -40,7 +40,7 @@ func (r *resolver) populateGlobalClonesDefaults() error {
 			)
 		}
 
-		r.globalClones.Dir = filepath.Join(h, "grit")
+		l.globalClones.Dir = filepath.Join(h, "grit")
 	}
 
 	return nil
@@ -48,7 +48,7 @@ func (r *resolver) populateGlobalClonesDefaults() error {
 
 // finalizeSouceSpecific returns the clones configuration to use for a specific
 // source.
-func (r *resolver) finalizeSourceSpecificClones(
+func (l *loader) finalizeSourceSpecificClones(
 	i intermediateSource,
 	s *clonesSchema,
 ) (Clones, error) {
@@ -57,13 +57,13 @@ func (r *resolver) finalizeSourceSpecificClones(
 	if s != nil {
 		cfg.Dir = s.Dir
 
-		if err := r.normalizePath(&cfg.Dir); err != nil {
+		if err := l.normalizePath(&cfg.Dir); err != nil {
 			return Clones{}, err
 		}
 	}
 
 	if cfg.Dir == "" {
-		cfg.Dir = filepath.Join(r.globalClones.Dir, i.Schema.Name)
+		cfg.Dir = filepath.Join(l.globalClones.Dir, i.Schema.Name)
 	}
 
 	return cfg, nil

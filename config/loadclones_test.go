@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 )
 
-var _ = Context("resolving clones configuration", func() {
+var _ = Describe("func Load() (clones configuration)", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,
