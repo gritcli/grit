@@ -8,28 +8,29 @@ import (
 )
 
 // mergeGlobalClones merges s into the configuration.
-func (r *resolver) mergeGlobalClones(s clonesSchema) error {
+func (r *resolver) mergeGlobalClones(file string, s clonesSchema) error {
 	if r.globalClonesFile != "" {
 		return fmt.Errorf(
 			"%s: the global clones configuration is already defined in %s",
-			r.currentFile,
+			file,
 			r.globalClonesFile,
 		)
 	}
 
-	c := Clones(s)
+	cfg := Clones(s)
 
-	if err := normalizePath(r.currentFile, &c.Dir); err != nil {
+	if err := r.normalizePath(&cfg.Dir); err != nil {
 		return err
 	}
 
-	r.globalClonesFile = r.currentFile
-	r.globalClones = c
+	r.globalClonesFile = file
+	r.globalClones = cfg
 
 	return nil
 }
 
 // populateGlobalClonesDefaults populates r.globalClones with default values.
+// TODO: can this be moved into the mergeGlobalClones() function
 func (r *resolver) populateGlobalClonesDefaults() error {
 	if r.globalClones.Dir == "" {
 		h, err := homedir.Dir()
@@ -46,26 +47,25 @@ func (r *resolver) populateGlobalClonesDefaults() error {
 	return nil
 }
 
-// normalizeSourceSpecificClonesBlock normalizes a clonesBlock within a source
-// configuration.
-func normalizeSourceSpecificClonesBlock(r *resolver, cfg unresolvedConfig, s *unresolvedSource) error {
-	if s.Block.ClonesBlock == nil {
-		s.Block.ClonesBlock = &clonesSchema{}
-	}
+// finalizeSouceSpecific returns the clones configuration to use for a specific
+// source.
+func (r *resolver) finalizeSourceSpecificClones(
+	i intermediateSource,
+	s *clonesSchema,
+) (Clones, error) {
+	cfg := Clones{}
 
-	if s.Block.ClonesBlock.Dir == "" {
-		s.Block.ClonesBlock.Dir = filepath.Join(
-			r.globalClones.Dir,
-			s.Block.Name,
-		)
-	} else {
-		// We make sure to only normalize the private key path against s.File if
-		// it actually came from the source config (not inherited from the
-		// git defaults block).
-		if err := normalizePath(s.File, &s.Block.ClonesBlock.Dir); err != nil {
-			return err
+	if s != nil {
+		cfg.Dir = s.Dir
+
+		if err := r.normalizePath(&cfg.Dir); err != nil {
+			return Clones{}, err
 		}
 	}
 
-	return nil
+	if cfg.Dir == "" {
+		cfg.Dir = filepath.Join(r.globalClones.Dir, i.Schema.Name)
+	}
+
+	return cfg, nil
 }

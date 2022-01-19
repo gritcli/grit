@@ -13,26 +13,29 @@ import (
 //
 // If the directory doesn't exist or does not contain any configuration files,
 // then DefaultConfig is returned.
+//
+// reg is a registry of drivers that can be used within the configuration. It
+// may be nil.
 func Load(dir string, reg *registry.Registry) (Config, error) {
 	dir, err := homedir.Expand(dir)
 	if err != nil {
 		return Config{}, err
 	}
 
+	// TODO: make sure dir is absolute
+
 	r := resolver{
 		configDir: dir,
-		registry:  reg,
+		registry: registry.Registry{
+			Parent: reg,
+		},
 	}
 
 	if err := loadDir(&r, dir); err != nil {
 		return Config{}, err
 	}
 
-	if err := r.Normalize(); err != nil {
-		return Config{}, err
-	}
-
-	return r.Assemble()
+	return r.Finalize()
 }
 
 // loadDir loads the configuration from all .hcl files in the given

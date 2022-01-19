@@ -4,43 +4,39 @@ import (
 	"fmt"
 
 	"github.com/gritcli/grit/internal/common/api"
-	"github.com/mitchellh/go-homedir"
 )
 
 // mergeDaemon merges s into the configuration.
-func (r *resolver) mergeDaemon(s daemonSchema) error {
+func (r *resolver) mergeDaemon(file string, s daemonSchema) error {
 	if r.daemonFile != "" {
 		return fmt.Errorf(
 			"%s: the daemon configuration is already defined in %s",
-			r.currentFile,
+			file,
 			r.daemonFile,
 		)
 	}
 
-	d := Daemon(s)
+	cfg := Daemon(s)
 
-	if err := normalizePath(r.currentFile, &d.Socket); err != nil {
-		return err
+	if err := r.normalizePath(&cfg.Socket); err != nil {
+		return err // TODO: explain error!
 	}
 
-	r.daemonFile = r.currentFile
-	r.output.Daemon = d
+	r.daemonFile = file
+	r.daemon = cfg
 
 	return nil
 }
 
-// populateDaemonDefaults populates r.output.Daemon with default values.
+// populateDaemonDefaults populates r.daemon with default values.
+// TODO: can this be moved into the mergeDaemon() function?
 func (r *resolver) populateDaemonDefaults() error {
-	if r.output.Daemon.Socket == "" {
-		s, err := homedir.Expand(api.DefaultSocket)
-		if err != nil {
-			return fmt.Errorf(
-				"unable to determine default daemon socket path: %w",
-				err,
-			)
-		}
+	if r.daemon.Socket == "" {
+		r.daemon.Socket = api.DefaultSocket
 
-		r.output.Daemon.Socket = s
+		if err := r.normalizePath(&r.daemon.Socket); err != nil {
+			return err // TODO: explain error!
+		}
 	}
 
 	return nil

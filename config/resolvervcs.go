@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/gritcli/grit/driver/vcsdriver"
@@ -10,18 +9,18 @@ import (
 )
 
 // mergeGlobalVCS merges s into the configuration.
-func (r *resolver) mergeGlobalVCS(s vcsSchema) error {
+func (r *resolver) mergeGlobalVCS(file string, s vcsSchema) error {
 	if s.Driver == "" {
 		return fmt.Errorf(
-			"%s: global VCS configurations must provide a driver name",
-			r.currentFile,
+			"%s: global VCS configuration with empty driver name",
+			file,
 		)
 	}
 
 	if existingFile, ok := r.globalVCSFiles[s.Driver]; ok {
 		return fmt.Errorf(
 			"%s: global configuration for the '%s' version control system is already defined in %s",
-			r.currentFile,
+			file,
 			s.Driver,
 			existingFile,
 		)
@@ -30,24 +29,23 @@ func (r *resolver) mergeGlobalVCS(s vcsSchema) error {
 	reg, ok := r.registry.VCSDriverByAlias(s.Driver)
 	if !ok {
 		return fmt.Errorf(
-			"%s: the '%s' version control system is not supported, the supported VCS drivers are: '%s'",
-			r.currentFile,
+			"%s: the '%s' version control system is not unrecognized, the supported VCS drivers are: '%s'",
+			file,
 			s.Driver,
 			strings.Join(r.registry.VCSDriverAliases(), "', '"),
 		)
 	}
 
 	bodySchema := reg.NewConfigSchema()
-	if diag := gohcl.DecodeBody(s.Body, nil, bodySchema); diag.HasErrors() {
+	if diag := gohcl.DecodeBody(s.DriverBody, nil, bodySchema); diag.HasErrors() {
 		return diag
 	}
 
-	nc := &normalizeContext{r.currentFile}
-	cfg, err := bodySchema.NormalizeGlobals(nc)
+	cfg, err := bodySchema.NormalizeGlobals(&vcsNormalizeContext{r})
 	if err != nil {
 		return fmt.Errorf(
 			"%s: the global configuration for the '%s' version control system is invalid: %w",
-			r.currentFile,
+			file,
 			s.Driver,
 			err,
 		)
@@ -58,7 +56,7 @@ func (r *resolver) mergeGlobalVCS(s vcsSchema) error {
 		r.globalVCSs = map[string]vcsdriver.Config{}
 	}
 
-	r.globalVCSFiles[s.Driver] = r.currentFile
+	r.globalVCSFiles[s.Driver] = file
 	r.globalVCSs[s.Driver] = cfg
 
 	return nil
@@ -76,8 +74,7 @@ func (r *resolver) populateImplicitGlobalVCSs() error {
 			continue
 		}
 
-		nc := &normalizeContext{r.configDir}
-		cfg, err := reg.NewConfigSchema().NormalizeGlobals(nc)
+		cfg, err := reg.NewConfigSchema().NormalizeGlobals(&vcsNormalizeContext{r})
 		if err != nil {
 			return fmt.Errorf(
 				"unable to produce default global configuration for the '%s' version control system: %w",
@@ -92,63 +89,80 @@ func (r *resolver) populateImplicitGlobalVCSs() error {
 	return nil
 }
 
-func normalizeSourceSpecificVCSBlocks(
-	r *resolver,
-	cfg unresolvedConfig,
-	s *unresolvedSource,
-) error {
-	if s.VCSConfigs == nil {
-		s.VCSConfigs = map[string]vcsdriver.Config{}
+// mergeSourceSpecificVCS merges s into i.VCSs.
+func (r *resolver) mergeSourceSpecificVCS(i *intermediateSource, s vcsSchema) error {
+	if s.Driver == "" {
+		return fmt.Errorf(
+			"%s: the '%s' source contains a VCS configuration with an empty driver name",
+			i.File,
+			i.Schema.Name,
+		)
 	}
 
-	for _, b := range s.Block.VCSBlocks {
-		if b.Driver == "" {
-			return fmt.Errorf(
-				"%s: the '%s' source contains a 'vcs' block with an empty driver alias",
-				s.File,
-				s.Block.Name,
-			)
-		}
+	if _, ok := i.VCSs[s.Driver]; ok {
+		return fmt.Errorf(
+			"%s: the '%s' source contains multiple configurations for the '%s' version control system",
+			i.File,
+			i.Schema.Name,
+			s.Driver,
+		)
+	}
 
-		for alias := range s.VCSConfigs {
-			if alias == b.Driver {
-				return fmt.Errorf(
-					"%s: the '%s' source contains multiple configurations for the '%s' version control system",
-					s.File,
-					s.Block.Name,
-					b.Driver,
-				)
-			}
-		}
+	reg, ok := r.registry.VCSDriverByAlias(s.Driver)
+	if !ok {
+		return fmt.Errorf(
+			"%s: the '%s' source contains configuration for an unrecognized version control system ('%s'), the supported VCS drivers are '%s'",
+			i.File,
+			i.Schema.Name,
+			s.Driver,
+			strings.Join(r.registry.VCSDriverAliases(), "', '"),
+		)
+	}
 
-		reg, ok := r.registry.VCSDriverByAlias(b.Driver)
-		if !ok {
-			return fmt.Errorf(
-				"%s: the '%s' source contains configuration for the '%s' version control system, which is not supported, the supported drivers are: '%s'",
-				s.File,
-				s.Block.Name,
-				b.Driver,
-				strings.Join(r.registry.VCSDriverAliases(), "', '"),
-			)
-		}
+	bodySchema := reg.NewConfigSchema()
+	if diag := gohcl.DecodeBody(s.DriverBody, nil, bodySchema); diag.HasErrors() {
+		return diag
+	}
 
-		driverBlock := reg.NewConfigSchema()
-		if diag := gohcl.DecodeBody(b.Body, nil, driverBlock); diag.HasErrors() {
-			return diag
-		}
+	i.VCSs[s.Driver] = bodySchema
 
-		nc := &normalizeContext{filepath.Dir(s.File)}
-		vcsConfig, err := driverBlock.NormalizeSourceSpecific(nc, r.globalVCSs[b.Driver])
+	return nil
+}
+
+// finalizeSourceSpecificVCS returns the VCS configurations for a specific
+// source.
+func (r *resolver) finalizeSourceSpecificVCSs(
+	i intermediateSource,
+) (map[string]vcsdriver.Config, error) {
+	configs := map[string]vcsdriver.Config{}
+
+	for n, s := range i.VCSs {
+		cfg, err := s.NormalizeSourceSpecific(
+			&vcsNormalizeContext{r},
+			r.globalVCSs[n],
+		)
 		if err != nil {
-			return fmt.Errorf(
-				"the '%s' configuration is invalid: %w",
-				b.Driver,
+			return nil, fmt.Errorf(
+				"%s: the '%s' source's configuration for the '%s' version control system is invalid: %w",
+				i.File, // TODO: this will be empty for 'implicit' sources
+				i.Schema.Name,
+				n,
 				err,
 			)
 		}
 
-		s.VCSConfigs[b.Driver] = vcsConfig
+		configs[n] = cfg
 	}
 
-	return nil
+	return configs, nil
+}
+
+// vcsNormalizeContext is an implementation of the
+// vcsdriver.ConfigNormalizeContext interface.
+type vcsNormalizeContext struct {
+	resolver *resolver
+}
+
+func (nc *vcsNormalizeContext) NormalizePath(p *string) error {
+	return nc.resolver.normalizePath(p)
 }

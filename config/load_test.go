@@ -46,10 +46,7 @@ var _ = Describe("func Load()", func() {
 	)
 
 	It("returns the default configuration when passed a non-existent directory", func() {
-		// TODO: don't test using built-ins
-		cfg, err := Load("./does-not-exist", &registry.Registry{
-			Parent: &registry.BuiltIns,
-		})
+		cfg, err := Load("./does-not-exist", nil)
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg).To(Equal(defaultConfig))
 	})
@@ -75,9 +72,7 @@ var _ = Describe("func Load()", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 
 		// TODO: don't test using built-ins
-		cfg, err := Load(dir, &registry.Registry{
-			Parent: &registry.BuiltIns,
-		})
+		cfg, err := Load(dir, nil)
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg).To(Equal(defaultConfig))
 	})

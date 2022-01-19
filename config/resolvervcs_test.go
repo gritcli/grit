@@ -88,7 +88,7 @@ var _ = Context("resolving VCS configuration", func() {
 			[]string{
 				`vcs "" {}`,
 			},
-			`<dir>/config-0.hcl: global VCS configurations must provide a driver name`,
+			`<dir>/config-0.hcl: global VCS configuration with empty driver name`,
 		),
 		Entry(
 			`duplicate global VCS configuration`,
@@ -103,7 +103,7 @@ var _ = Context("resolving VCS configuration", func() {
 			[]string{
 				`vcs "<unrecognized>" {}`,
 			},
-			`<dir>/config-0.hcl: the '<unrecognized>' version control system is not supported, the supported VCS drivers are: 'test_vcs_driver'`,
+			`<dir>/config-0.hcl: the '<unrecognized>' version control system is not unrecognized, the supported VCS drivers are: 'test_vcs_driver'`,
 		),
 		Entry(
 			`VCS defaults with a well-structured, but invalid body`,
@@ -126,7 +126,7 @@ var _ = Context("resolving VCS configuration", func() {
 					vcs "" {}
 				}`,
 			},
-			`<dir>/config-0.hcl: the 'test_source' source contains a 'vcs' block with an empty driver alias`,
+			`<dir>/config-0.hcl: the 'test_source' source contains a VCS configuration with an empty driver name`,
 		),
 		Entry(
 			`duplicate VCS defaults configuration`,
@@ -145,7 +145,7 @@ var _ = Context("resolving VCS configuration", func() {
 					vcs "<unrecognized>" {}
 				}`,
 			},
-			`<dir>/config-0.hcl: the 'test_source' source contains configuration for the '<unrecognized>' version control system, which is not supported, the supported drivers are: 'test_vcs_driver'`,
+			`<dir>/config-0.hcl: the 'test_source' source contains configuration for an unrecognized version control system ('<unrecognized>'), the supported VCS drivers are 'test_vcs_driver'`,
 		),
 		Entry(
 			`VCS defaults with a well-structured, but invalid body`,

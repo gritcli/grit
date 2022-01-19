@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 )
 
-var _ = Describe("func Load() (source blocks)", func() {
+var _ = Context("resolving source configuration", func() {
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,
@@ -78,14 +78,14 @@ var _ = Describe("func Load() (source blocks)", func() {
 			[]string{
 				`source "" "test_source_driver" {}`,
 			},
-			`<dir>/config-0.hcl: this file contains a 'source' block with an empty name`,
+			`<dir>/config-0.hcl: source configurations must provide a name`,
 		),
 		Entry(
 			`invalid source name`,
 			[]string{
 				`source "<invalid>" "test_source_driver" {}`,
 			},
-			`<dir>/config-0.hcl: the '<invalid>' source has an invalid name, source names must contain only alpha-numeric characters and underscores`,
+			`<dir>/config-0.hcl: '<invalid>' is not a valid source name, valid characters are ASCII letters, numbers and underscore`,
 		),
 		Entry(
 			`duplicate source names`,
@@ -93,7 +93,7 @@ var _ = Describe("func Load() (source blocks)", func() {
 				`source "test_source" "test_source_driver" {}`,
 				`source "test_source" "test_source_driver" {}`,
 			},
-			`<dir>/config-1.hcl: a source named 'test_source' is already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: the 'test_source' source conflicts with a source of the same name in <dir>/config-0.hcl (source names are case-insensitive)`,
 		),
 		Entry(
 			`duplicate source names (case-insensitive)`,
@@ -101,14 +101,14 @@ var _ = Describe("func Load() (source blocks)", func() {
 				`source "test_source" "test_source_driver" {}`,
 				`source "TEST_SOURCE" "test_source_driver" {}`,
 			},
-			`<dir>/config-1.hcl: a source named 'test_source' is already defined in <dir>/config-0.hcl`,
+			`<dir>/config-1.hcl: the 'TEST_SOURCE' source conflicts with a source of the same name in <dir>/config-0.hcl (source names are case-insensitive)`,
 		),
 		Entry(
 			`unrecognized source driver`,
 			[]string{
 				`source "test_source" "<unrecognized>" {}`,
 			},
-			`<dir>/config-0.hcl: the 'test_source' source uses '<unrecognized>' which is not supported, the supported drivers are: 'test_source_driver'`,
+			`<dir>/config-0.hcl: the 'test_source' source uses an unrecognized driver ('<unrecognized>'), the supported source drivers are 'test_source_driver'`,
 		),
 		Entry(
 			`source with a well-structured, but invalid body`,

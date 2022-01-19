@@ -4,7 +4,7 @@ import "github.com/hashicorp/hcl/v2"
 
 // fileSchema is HCL schema for a single configuration file.
 type fileSchema struct {
-	// Daemon is the configuratio for the Grit daemon.
+	// Daemon is the configuration for the Grit daemon.
 	//
 	// It is optional, but if present can only be specified once across all of
 	// the loaded configuration files.
@@ -19,8 +19,8 @@ type fileSchema struct {
 	// the loaded configuration files.
 	GlobalClones *clonesSchema `hcl:"clones,block"`
 
-	// GlobalVCSs is the global configuration for how Grit uses a specific
-	// version-control system.
+	// GlobalVCSs is the global configuration for how Grit uses specific
+	// version-control systems.
 	//
 	// This configuration may be overridden on a source-by-source basis.
 	//
@@ -28,6 +28,10 @@ type fileSchema struct {
 	// all of the loaded configuration files.
 	GlobalVCSs []vcsSchema `hcl:"vcs,block"`
 
+	// Sources is the configuration for repository sources.
+	//
+	// Each source has a (case-insensitive) name which must be unique across all
+	// of the loaded configuration files.
 	Sources []sourceSchema `hcl:"source,block"`
 }
 
@@ -56,17 +60,36 @@ type vcsSchema struct {
 	// applies to.
 	Driver string `hcl:",label"`
 
-	// Body is the VCS-driver-specific configuration. The schema is defined by
+	// DriverBody is the VCS-driver-specific configuration. The schema is defined by
 	// the driver.
-	Body hcl.Body `hcl:",remain"`
+	DriverBody hcl.Body `hcl:",remain"`
 }
 
 // sourceSchema is the HCL schema for a "source" block.
 type sourceSchema struct {
-	Name        string        `hcl:",label"`
-	DriverAlias string        `hcl:",label"`
-	Enabled     *bool         `hcl:"enabled"`
-	ClonesBlock *clonesSchema `hcl:"clones,block"`
-	VCSBlocks   []vcsSchema   `hcl:"vcs,block"`
-	DriverBlock hcl.Body      `hcl:",remain"`
+	// Name is the unique name for the source.
+	Name string `hcl:",label"`
+
+	// Driver is the name (or alias) of the VCS driver that this configuration
+	// applies to.
+	Driver string `hcl:",label"`
+
+	// Enabled indicates whether the source is enabled or not.
+	//
+	// If it is null (absent) the source is enabled by default. Enabled sources
+	// are not ignored completely, but some operations (such as searching for
+	// repositories for cloning) will skip disabled sources.
+	Enabled *bool `hcl:"enabled"`
+
+	// Clones is the configuration for how Grit stores local repository clones
+	// that are cloned from this source.
+	Clones *clonesSchema `hcl:"clones,block"`
+
+	// VCSs is the configuration for how Grit uses specific version-control
+	// systems when dealing with repositories from this source.
+	VCSs []vcsSchema `hcl:"vcs,block"`
+
+	// DriverBody the source-driver-specific configuration. The schema is defined by
+	// the driver.
+	DriverBody hcl.Body `hcl:",remain"`
 }
