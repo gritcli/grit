@@ -8,6 +8,7 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/internal/daemon/internal/apiserver"
 	"github.com/gritcli/grit/internal/daemon/internal/deps"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
@@ -27,10 +28,14 @@ func Run(version string) (err error) {
 	return deps.Container.Invoke(func(
 		cfg config.Config,
 		s *grpc.Server,
+		r *registry.Registry,
 		sources source.List,
 		logger logging.Logger,
 	) error {
 		logging.Log(logger, "grit daemon v%s", version)
+
+		logDrivers(logger, r)
+		logSources(logger, sources)
 
 		if err := initSourceDrivers(ctx, logger, sources); err != nil {
 			return err
@@ -48,6 +53,54 @@ func Run(version string) (err error) {
 
 		return g.Wait()
 	})
+}
+
+// logDrivers logs information about the drivers in the registry.
+func logDrivers(logger logging.Logger, r *registry.Registry) {
+	for alias, reg := range r.SourceDrivers() {
+		if alias == reg.Name {
+			logger.Log(
+				"config: loaded '%s' source driver: %s",
+				reg.Name,
+				reg.Description,
+			)
+		} else {
+			logger.Log(
+				"config: loaded '%s' source driver as '%s': %s",
+				reg.Name,
+				reg.Description,
+				alias,
+			)
+		}
+	}
+
+	for alias, reg := range r.VCSDrivers() {
+		if alias == reg.Name {
+			logger.Log(
+				"config: loaded '%s' vcs driver: %s",
+				reg.Name,
+				reg.Description,
+			)
+		} else {
+			logger.Log(
+				"config: loaded '%s' vcs driver as '%s': %s",
+				reg.Name,
+				reg.Description,
+				alias,
+			)
+		}
+	}
+}
+
+// logSources logs information about the sources in the configuration.
+func logSources(logger logging.Logger, sources source.List) {
+	for _, s := range sources {
+		logger.Log(
+			"config: loaded '%s' source: %s",
+			s.Name,
+			s.Description,
+		)
+	}
 }
 
 // initSourceDrivers initializes each source's driver in parallel.

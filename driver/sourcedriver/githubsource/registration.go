@@ -8,7 +8,7 @@ import (
 // Grit's driver registry.
 var Registration = sourcedriver.Registration{
 	Name:        "github",
-	Description: "Use repositories from GitHub.com or GitHub Enterprise Server.",
+	Description: "adds support for GitHub and GitHub Enterprise Server as repository sources",
 	NewConfigSchema: func() sourcedriver.ConfigSchema {
 		return &configSchema{}
 	},

@@ -6,7 +6,7 @@ import "github.com/gritcli/grit/driver/vcsdriver"
 // Grit's driver registry.
 var Registration = vcsdriver.Registration{
 	Name:        "git",
-	Description: "Git distributed SCM (https://git-scm.com)",
+	Description: "adds support for Git repositories",
 	NewConfigSchema: func() vcsdriver.ConfigSchema {
 		return &configSchema{}
 	},
