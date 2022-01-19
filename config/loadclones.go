@@ -11,8 +11,7 @@ import (
 func (l *loader) mergeGlobalClones(file string, s clonesSchema) error {
 	if l.globalClonesFile != "" {
 		return fmt.Errorf(
-			"%s: the global clones configuration is already defined in %s",
-			file,
+			"the global clones configuration is already defined in %s",
 			l.globalClonesFile,
 		)
 	}

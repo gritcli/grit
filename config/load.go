@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -152,7 +153,16 @@ func isConfigFile(e fs.DirEntry) bool {
 
 // mergeFile merges the configuration from a single file into the intermediate
 // representation of the configuration.
-func (l *loader) mergeFile(file string, f fileSchema) error {
+func (l *loader) mergeFile(file string, f fileSchema) (err error) {
+	defer func() {
+		if err != nil {
+			prefix := file + ":"
+			if !strings.HasPrefix(err.Error(), prefix) {
+				err = fmt.Errorf("%s %w", prefix, err)
+			}
+		}
+	}()
+
 	if f.Daemon != nil {
 		if err := l.mergeDaemon(file, *f.Daemon); err != nil {
 			return err
@@ -204,6 +214,11 @@ func (l *loader) Finalize() (Config, error) {
 	for _, i := range l.sources {
 		src, err := l.finalizeSource(i)
 		if err != nil {
+			if i.File != "" {
+				return Config{}, fmt.Errorf("%s: %w", i.File, err)
+			}
+
+			// TODO: handle implicit sources that don't have a file
 			return Config{}, err
 		}
 

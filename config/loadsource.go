@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -29,16 +30,12 @@ type intermediateSource struct {
 // mergeSource merges s into the configuration.
 func (l *loader) mergeSource(file string, s sourceSchema) error {
 	if s.Name == "" {
-		return fmt.Errorf(
-			"%s: source configurations must provide a name",
-			file,
-		)
+		return errors.New("source configurations must provide a name")
 	}
 
 	if !sourceNameRegexp.MatchString(s.Name) {
 		return fmt.Errorf(
-			"%s: '%s' is not a valid source name, valid characters are ASCII letters, numbers and underscore",
-			file,
+			"'%s' is not a valid source name, valid characters are ASCII letters, numbers and underscore",
 			s.Name,
 		)
 	}
@@ -47,8 +44,7 @@ func (l *loader) mergeSource(file string, s sourceSchema) error {
 
 	if existingSource, ok := l.sources[lowerName]; ok {
 		return fmt.Errorf(
-			"%s: the '%s' source conflicts with a source of the same name in %s (source names are case-insensitive)",
-			file,
+			"the '%s' source conflicts with a source of the same name in %s (source names are case-insensitive)",
 			s.Name,
 			existingSource.File,
 		)
@@ -56,8 +52,7 @@ func (l *loader) mergeSource(file string, s sourceSchema) error {
 
 	if s.Driver == "" {
 		return fmt.Errorf(
-			"%s: the '%s' source has an empty driver name",
-			file,
+			"the '%s' source has an empty driver name",
 			s.Name,
 		)
 	}
@@ -65,8 +60,7 @@ func (l *loader) mergeSource(file string, s sourceSchema) error {
 	reg, ok := l.Registry.SourceDriverByAlias(s.Driver)
 	if !ok {
 		return fmt.Errorf(
-			"%s: the '%s' source uses an unrecognized driver ('%s'), the supported source drivers are '%s'",
-			file,
+			"the '%s' source uses an unrecognized driver ('%s'), the supported source drivers are '%s'",
 			s.Name,
 			s.Driver,
 			strings.Join(l.Registry.SourceDriverAliases(), "', '"),
@@ -146,8 +140,7 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 	cfg, err := i.Driver.Normalize(nc)
 	if err != nil {
 		return Source{}, fmt.Errorf(
-			"%s: the '%s' source is invalid: %w",
-			i.File, // TODO: s.File is empty for "implicit" sources
+			"the '%s' source is invalid: %w", // TODO: not necessarily invalid config, but just can't be loaded
 			i.Schema.Name,
 			err,
 		)

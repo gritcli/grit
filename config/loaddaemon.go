@@ -10,8 +10,7 @@ import (
 func (l *loader) mergeDaemon(file string, s daemonSchema) error {
 	if l.daemonFile != "" {
 		return fmt.Errorf(
-			"%s: the daemon configuration is already defined in %s",
-			file,
+			"the daemon configuration is already defined in %s",
 			l.daemonFile,
 		)
 	}
