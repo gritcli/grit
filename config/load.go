@@ -22,7 +22,10 @@ func Load(dir string, reg *registry.Registry) (Config, error) {
 		return Config{}, err
 	}
 
-	// TODO: make sure dir is absolute
+	dir, err = filepath.Abs(dir)
+	if err != nil {
+		return Config{}, err
+	}
 
 	r := resolver{
 		configDir: dir,
