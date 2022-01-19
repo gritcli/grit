@@ -29,7 +29,6 @@ func (r *resolver) mergeDaemon(file string, s daemonSchema) error {
 }
 
 // populateDaemonDefaults populates r.daemon with default values.
-// TODO: can this be moved into the mergeDaemon() function?
 func (r *resolver) populateDaemonDefaults() error {
 	if r.daemon.Socket == "" {
 		r.daemon.Socket = api.DefaultSocket

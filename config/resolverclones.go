@@ -30,7 +30,6 @@ func (r *resolver) mergeGlobalClones(file string, s clonesSchema) error {
 }
 
 // populateGlobalClonesDefaults populates r.globalClones with default values.
-// TODO: can this be moved into the mergeGlobalClones() function
 func (r *resolver) populateGlobalClonesDefaults() error {
 	if r.globalClones.Dir == "" {
 		h, err := homedir.Dir()
