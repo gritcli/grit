@@ -71,7 +71,6 @@ var _ = Describe("func Load()", func() {
 		err = os.WriteFile(filepath.Join(dir, ".dot.hcl"), []byte("<invalid config>"), 0600)
 		Expect(err).ShouldNot(HaveOccurred())
 
-		// TODO: don't test using built-ins
 		cfg, err := Load(dir, nil)
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg).To(Equal(defaultConfig))

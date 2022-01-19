@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 
 	. "github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/driver/registry"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -48,10 +47,7 @@ var _ = Context("resolving daemon configuration", func() {
 		)
 		defer cleanup()
 
-		// TODO: don't test using built-ins
-		cfg, err := Load(dir, &registry.Registry{
-			Parent: &registry.BuiltIns,
-		})
+		cfg, err := Load(dir, nil)
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg.Daemon.Socket).To(Equal(
 			filepath.Join(dir, "relative/path/to/socket"),
