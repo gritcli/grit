@@ -22,17 +22,24 @@ import (
 // reg is a registry of drivers that can be used within the configuration. It
 // may be nil.
 func Load(dir string, reg *registry.Registry) (Config, error) {
+	dir, err := homedir.Expand(dir)
+	if err != nil {
+		return Config{}, err
+	}
+
+	dir, err = filepath.Abs(dir)
+	if err != nil {
+		return Config{}, err
+	}
+
 	l := loader{
+		ConfigDir: dir,
 		Registry: registry.Registry{
 			Parent: reg,
 		},
 	}
 
-	if err := l.LoadDir(dir); err != nil {
-		return Config{}, err
-	}
-
-	return l.Finalize()
+	return l.Load()
 }
 
 // A loader loads configuration from files and flattens them into a single
@@ -46,13 +53,13 @@ func Load(dir string, reg *registry.Registry) (Config, error) {
 // 2. The "finalize" phase produces a Config value from the intermediate
 // representation.
 type loader struct {
-	// Registry is used to lookup information about source and VCS drivers.
-	Registry registry.Registry
-
-	// configDir is the directory containing the configuration files to load.
+	// ConfigDir is the directory containing the configuration files to load.
 	//
 	// It must be an absolute directory.
-	configDir string
+	ConfigDir string
+
+	// Registry is used to lookup information about source and VCS drivers.
+	Registry registry.Registry
 
 	// daemonFile is the name of the file containing the "daemon" block that was
 	// merged into the configuration. It is empty if no "daemon" block has yet
@@ -82,32 +89,28 @@ type loader struct {
 	sources map[string]intermediateSource
 }
 
-// LoadDir loads the configuration from .hcl files in the given directory and
-// merges them into the configuration.
+// Load loads the configuration from .hcl files in l.ConfigDir and merges them
+// into the configuration.
 //
 // This is the main entrypoint for the loader.
 //
 // Files that begin with and underscore (_) or dot (.) are ignored. It does not
 // descend into sub-directories.
-func (l *loader) LoadDir(dir string) error {
-	dir, err := homedir.Expand(dir)
-	if err != nil {
-		return err
+func (l *loader) Load() (Config, error) {
+	if err := l.load(); err != nil {
+		return Config{}, err
 	}
 
-	dir, err = filepath.Abs(dir)
-	if err != nil {
-		return err
-	}
+	return l.finalize()
+}
 
-	l.configDir = dir
-
-	entries, err := os.ReadDir(l.configDir)
+func (l *loader) load() error {
+	entries, err := os.ReadDir(l.ConfigDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			// A non-existent directory is not an error, it's simply an empty
 			// configuration.
-			return nil
+			err = nil
 		}
 
 		return err
@@ -118,7 +121,7 @@ func (l *loader) LoadDir(dir string) error {
 			continue
 		}
 
-		file := filepath.Join(dir, entry.Name())
+		file := filepath.Join(l.ConfigDir, entry.Name())
 
 		var f fileSchema
 		if err := hclsimple.DecodeFile(file, nil, &f); err != nil {
@@ -190,9 +193,9 @@ func (l *loader) mergeFile(file string, f fileSchema) (err error) {
 	return nil
 }
 
-// Finalize builds the complete configuration from the intermediate
+// finalize builds the complete configuration from the intermediate
 // representation.
-func (l *loader) Finalize() (Config, error) {
+func (l *loader) finalize() (Config, error) {
 	if err := l.populateDaemonDefaults(); err != nil {
 		return Config{}, err
 	}
@@ -255,7 +258,7 @@ func (l *loader) normalizePath(p *string) error {
 	}
 
 	if !filepath.IsAbs(result) {
-		result = filepath.Join(l.configDir, result)
+		result = filepath.Join(l.ConfigDir, result)
 	}
 
 	*p = filepath.Clean(result)

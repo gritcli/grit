@@ -18,7 +18,11 @@ func (l *loader) mergeDaemon(file string, s daemonSchema) error {
 	cfg := Daemon(s)
 
 	if err := l.normalizePath(&cfg.Socket); err != nil {
-		return err // TODO: explain error!
+		return fmt.Errorf(
+			"unable to normalize daemon socket path (%s): %w",
+			cfg.Socket,
+			err,
+		)
 	}
 
 	l.daemonFile = file
@@ -33,7 +37,11 @@ func (l *loader) populateDaemonDefaults() error {
 		l.daemon.Socket = api.DefaultSocket
 
 		if err := l.normalizePath(&l.daemon.Socket); err != nil {
-			return err // TODO: explain error!
+			return fmt.Errorf(
+				"unable to normalize default daemon socket path (%s): %w",
+				l.daemon.Socket,
+				err,
+			)
 		}
 	}
 
