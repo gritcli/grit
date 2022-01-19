@@ -1,7 +1,6 @@
 package githubsource
 
 import (
-	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
@@ -20,11 +19,4 @@ var Registration = sourcedriver.Registration{
 			}
 		},
 	},
-}
-
-func init() {
-	registry.BuiltIns.RegisterSourceDriver(
-		"github",
-		Registration,
-	)
 }

@@ -7,9 +7,6 @@ import (
 	"github.com/gritcli/grit/driver/vcsdriver"
 )
 
-// BuiltIns is the registry of official drivers that ship with Grit.
-var BuiltIns Registry
-
 // Registry is a collection of driver implementations.
 type Registry struct {
 	Parent *Registry
