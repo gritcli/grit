@@ -48,6 +48,8 @@ type ConfigNormalizeContext interface {
 }
 
 // Config is an interface for driver-specific configuration options for a VCS.
+//
+// The underlying implementation must not be used by more than one driver.
 type Config interface {
 	// DescribeVCSConfig returns a human-readable description of the
 	// configuration.

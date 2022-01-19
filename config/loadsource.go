@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/gritcli/grit/driver/sourcedriver"
@@ -177,40 +178,71 @@ func (nc *sourceNormalizeContext) NormalizePath(p *string) error {
 	return nc.loader.normalizePath(p)
 }
 
-func (nc *sourceNormalizeContext) ResolveVCSConfig(cfg interface{}) error {
-	// TODO: validate that cfg is a pointer-to-impl to provide a better error
-	// message.
-	elem := reflect.ValueOf(cfg).Elem()
+func (nc *sourceNormalizeContext) UnmarshalVCSConfig(driver string, v interface{}) error {
+	configInterfaceType := reflect.TypeOf((*vcsdriver.Config)(nil)).Elem()
 
-	if nc.resolveVCSConfig(nc.sourceVCSs, elem) {
-		return nil
+	target := reflect.ValueOf(v)
+
+	if target.Kind() != reflect.Ptr {
+		panic(fmt.Sprintf(
+			"v must be a pointer to a concrete implementation of the %s interface, but %s is not a pointer",
+			configInterfaceType,
+			target.Type(),
+		))
 	}
 
-	if nc.resolveVCSConfig(nc.globalVCSs, elem) {
-		return nil
+	target = target.Elem()
+
+	if !target.Type().Implements(configInterfaceType) {
+		panic(fmt.Sprintf(
+			"v must be a pointer to a concrete implementation of the %s interface, but %s does not implement that interface",
+			configInterfaceType,
+			target.Type(),
+		))
 	}
 
-	return fmt.Errorf(
-		"none of the supported VCS drivers provided a config of type %s",
-		elem.Type(),
-	)
-}
+	if target.Kind() == reflect.Interface {
+		panic(fmt.Sprintf(
+			"v must be a pointer to a concrete implementation of the %s interface, but %s is not a concrete type (it's an interface)",
+			configInterfaceType,
+			target.Type(),
+		))
+	}
 
-// resolveVCSConfig assigns a value from configs to elem, if possible.
-func (nc *sourceNormalizeContext) resolveVCSConfig(
-	configs map[string]vcsdriver.Config,
-	elem reflect.Value,
-) bool {
-	t := elem.Type()
+	var matches []string
 
-	for _, cfg := range configs {
-		v := reflect.ValueOf(cfg)
+	for alias, reg := range nc.loader.Registry.VCSDrivers() {
+		if reg.Name != driver {
+			continue
+		}
 
-		if v.Type().AssignableTo(t) {
-			elem.Set(v)
-			return true
+		matches = append(matches, alias)
+
+		cfg, ok := nc.sourceVCSs[alias]
+		if !ok {
+			cfg = nc.globalVCSs[alias]
+		}
+
+		rv := reflect.ValueOf(cfg)
+
+		if rv.Type() == target.Type() {
+			target.Set(rv)
+			return nil
 		}
 	}
 
-	return false
+	if len(matches) == 0 {
+		return fmt.Errorf(
+			"dependency on unrecognized version control system ('%s')",
+			driver,
+		)
+	}
+
+	sort.Strings(matches)
+
+	return fmt.Errorf(
+		"depends on incompatible version control system ('%s'), none of the matching drivers ('%s') use the same configuration structure",
+		driver,
+		strings.Join(matches, "', '"),
+	)
 }

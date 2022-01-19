@@ -39,7 +39,8 @@ func TestVCSDriver(
 					Name: "driver_under_test",
 					NewConfigSchema: func() sourcedriver.ConfigSchema {
 						return &vcsTestSourceConfigSchema{
-							pointerToVCSConfig: reflect.New(
+							driverName: r.Name,
+							unmarshalTarget: reflect.New(
 								reflect.TypeOf(zero),
 							).Interface(),
 						}
@@ -147,19 +148,23 @@ func VCSFailure(
 }
 
 type vcsTestSourceConfigSchema struct {
-	pointerToVCSConfig interface{}
+	driverName      string
+	unmarshalTarget interface{}
 }
 
 func (s *vcsTestSourceConfigSchema) Normalize(
 	ctx sourcedriver.ConfigNormalizeContext,
 ) (sourcedriver.Config, error) {
-	if err := ctx.ResolveVCSConfig(s.pointerToVCSConfig); err != nil {
+	if err := ctx.UnmarshalVCSConfig(
+		s.driverName,
+		s.unmarshalTarget,
+	); err != nil {
 		return nil, err
 	}
 
 	return vcsTestSourceConfig{
 		VCSConfig: reflect.
-			ValueOf(s.pointerToVCSConfig).
+			ValueOf(s.unmarshalTarget).
 			Elem().
 			Interface().(vcsdriver.Config),
 	}, nil

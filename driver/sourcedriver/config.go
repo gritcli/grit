@@ -14,8 +14,8 @@ type ConfigSchema interface {
 	// Normalize validates the configuration as parsed by this schema and
 	// returns a normalized Config.
 	//
-	// The implementation must call ctx.ResolveVCSConfig() for each VCS driver
-	// that is supported.
+	// The implementation must call ctx.ReadVCSConfig() for each VCS driver
+	// that is supported, even if they are not currently in use.
 	Normalize(ctx ConfigNormalizeContext) (Config, error)
 }
 
@@ -35,15 +35,24 @@ type ConfigNormalizeContext interface {
 	// It does nothing if p is nil or *p is empty.
 	NormalizePath(p *string) error
 
-	// ResolveVCSConfig resolves a driver-specific configuration block for one
-	// of the supported version control systems.
+	// UnmarshalVCSConfig stores the configuration for a VCS driver in the value
+	// pointed to by v.
 	//
-	// cfg must be a pointer to a concrete implementation of vcsconfig.Config.
-	ResolveVCSConfig(cfg interface{}) error
+	// It panics v is nil or not a pointer.
+	//
+	// driver is the name (not the alias) of the VCS driver that provides the
+	// configuration, as specified in its vcsdriver.Registration entry.
+	//
+	// Multiple drivers may share the same name by using different aliases. In
+	// this case, the type of the value pointed to by v the driver that supplies
+	// a config of the type pointed to by v is used.
+	UnmarshalVCSConfig(driver string, v interface{}) error
 }
 
 // Config is an interface for driver-specific configuration options for a
 // repository source.
+//
+// The underlying implementation must not be used by more than one driver.
 type Config interface {
 	// NewDriver constructs a new driver that uses this configuration.
 	NewDriver() Driver

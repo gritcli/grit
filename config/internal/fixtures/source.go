@@ -44,7 +44,7 @@ func (s *SourceConfigSchemaStub) Normalize(
 		cfg.Value = "<default>"
 	}
 
-	if err := ctx.ResolveVCSConfig(&cfg.VCSConfig); err != nil {
+	if err := ctx.UnmarshalVCSConfig(VCSRegistration.Name, &cfg.VCSConfig); err != nil {
 		return nil, err
 	}
 

@@ -54,7 +54,7 @@ func (s *configSchema) Normalize(
 		Token:  s.Token,
 	}
 
-	if err := ctx.ResolveVCSConfig(&cfg.Git); err != nil {
+	if err := ctx.UnmarshalVCSConfig(gitvcs.Registration.Name, &cfg.Git); err != nil {
 		return nil, err
 	}
 
