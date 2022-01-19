@@ -1,11 +1,27 @@
 package config
 
 import (
+	"path/filepath"
+
 	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
-// DefaultDirectory is the default directory to search for configuration files.
-const DefaultDirectory = "~/.config/grit"
+var (
+	// DefaultDirectory is the default directory to search for configuration
+	// files.
+	DefaultDirectory = filepath.Join("~", ".config", "grit")
+
+	// DefaultDaemonSocket is the default path the Unix socket used for
+	// communication between the CLI and the daemon.
+	//
+	// Even though this is a "Unix socket", the AF_UNIX address family is
+	// supported on Windows 10+.
+	DefaultDaemonSocket = filepath.Join("~", "grit", "daemon.sock")
+
+	// DefaultClonesDirectory is the default path in which grit stores local
+	// clones of remote repositories.
+	DefaultClonesDirectory = filepath.Join("~", "grit")
+)
 
 // Config contains an entire Grit configuration.
 type Config struct {

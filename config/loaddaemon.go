@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-
-	"github.com/gritcli/grit/internal/common/api"
 )
 
 // mergeDaemon merges s into the configuration.
@@ -19,9 +17,9 @@ func (l *loader) mergeDaemon(file string, s daemonSchema) error {
 
 	if err := l.normalizePath(&cfg.Socket); err != nil {
 		return fmt.Errorf(
-			"unable to normalize daemon socket path (%s): %w",
-			cfg.Socket,
+			"unable to resolve daemon socket path: %w (%s)",
 			err,
+			cfg.Socket,
 		)
 	}
 
@@ -34,13 +32,13 @@ func (l *loader) mergeDaemon(file string, s daemonSchema) error {
 // populateDaemonDefaults populates l.daemon with default values.
 func (l *loader) populateDaemonDefaults() error {
 	if l.daemon.Socket == "" {
-		l.daemon.Socket = api.DefaultSocket
+		l.daemon.Socket = DefaultDaemonSocket
 
 		if err := l.normalizePath(&l.daemon.Socket); err != nil {
 			return fmt.Errorf(
-				"unable to normalize default daemon socket path (%s): %w",
-				l.daemon.Socket,
+				"unable to resolve default daemon socket path: %w (%s)",
 				err,
+				l.daemon.Socket,
 			)
 		}
 	}

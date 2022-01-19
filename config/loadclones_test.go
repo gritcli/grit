@@ -91,5 +91,51 @@ var _ = Describe("func Load() (clones configuration)", func() {
 			},
 			`<dir>/config-1.hcl: the global clones configuration is already defined in <dir>/config-0.hcl`,
 		),
+		Entry(
+			`unexpandable global clones directory`,
+			[]string{
+				`clones {
+					dir = "~someuser/path/to/clones"
+				}`,
+			},
+			`<dir>/config-0.hcl: unable to resolve global clones directory: cannot expand user-specific home dir (~someuser/path/to/clones)`,
+		),
+		Entry(
+			`unexpandable source-specific clones directory`,
+			[]string{
+				`source "test_source" "test_source_driver" {
+					clones {
+						dir = "~someuser/path/to/clones"
+					}
+				}`,
+			},
+			`<dir>/config-0.hcl: unable to resolve clones directory for the 'test_source' source: cannot expand user-specific home dir (~someuser/path/to/clones)`,
+		),
 	)
+
+	Context("when the default global clones directory can not be resolved", func() {
+		var original string
+
+		BeforeEach(func() {
+			// HACK: We really shouldn't manipulate (or even have) global
+			// variables like this, but it's the only cross-platform way to
+			// force the home directory resolution to fail.
+			original = DefaultClonesDirectory
+			DefaultClonesDirectory = "~someuser/path/to/socket"
+		})
+
+		AfterEach(func() {
+			DefaultClonesDirectory = original
+		})
+
+		DescribeTable(
+			"it returns an error",
+			testLoadFailure,
+			Entry(
+				`unexpandable default daemon socket`,
+				[]string{},
+				`unable to resolve default global clones directory: cannot expand user-specific home dir (~someuser/path/to/socket)`,
+			),
+		)
+	})
 })

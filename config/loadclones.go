@@ -3,8 +3,6 @@ package config
 import (
 	"fmt"
 	"path/filepath"
-
-	homedir "github.com/mitchellh/go-homedir"
 )
 
 // mergeGlobalClones merges s into the configuration.
@@ -19,7 +17,11 @@ func (l *loader) mergeGlobalClones(file string, s clonesSchema) error {
 	cfg := Clones(s)
 
 	if err := l.normalizePath(&cfg.Dir); err != nil {
-		return err
+		return fmt.Errorf(
+			"unable to resolve global clones directory: %w (%s)",
+			err,
+			cfg.Dir,
+		)
 	}
 
 	l.globalClonesFile = file
@@ -31,15 +33,15 @@ func (l *loader) mergeGlobalClones(file string, s clonesSchema) error {
 // populateGlobalClonesDefaults populates l.globalClones with default values.
 func (l *loader) populateGlobalClonesDefaults() error {
 	if l.globalClones.Dir == "" {
-		h, err := homedir.Dir()
-		if err != nil {
+		l.globalClones.Dir = DefaultClonesDirectory
+
+		if err := l.normalizePath(&l.globalClones.Dir); err != nil {
 			return fmt.Errorf(
-				"unable to determine default clones directory: %w",
+				"unable to resolve default global clones directory: %w (%s)",
 				err,
+				l.globalClones.Dir,
 			)
 		}
-
-		l.globalClones.Dir = filepath.Join(h, "grit")
 	}
 
 	return nil
@@ -57,7 +59,12 @@ func (l *loader) finalizeSourceSpecificClones(
 		cfg.Dir = s.Dir
 
 		if err := l.normalizePath(&cfg.Dir); err != nil {
-			return Clones{}, err
+			return Clones{}, fmt.Errorf(
+				"unable to resolve clones directory for the '%s' source: %w (%s)",
+				i.Schema.Name,
+				err,
+				cfg.Dir,
+			)
 		}
 	}
 
