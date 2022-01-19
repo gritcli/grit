@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/gritcli/grit/driver/registry"
@@ -227,13 +226,6 @@ func (l *loader) finalize() (Config, error) {
 
 		cfg.Sources = append(cfg.Sources, src)
 	}
-
-	sort.Slice(
-		cfg.Sources,
-		func(i, j int) bool {
-			return cfg.Sources[i].Name < cfg.Sources[j].Name
-		},
-	)
 
 	return cfg, nil
 }
