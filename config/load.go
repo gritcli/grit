@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/vcsdriver"
@@ -143,12 +144,10 @@ func isConfigFile(e fs.DirEntry) bool {
 		return false
 	}
 
-	ext := filepath.Ext(name)
-	if ext != ".hcl" {
-		return false
-	}
-
-	return true
+	return strings.EqualFold(
+		filepath.Ext(name),
+		".hcl",
+	)
 }
 
 // mergeFile merges the configuration from a single file into the intermediate
