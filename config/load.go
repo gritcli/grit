@@ -21,18 +21,28 @@ import (
 // reg is a registry of drivers that can be used within the configuration. It
 // may be nil.
 func Load(dir string, reg *registry.Registry) (Config, error) {
-	dir, err := homedir.Expand(dir)
-	if err != nil {
-		return Config{}, err
+	if dir == "" {
+		dir = DefaultDirectory
 	}
 
-	dir, err = filepath.Abs(dir)
+	configDir, err := homedir.Expand(dir)
 	if err != nil {
+		return Config{}, fmt.Errorf(
+			"unable to resolve configuration directory: %w (%s)",
+			err,
+			dir,
+		)
+	}
+
+	configDir, err = filepath.Abs(configDir)
+	if err != nil {
+		// CODE COVERAGE: I'm not aware of a simple and cross-platform way to
+		// induce filepath.Abs() to fail.
 		return Config{}, err
 	}
 
 	l := loader{
-		ConfigDir: dir,
+		ConfigDir: configDir,
 		Registry: registry.Registry{
 			Parent: reg,
 		},

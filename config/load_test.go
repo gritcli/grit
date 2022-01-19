@@ -75,6 +75,22 @@ var _ = Describe("func Load()", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(cfg).To(Equal(defaultConfig))
 	})
+
+	It("uses the DefaultDirectory by default", func() {
+		// HACK: We really shouldn't manipulate (or even have) global variables
+		// like this.
+		original := DefaultDirectory
+		DefaultDirectory = "~someuser/path/to/config" // force a failure so we know this path was used
+		defer func() { DefaultDirectory = original }()
+
+		_, err := Load("", nil)
+		Expect(err).To(MatchError("unable to resolve configuration directory: cannot expand user-specific home dir (~someuser/path/to/config)"))
+	})
+
+	It("returns an error if the config directory can not be resolved", func() {
+		_, err := Load("~someuser/path/to/config", nil)
+		Expect(err).To(MatchError("unable to resolve configuration directory: cannot expand user-specific home dir (~someuser/path/to/config)"))
+	})
 })
 
 // makeConfigDir makes a temporary config directory containing config files

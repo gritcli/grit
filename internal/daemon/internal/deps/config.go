@@ -9,13 +9,8 @@ import (
 
 func init() {
 	Container.Provide(func(r *registry.Registry) (config.Config, error) {
-		dir := os.Getenv("GRIT_CONFIG_DIR")
-		if dir == "" {
-			dir = config.DefaultDirectory
-		}
-
 		return config.Load(
-			dir,
+			os.Getenv("GRIT_CONFIG_DIR"),
 			&registry.Registry{
 				Parent: &registry.BuiltIns,
 			},

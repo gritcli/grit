@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	// DefaultDirectory is the default directory to search for configuration
-	// files.
+	// DefaultDirectory is the standard location for Grit configuration files.
 	DefaultDirectory = filepath.Join("~", ".config", "grit")
 
 	// DefaultDaemonSocket is the default path the Unix socket used for
