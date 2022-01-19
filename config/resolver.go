@@ -145,10 +145,6 @@ func (r *resolver) normalizePath(p *string) error {
 	}
 
 	if !filepath.IsAbs(result) {
-		if !filepath.IsAbs(r.configDir) {
-			panic("configuration directory is not absolute")
-		}
-
 		result = filepath.Join(r.configDir, result)
 	}
 
