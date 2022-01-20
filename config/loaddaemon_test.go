@@ -48,7 +48,7 @@ var _ = Describe("func Load() (daemon configuration)", func() {
 		),
 	)
 
-	Context("when the default daemon socket can not be resolved", func() {
+	Context("when the default daemon socket cannot be resolved", func() {
 		var original string
 
 		BeforeEach(func() {

@@ -124,7 +124,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 					filesystem_path = "~someuser/path/to/nowhere"
 				}`,
 			},
-			`<dir>/config-0.hcl: the global configuration for the 'test_vcs_driver' version control system can not be loaded: cannot expand user-specific home dir`,
+			`<dir>/config-0.hcl: the global configuration for the 'test_vcs_driver' version control system cannot be loaded: cannot expand user-specific home dir`,
 		),
 	)
 
@@ -179,11 +179,11 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 					}
 				}`,
 			},
-			`<dir>/config-0.hcl: the 'test_source' source's configuration for the 'test_vcs_driver' version control system could not be loaded: cannot expand user-specific home dir`,
+			`<dir>/config-0.hcl: the 'test_source' source's configuration for the 'test_vcs_driver' version control system cannot be loaded: cannot expand user-specific home dir`,
 		),
 	)
 
-	It("returns an error if a VCS driver defaults can not be normalized", func() {
+	It("returns an error if a VCS driver defaults cannot be normalized", func() {
 		reg := &registry.Registry{}
 
 		reg.RegisterVCSDriver(

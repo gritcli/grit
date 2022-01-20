@@ -113,7 +113,7 @@ var _ = Describe("func Load() (clones configuration)", func() {
 		),
 	)
 
-	Context("when the default global clones directory can not be resolved", func() {
+	Context("when the default global clones directory cannot be resolved", func() {
 		var original string
 
 		BeforeEach(func() {

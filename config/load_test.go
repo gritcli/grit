@@ -87,7 +87,7 @@ var _ = Describe("func Load()", func() {
 		Expect(err).To(MatchError("unable to resolve configuration directory: cannot expand user-specific home dir (~someuser/path/to/config)"))
 	})
 
-	It("returns an error if the config directory can not be resolved", func() {
+	It("returns an error if the config directory cannot be resolved", func() {
 		_, err := Load("~someuser/path/to/config", nil)
 		Expect(err).To(MatchError("unable to resolve configuration directory: cannot expand user-specific home dir (~someuser/path/to/config)"))
 	})

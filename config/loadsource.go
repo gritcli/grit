@@ -18,7 +18,7 @@ var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
 
 // intermediateSource is the intermediate representation of a source.
 //
-// Some of the contents of a source configuration can not be finalized until all
+// Some of the contents of a source configuration cannot be finalized until all
 // configuration files have been loaded.
 type intermediateSource struct {
 	Schema sourceSchema
@@ -140,11 +140,14 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 	cfg, err := i.Driver.Normalize(nc)
 	if err != nil {
 		return Source{}, fmt.Errorf(
-			"the '%s' source is invalid: %w", // TODO: not necessarily invalid config, but just can't be loaded
+			"the configuration for the '%s' source cannot be loaded: %w",
 			i.Schema.Name,
 			err,
 		)
 	}
+
+	// TODO: produce an error if the source has VCS configurations for
+	// unsupported VCS drivers.
 
 	enabled := true
 	if i.Schema.Enabled != nil {
