@@ -40,7 +40,7 @@ func (l *loader) mergeGlobalVCS(file string, s vcsSchema) error {
 	cfg, err := bodySchema.NormalizeGlobals(&vcsNormalizeContext{l})
 	if err != nil {
 		return fmt.Errorf(
-			"the global configuration for the '%s' version control system is invalid: %w", // TODO: not necessarily invalid config, but just can't be loaded
+			"the global configuration for the '%s' version control system can not be loaded: %w",
 			s.Driver,
 			err,
 		)
@@ -135,7 +135,7 @@ func (l *loader) finalizeSourceSpecificVCSs(
 		)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"the '%s' source's configuration for the '%s' version control system is invalid: %w", // TODO: not necessarily invalid config, but just can't be loaded
+				"the '%s' source's configuration for the '%s' version control system could not be loaded: %w",
 				i.Schema.Name,
 				n,
 				err,

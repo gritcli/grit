@@ -3,8 +3,11 @@ package config_test
 import (
 	. "github.com/gritcli/grit/config"
 	. "github.com/gritcli/grit/config/internal/fixtures"
+	"github.com/gritcli/grit/driver/registry"
+	"github.com/gritcli/grit/driver/vcsdriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("func Load() (VCS configuration)", func() {
@@ -114,6 +117,15 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			},
 			`<dir>/config-0.hcl:2,6-18: Unsupported argument; An argument named "unrecognized" is not expected here.`,
 		),
+		Entry(
+			`error normalizing driver configuration`,
+			[]string{
+				`vcs "test_vcs_driver" {
+					filesystem_path = "~someuser/path/to/nowhere"
+				}`,
+			},
+			`<dir>/config-0.hcl: the global configuration for the 'test_vcs_driver' version control system can not be loaded: cannot expand user-specific home dir`,
+		),
 	)
 
 	DescribeTable(
@@ -158,5 +170,36 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			},
 			`<dir>/config-0.hcl:3,7-19: Unsupported argument; An argument named "unrecognized" is not expected here.`,
 		),
+		Entry(
+			`error normalizing driver configuration`,
+			[]string{
+				`source "test_source" "test_source_driver" {
+					vcs "test_vcs_driver" {
+						filesystem_path = "~someuser/path/to/nowhere"
+					}
+				}`,
+			},
+			`<dir>/config-0.hcl: the 'test_source' source's configuration for the 'test_vcs_driver' version control system could not be loaded: cannot expand user-specific home dir`,
+		),
 	)
+
+	It("returns an error if a VCS driver defaults can not be normalized", func() {
+		reg := &registry.Registry{}
+
+		reg.RegisterVCSDriver(
+			"vcs",
+			vcsdriver.Registration{
+				Name:        "test_vcs_driver",
+				Description: "test VCS driver (with broken defaults)",
+				NewConfigSchema: func() vcsdriver.ConfigSchema {
+					return &VCSConfigSchemaStub{
+						FilesystemPath: "~someuser/path/to/nowhere",
+					}
+				},
+			},
+		)
+
+		_, err := Load("./does-not-exist", reg)
+		Expect(err).To(MatchError("unable to produce default global configuration for the 'vcs' version control system: cannot expand user-specific home dir"))
+	})
 })

@@ -8,7 +8,8 @@ import (
 
 // VCSConfigStub is a test implementation of vcsdriver.Config.
 type VCSConfigStub struct {
-	Value string
+	Value          string
+	FilesystemPath string
 }
 
 // DescribeVCSConfig returns a human-readable description of the
@@ -22,7 +23,8 @@ func (c VCSConfigStub) DescribeVCSConfig() string {
 
 // VCSConfigSchemaStub is a test implementation of vcsdriver.ConfigSchema.
 type VCSConfigSchemaStub struct {
-	Value string `hcl:"value,optional"`
+	Value          string `hcl:"value,optional"`
+	FilesystemPath string `hcl:"filesystem_path,optional"`
 }
 
 // NormalizeGlobals validates the global configuration as parsed by this schema,
@@ -31,11 +33,16 @@ func (s *VCSConfigSchemaStub) NormalizeGlobals(
 	ctx vcsdriver.ConfigNormalizeContext,
 ) (vcsdriver.Config, error) {
 	cfg := VCSConfigStub{
-		Value: s.Value,
+		Value:          s.Value,
+		FilesystemPath: s.FilesystemPath,
 	}
 
 	if cfg.Value == "" {
 		cfg.Value = "<default>"
+	}
+
+	if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
+		return nil, err
 	}
 
 	return cfg, nil
@@ -50,7 +57,17 @@ func (s *VCSConfigSchemaStub) NormalizeSourceSpecific(
 	cfg := g.(VCSConfigStub)
 
 	if s.Value != "" {
+		// Note, we concat here (not replace) so that tests can verify that the
+		// defaults are available to NormalizeSourceSpecific()
 		cfg.Value += s.Value
+	}
+
+	if s.FilesystemPath != "" {
+		cfg.FilesystemPath = s.FilesystemPath
+	}
+
+	if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
+		return nil, err
 	}
 
 	return cfg, nil
