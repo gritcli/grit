@@ -126,5 +126,14 @@ var _ = Describe("func Load() (source configuration)", func() {
 			},
 			`<dir>/config-0.hcl:2,6-18: Unsupported argument; An argument named "unrecognized" is not expected here.`,
 		),
+		Entry(
+			`error normalizing driver configuration`,
+			[]string{
+				`source "test_source" "test_source_driver" {
+					filesystem_path = "~someuser/path/to/nowhere"
+				}`,
+			},
+			`<dir>/config-0.hcl: the configuration for the 'test_source' source cannot be loaded: cannot expand user-specific home dir`,
+		),
 	)
 })

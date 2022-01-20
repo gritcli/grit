@@ -8,8 +8,9 @@ import (
 
 // SourceConfigStub is a test implementation of sourcedriver.Config.
 type SourceConfigStub struct {
-	Value     string
-	VCSConfig VCSConfigStub
+	Value          string
+	FilesystemPath string
+	VCSConfig      VCSConfigStub
 }
 
 // NewDriver constructs a new driver that uses this configuration.
@@ -28,7 +29,8 @@ func (c SourceConfigStub) DescribeSourceConfig() string {
 
 // SourceConfigSchemaStub is a test implementation of sourcedriver.ConfigSchema.
 type SourceConfigSchemaStub struct {
-	Value string `hcl:"value,optional"`
+	Value          string `hcl:"value,optional"`
+	FilesystemPath string `hcl:"filesystem_path,optional"`
 }
 
 // Normalize validates the configuration as parsed by this schema and
@@ -37,11 +39,16 @@ func (s *SourceConfigSchemaStub) Normalize(
 	ctx sourcedriver.ConfigNormalizeContext,
 ) (sourcedriver.Config, error) {
 	cfg := SourceConfigStub{
-		Value: s.Value,
+		Value:          s.Value,
+		FilesystemPath: s.FilesystemPath,
 	}
 
 	if cfg.Value == "" {
 		cfg.Value = "<default>"
+	}
+
+	if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
+		return nil, err
 	}
 
 	if err := ctx.UnmarshalVCSConfig(VCSRegistration.Name, &cfg.VCSConfig); err != nil {
