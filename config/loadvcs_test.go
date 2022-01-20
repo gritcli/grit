@@ -87,7 +87,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 		"it returns an error if there is a problem with the global configuration",
 		testLoadFailure,
 		Entry(
-			`empty VCS driver alias`,
+			`empty VCS driver name`,
 			[]string{
 				`vcs "" {}`,
 			},
@@ -102,7 +102,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			`<dir>/config-1.hcl: global configuration for the 'test_vcs_driver' version control system is already defined in <dir>/config-0.hcl`,
 		),
 		Entry(
-			`unrecognized VCS alias`,
+			`unrecognized VCS driver name`,
 			[]string{
 				`vcs "<unrecognized>" {}`,
 			},
@@ -132,7 +132,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 		"it returns an error if there is a problem with a source-specific configuration",
 		testLoadFailure,
 		Entry(
-			`empty VCS driver alias`,
+			`empty VCS driver name`,
 			[]string{
 				`source "test_source" "test_source_driver" {
 					vcs "" {}
@@ -151,7 +151,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			`<dir>/config-0.hcl: the 'test_source' source contains multiple configurations for the 'test_vcs_driver' version control system`,
 		),
 		Entry(
-			`unrecognized VCS alias`,
+			`unrecognized VCS name`,
 			[]string{
 				`source "test_source" "test_source_driver" {
 					vcs "<unrecognized>" {}

@@ -104,7 +104,14 @@ var _ = Describe("func Load() (source configuration)", func() {
 			`<dir>/config-1.hcl: the 'TEST_SOURCE' source conflicts with a source of the same name in <dir>/config-0.hcl (source names are case-insensitive)`,
 		),
 		Entry(
-			`unrecognized source driver`,
+			`empty driver name`,
+			[]string{
+				`source "test_source" "" {}`,
+			},
+			`<dir>/config-0.hcl: the 'test_source' source has an empty driver name`,
+		),
+		Entry(
+			`unrecognized source driver name`,
 			[]string{
 				`source "test_source" "<unrecognized>" {}`,
 			},
