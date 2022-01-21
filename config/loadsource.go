@@ -100,18 +100,20 @@ func (l *loader) mergeSource(file string, s sourceSchema) error {
 // Any implicit source with a name that has already been defined in the
 // configuration files is ignored.
 func (l *loader) populateImplicitSources() {
-	for _, reg := range l.Registry.SourceDrivers() {
+	for alias, reg := range l.Registry.SourceDrivers() {
 		for name, newSchema := range reg.ImplicitSources {
 			lowerName := strings.ToLower(name)
 
-			if _, ok := l.sources[lowerName]; ok {
+			if l.sources == nil {
+				l.sources = map[string]intermediateSource{}
+			} else if _, ok := l.sources[lowerName]; ok {
 				continue
 			}
 
 			l.sources[lowerName] = intermediateSource{
 				Schema: sourceSchema{
 					Name:   name,
-					Driver: reg.Name,
+					Driver: alias,
 				},
 				Driver: newSchema(),
 			}
@@ -139,6 +141,15 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 
 	cfg, err := i.Driver.Normalize(nc)
 	if err != nil {
+		if i.File == "" {
+			return Source{}, fmt.Errorf(
+				"the configuration for the implicit '%s' source (provided by the '%s' driver) cannot be loaded: %w",
+				i.Schema.Name,
+				i.Schema.Driver,
+				err,
+			)
+		}
+
 		return Source{}, fmt.Errorf(
 			"the configuration for the '%s' source cannot be loaded: %w",
 			i.Schema.Name,

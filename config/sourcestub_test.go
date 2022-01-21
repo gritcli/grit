@@ -29,8 +29,9 @@ func (c sourceConfigStub) DescribeSourceConfig() string {
 
 // sourceConfigSchemaStub is a test implementation of sourcedriver.ConfigSchema.
 type sourceConfigSchemaStub struct {
-	Value          string `hcl:"value,optional"`
-	FilesystemPath string `hcl:"filesystem_path,optional"`
+	Value                string `hcl:"value,optional"`
+	FilesystemPath       string `hcl:"filesystem_path,optional"`
+	SkipVCSNormalization bool   `hcl:"skip_vcs_normalization,optional"`
 }
 
 // Normalize validates the configuration as parsed by this schema and
@@ -51,8 +52,10 @@ func (s *sourceConfigSchemaStub) Normalize(
 		return nil, err
 	}
 
-	if err := ctx.UnmarshalVCSConfig(testVCSRegistration.Name, &cfg.VCSConfig); err != nil {
-		return nil, err
+	if !s.SkipVCSNormalization {
+		if err := ctx.UnmarshalVCSConfig(testVCSRegistration.Name, &cfg.VCSConfig); err != nil {
+			return nil, err
+		}
 	}
 
 	return cfg, nil

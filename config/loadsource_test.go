@@ -2,6 +2,8 @@ package config_test
 
 import (
 	. "github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/driver/registry"
+	"github.com/gritcli/grit/driver/sourcedriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 )
@@ -133,6 +135,30 @@ var _ = Describe("func Load() (source configuration)", func() {
 				}`,
 			},
 			`<dir>/config-0.hcl: the configuration for the 'test_source' source cannot be loaded: cannot expand user-specific home dir`,
+		),
+		Entry(
+			`error normalizing implicit source's driver configuration`,
+			[]string{},
+			`the configuration for the implicit 'implicit' source (provided by the 'test_source_driver_with_implicit_source' driver) cannot be loaded: cannot expand user-specific home dir`,
+			func(reg *registry.Registry) {
+				reg.RegisterSourceDriver(
+					"test_source_driver_with_implicit_source",
+					sourcedriver.Registration{
+						Name:        "test_source_driver",
+						Description: "test source driver",
+						NewConfigSchema: func() sourcedriver.ConfigSchema {
+							return &sourceConfigSchemaStub{}
+						},
+						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
+							"implicit": func() sourcedriver.ConfigSchema {
+								return &sourceConfigSchemaStub{
+									FilesystemPath: "~someuser/path/to/nowhere",
+								}
+							},
+						},
+					},
+				)
+			},
 		),
 	)
 })
