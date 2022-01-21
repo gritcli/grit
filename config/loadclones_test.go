@@ -30,7 +30,9 @@ var _ = Describe("func Load() (clones configuration)", func() {
 				Driver: &stubs.SourceDriverConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+						testVCSDriverName: &stubs.VCSDriverConfig{
+							ArbitraryAttribute: "<default>",
+						},
 					},
 				},
 			}),
@@ -53,7 +55,9 @@ var _ = Describe("func Load() (clones configuration)", func() {
 				Driver: &stubs.SourceDriverConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+						testVCSDriverName: &stubs.VCSDriverConfig{
+							ArbitraryAttribute: "<default>",
+						},
 					},
 				},
 			}),
@@ -80,7 +84,9 @@ var _ = Describe("func Load() (clones configuration)", func() {
 				Driver: &stubs.SourceDriverConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+						testVCSDriverName: &stubs.VCSDriverConfig{
+							ArbitraryAttribute: "<default>",
+						},
 					},
 				},
 			}),

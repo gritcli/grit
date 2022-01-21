@@ -190,6 +190,7 @@ func (nc *sourceNormalizeContext) UnmarshalVCSConfig(driver string, v interface{
 
 	target := reflect.ValueOf(v)
 
+	// TODO: allow the pointer itself to implement the config interface.
 	if target.Kind() != reflect.Ptr {
 		panic(fmt.Sprintf(
 			"v must be a pointer to a concrete implementation of the %s interface, but %s is not a pointer",

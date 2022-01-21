@@ -17,7 +17,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			"sources inherit the global VCS configuration",
 			[]string{
 				`vcs "test_vcs_driver" {
-					value = "<explicit>"
+					arbitrary_attribute = "<explicit>"
 				}
 
 				source "test_source" "test_source_driver" {}`,
@@ -31,7 +31,9 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Driver: &stubs.SourceDriverConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						"test_vcs_driver": vcsConfigStub{Value: "<explicit>"},
+						testVCSDriverName: &stubs.VCSDriverConfig{
+							ArbitraryAttribute: "<explicit>",
+						},
 					},
 				},
 			}),
@@ -41,7 +43,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			[]string{
 				`source "test_source" "test_source_driver" {
 					vcs "test_vcs_driver" {
-						value = "<explicit>"
+						arbitrary_attribute = "<explicit>"
 					}
 				}`,
 			},
@@ -54,7 +56,9 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Driver: &stubs.SourceDriverConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						"test_vcs_driver": vcsConfigStub{Value: "<default><explicit>"},
+						testVCSDriverName: &stubs.VCSDriverConfig{
+							ArbitraryAttribute: "<default><explicit>",
+						},
 					},
 				},
 			}),
@@ -63,12 +67,12 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			"sources can override the global VCS configuration",
 			[]string{
 				`vcs "test_vcs_driver" {
-					value = "<explicit global>"
+					arbitrary_attribute = "<explicit global>"
 				}
 
 				source "test_source" "test_source_driver" {
 					vcs "test_vcs_driver" {
-						value = "<override>"
+						arbitrary_attribute = "<override>"
 					}
 				}`,
 			},
@@ -81,7 +85,9 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Driver: &stubs.SourceDriverConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						"test_vcs_driver": vcsConfigStub{Value: "<explicit global><override>"},
+						testVCSDriverName: &stubs.VCSDriverConfig{
+							ArbitraryAttribute: "<explicit global><override>",
+						},
 					},
 				},
 			}),
@@ -139,11 +145,11 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				reg.RegisterVCSDriver(
 					"test_vcs_driver_with_broken_default",
 					vcsdriver.Registration{
-						Name: "test_vcs_driver",
+						Name: testVCSDriverName,
 						NewConfigSchema: func() vcsdriver.ConfigSchema {
-							return &vcsConfigSchemaStub{
-								FilesystemPath: "~someuser/path/to/nowhere",
-							}
+							s := newVCSStub()
+							s.FilesystemPath = "~someuser/path/to/nowhere"
+							return s
 						},
 					},
 				)

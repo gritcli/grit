@@ -166,14 +166,19 @@ func testLoadFailure(
 	Expect(message).To(Equal(expect))
 }
 
+const (
+	testSourceDriverName = "test_source_driver"
+	testVCSDriverName    = "test_vcs_driver"
+)
+
 // newRegistry returns the registry to use for Load() tests.
 func newRegistry() *registry.Registry {
 	reg := &registry.Registry{}
 
 	reg.RegisterSourceDriver(
-		"test_source_driver",
+		testSourceDriverName,
 		sourcedriver.Registration{
-			Name: "test_source_driver",
+			Name: testSourceDriverName,
 			NewConfigSchema: func() sourcedriver.ConfigSchema {
 				return newSourceStub()
 			},
@@ -181,13 +186,20 @@ func newRegistry() *registry.Registry {
 	)
 
 	reg.RegisterVCSDriver(
-		testVCSRegistration.Name,
-		testVCSRegistration,
+		testVCSDriverName,
+		vcsdriver.Registration{
+			Name: testVCSDriverName,
+			NewConfigSchema: func() vcsdriver.ConfigSchema {
+				return newVCSStub()
+			},
+		},
 	)
 
 	return reg
 }
 
+// newSourceStub returns a new stub of sourcedriver.ConfigSchema for testing
+// source driver configuration.
 func newSourceStub() *stubs.SourceDriverConfigSchema {
 	return &stubs.SourceDriverConfigSchema{
 		NormalizeFunc: func(
@@ -207,16 +219,67 @@ func newSourceStub() *stubs.SourceDriverConfigSchema {
 				return nil, err
 			}
 
-			var vcsConfig vcsConfigStub
-			if err := nc.UnmarshalVCSConfig(testVCSRegistration.Name, &vcsConfig); err != nil {
+			vcsConfig := &stubs.VCSDriverConfig{}
+			if err := nc.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
 				return nil, err
 			}
 
 			cfg.VCSs = map[string]vcsdriver.Config{
-				testVCSRegistration.Name: vcsConfig,
+				testVCSDriverName: vcsConfig,
 			}
 
 			return cfg, nil
+		},
+	}
+}
+
+// newVCSStub returns a new stub of vcsdriver.ConfigSchema for testing VCS
+// driver configuration.
+func newVCSStub() *stubs.VCSDriverConfigSchema {
+	return &stubs.VCSDriverConfigSchema{
+		NormalizeGlobalsFunc: func(
+			nc vcsdriver.ConfigNormalizeContext,
+			s *stubs.VCSDriverConfigSchema,
+		) (vcsdriver.Config, error) {
+			cfg := &stubs.VCSDriverConfig{
+				ArbitraryAttribute: s.ArbitraryAttribute,
+				FilesystemPath:     s.FilesystemPath,
+			}
+
+			if cfg.ArbitraryAttribute == "" {
+				cfg.ArbitraryAttribute = "<default>"
+			}
+
+			if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
+				return nil, err
+			}
+
+			return cfg, nil
+		},
+
+		NormalizeSourceSpecificFunc: func(
+			nc vcsdriver.ConfigNormalizeContext,
+			g vcsdriver.Config,
+			s *stubs.VCSDriverConfigSchema,
+		) (vcsdriver.Config, error) {
+			cfg := *g.(*stubs.VCSDriverConfig) // clone
+
+			if s.ArbitraryAttribute != "" {
+				// Note, we concat to the default here (not replace) so that
+				// tests can verify that the defaults are made available to
+				// NormalizeSourceSpecific()
+				cfg.ArbitraryAttribute += s.ArbitraryAttribute
+			}
+
+			if s.FilesystemPath != "" {
+				cfg.FilesystemPath = s.FilesystemPath
+			}
+
+			if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
+				return nil, err
+			}
+
+			return &cfg, nil
 		},
 	}
 }
