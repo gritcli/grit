@@ -10,7 +10,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	. "github.com/gritcli/grit/internal/daemon/internal/source"
-	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/fixtures"
+	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -18,7 +18,7 @@ import (
 var _ = Describe("type Cloner", func() {
 	var (
 		tempDir string
-		drv     *DriverStub
+		drv     *stubs.SourceDriver
 		cloner  *Cloner
 	)
 
@@ -27,7 +27,7 @@ var _ = Describe("type Cloner", func() {
 		tempDir, err = os.MkdirTemp("", "")
 		Expect(err).ShouldNot(HaveOccurred())
 
-		drv = &DriverStub{}
+		drv = &stubs.SourceDriver{}
 
 		cloner = &Cloner{
 			Sources: List{
@@ -54,7 +54,7 @@ var _ = Describe("type Cloner", func() {
 				string,
 				logging.Logger,
 			) (sourcedriver.Cloner, string, error) {
-				return &ClonerStub{
+				return &stubs.SourceDriverCloner{
 					CloneFunc: func(
 						context.Context,
 						string,
@@ -85,7 +85,7 @@ var _ = Describe("type Cloner", func() {
 				string,
 				logging.Logger,
 			) (sourcedriver.Cloner, string, error) {
-				return &ClonerStub{}, "existing-dir", nil
+				return &stubs.SourceDriverCloner{}, "existing-dir", nil
 			}
 
 			_, err = cloner.Clone(
@@ -108,7 +108,7 @@ var _ = Describe("type Cloner", func() {
 				string,
 				logging.Logger,
 			) (sourcedriver.Cloner, string, error) {
-				return &ClonerStub{}, "\x00", nil
+				return &stubs.SourceDriverCloner{}, "\x00", nil
 			}
 
 			_, err := cloner.Clone(
@@ -159,7 +159,7 @@ var _ = Describe("type Cloner", func() {
 				string,
 				logging.Logger,
 			) (sourcedriver.Cloner, string, error) {
-				return &ClonerStub{
+				return &stubs.SourceDriverCloner{
 					CloneFunc: func(
 						context.Context,
 						string,

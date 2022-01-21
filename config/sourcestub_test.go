@@ -60,8 +60,7 @@ func (s *sourceConfigSchemaStub) Normalize(
 
 // testSourceRegistration contains registration info for the test source driver.
 var testSourceRegistration = sourcedriver.Registration{
-	Name:        "test_source_driver",
-	Description: "test source driver",
+	Name: "test_source_driver",
 	NewConfigSchema: func() sourcedriver.ConfigSchema {
 		return &sourceConfigSchemaStub{}
 	},

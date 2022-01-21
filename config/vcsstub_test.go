@@ -75,8 +75,7 @@ func (s *vcsConfigSchemaStub) NormalizeSourceSpecific(
 
 // testVCSRegistration contains registration info for the test VCS driver.
 var testVCSRegistration = vcsdriver.Registration{
-	Name:        "test_vcs_driver",
-	Description: "test VCS driver",
+	Name: "test_vcs_driver",
 	NewConfigSchema: func() vcsdriver.ConfigSchema {
 		return &vcsConfigSchemaStub{}
 	},

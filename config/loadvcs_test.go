@@ -132,8 +132,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				reg.RegisterVCSDriver(
 					"test_vcs_driver_with_broken_default",
 					vcsdriver.Registration{
-						Name:        "test_vcs_driver",
-						Description: "test VCS driver (with broken defaults)",
+						Name: "test_vcs_driver",
 						NewConfigSchema: func() vcsdriver.ConfigSchema {
 							return &vcsConfigSchemaStub{
 								FilesystemPath: "~someuser/path/to/nowhere",

@@ -87,8 +87,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
-						Name:        "test_source_driver",
-						Description: "test source driver",
+						Name: "test_source_driver",
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return &sourceConfigSchemaStub{}
 						},
@@ -125,8 +124,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
-						Name:        "test_source_driver",
-						Description: "test source driver",
+						Name: "test_source_driver",
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return &sourceConfigSchemaStub{}
 						},
@@ -216,8 +214,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
-						Name:        "test_source_driver",
-						Description: "test source driver",
+						Name: "test_source_driver",
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return &sourceConfigSchemaStub{}
 						},
@@ -233,4 +230,29 @@ var _ = Describe("func Load() (source configuration)", func() {
 			},
 		),
 	)
+
+	When("a source driver is implemented incorrectly", func() {
+		When("unmarshaling a VCS config", func() {
+			It("panics if the target is not a pointer", func() {
+				reg := &registry.Registry{}
+
+				reg.RegisterSourceDriver(
+					"test_source_driver",
+					sourcedriver.Registration{
+						Name: "test_source_driver",
+						NewConfigSchema: func() sourcedriver.ConfigSchema {
+							return &sourceConfigSchemaStub{}
+						},
+						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
+							"implicit": func() sourcedriver.ConfigSchema {
+								return &sourceConfigSchemaStub{
+									FilesystemPath: "~someuser/path/to/nowhere",
+								}
+							},
+						},
+					},
+				)
+			})
+		})
+	})
 })

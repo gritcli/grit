@@ -4,7 +4,7 @@ import (
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	. "github.com/gritcli/grit/internal/daemon/internal/source"
-	. "github.com/gritcli/grit/internal/daemon/internal/source/internal/fixtures"
+	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -14,7 +14,7 @@ var _ = Describe("type List", func() {
 
 	Describe("func NewList()", func() {
 		It("constructs the source from the configuration", func() {
-			d := &DriverStub{}
+			d := &stubs.SourceDriver{}
 
 			list = NewList([]config.Source{
 				{
@@ -23,7 +23,7 @@ var _ = Describe("type List", func() {
 					Clones: config.Clones{
 						Dir: "/path/to/clones",
 					},
-					Driver: &DriverConfigStub{
+					Driver: &stubs.SourceDriverConfig{
 						NewDriverFunc: func() sourcedriver.Driver {
 							return d
 						},
@@ -34,7 +34,7 @@ var _ = Describe("type List", func() {
 			Expect(list).To(Equal(List{
 				{
 					Name:        "<source>",
-					Description: "<driver config stub>",
+					Description: "<description>",
 					CloneDir:    "/path/to/clones",
 					Driver:      d,
 				},
@@ -47,17 +47,17 @@ var _ = Describe("type List", func() {
 				{
 					Name:    "<b>",
 					Enabled: true,
-					Driver:  &DriverConfigStub{},
+					Driver:  &stubs.SourceDriverConfig{},
 				},
 				{
 					Name:    "<c>",
 					Enabled: true,
-					Driver:  &DriverConfigStub{},
+					Driver:  &stubs.SourceDriverConfig{},
 				},
 				{
 					Name:    "<a>",
 					Enabled: true,
-					Driver:  &DriverConfigStub{},
+					Driver:  &stubs.SourceDriverConfig{},
 				},
 			})
 
