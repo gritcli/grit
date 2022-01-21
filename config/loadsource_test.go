@@ -69,6 +69,40 @@ var _ = Describe("func Load() (source configuration)", func() {
 				},
 			}),
 		),
+		Entry(
+			`implicit source`,
+			[]string{},
+			withSource(defaultConfig, Source{
+				Name:    "implicit",
+				Enabled: true,
+				Clones: Clones{
+					Dir: "~/grit/implicit",
+				},
+				Driver: sourceConfigStub{
+					Value:     "<implicit>",
+					VCSConfig: vcsConfigStub{Value: "<default>"},
+				},
+			}),
+			func(reg *registry.Registry) {
+				reg.RegisterSourceDriver(
+					"test_source_driver_with_implicit_source",
+					sourcedriver.Registration{
+						Name:        "test_source_driver",
+						Description: "test source driver",
+						NewConfigSchema: func() sourcedriver.ConfigSchema {
+							return &sourceConfigSchemaStub{}
+						},
+						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
+							"implicit": func() sourcedriver.ConfigSchema {
+								return &sourceConfigSchemaStub{
+									Value: "<implicit>",
+								}
+							},
+						},
+					},
+				)
+			},
+		),
 	)
 
 	DescribeTable(
