@@ -114,11 +114,20 @@ func makeConfigDir(configs ...string) (dir string, cleanup func()) {
 
 // testLoadSuccess is a function for use in DescribeTable that tests for success
 // cases when loading configuration files.
-func testLoadSuccess(configs []string, expect Config) {
+func testLoadSuccess(
+	configs []string,
+	expect Config,
+	hooks ...func(r *registry.Registry),
+) {
 	dir, cleanup := makeConfigDir(configs...)
 	defer cleanup()
 
-	cfg, err := Load(dir, newRegistry())
+	r := newRegistry()
+	for _, h := range hooks {
+		h(r)
+	}
+
+	cfg, err := Load(dir, r)
 	Expect(err).ShouldNot(HaveOccurred())
 	Expect(cfg).To(Equal(expect))
 }
@@ -128,7 +137,11 @@ func testLoadSuccess(configs []string, expect Config) {
 //
 // The text "<dir>" can be used in the expected message as a placeholder for the
 // actual temporary directory used during the test.
-func testLoadFailure(configs []string, expect string) {
+func testLoadFailure(
+	configs []string,
+	expect string,
+	hooks ...func(r *registry.Registry),
+) {
 	orig := format.TruncatedDiff
 	format.TruncatedDiff = false
 	defer func() {
@@ -138,7 +151,12 @@ func testLoadFailure(configs []string, expect string) {
 	dir, cleanup := makeConfigDir(configs...)
 	defer cleanup()
 
-	_, err := Load(dir, newRegistry())
+	r := newRegistry()
+	for _, h := range hooks {
+		h(r)
+	}
+
+	_, err := Load(dir, r)
 	Expect(err).Should(HaveOccurred())
 
 	message := strings.ReplaceAll(err.Error(), dir, "<dir>")

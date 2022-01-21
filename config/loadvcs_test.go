@@ -6,7 +6,6 @@ import (
 	"github.com/gritcli/grit/driver/vcsdriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
-	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("func Load() (VCS configuration)", func() {
@@ -125,6 +124,25 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			},
 			`<dir>/config-0.hcl: the global configuration for the 'test_vcs_driver' version control system cannot be loaded: cannot expand user-specific home dir`,
 		),
+		Entry(
+			`error normalizing default driver configuration`,
+			[]string{},
+			`unable to produce default global configuration for the 'test_vcs_driver_with_broken_default' version control system: cannot expand user-specific home dir`,
+			func(reg *registry.Registry) {
+				reg.RegisterVCSDriver(
+					"test_vcs_driver_with_broken_default",
+					vcsdriver.Registration{
+						Name:        "test_vcs_driver",
+						Description: "test VCS driver (with broken defaults)",
+						NewConfigSchema: func() vcsdriver.ConfigSchema {
+							return &vcsConfigSchemaStub{
+								FilesystemPath: "~someuser/path/to/nowhere",
+							}
+						},
+					},
+				)
+			},
+		),
 	)
 
 	DescribeTable(
@@ -181,24 +199,4 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			`<dir>/config-0.hcl: the 'test_source' source's configuration for the 'test_vcs_driver' version control system cannot be loaded: cannot expand user-specific home dir`,
 		),
 	)
-
-	It("returns an error if a VCS driver defaults cannot be normalized", func() {
-		reg := &registry.Registry{}
-
-		reg.RegisterVCSDriver(
-			"vcs",
-			vcsdriver.Registration{
-				Name:        "test_vcs_driver",
-				Description: "test VCS driver (with broken defaults)",
-				NewConfigSchema: func() vcsdriver.ConfigSchema {
-					return &vcsConfigSchemaStub{
-						FilesystemPath: "~someuser/path/to/nowhere",
-					}
-				},
-			},
-		)
-
-		_, err := Load("./does-not-exist", reg)
-		Expect(err).To(MatchError("unable to produce default global configuration for the 'vcs' version control system: cannot expand user-specific home dir"))
-	})
 })
