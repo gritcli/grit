@@ -6,12 +6,13 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/driver/vcsdriver"
 )
 
 // SourceDriverConfigSchema is a test implementation of
 // sourcedriver.ConfigSchema.
 type SourceDriverConfigSchema struct {
-	NormalizeFunc func(sourcedriver.ConfigNormalizeContext) (sourcedriver.Config, error)
+	NormalizeFunc func(sourcedriver.ConfigNormalizeContext, *SourceDriverConfigSchema) (sourcedriver.Config, error)
 
 	// These attributes must be defined in _this_ struct in order to use it as
 	// the HCL schema.
@@ -23,10 +24,10 @@ type SourceDriverConfigSchema struct {
 // Normalize returns s.NormalizeFunc() if it is non-nil, otherwise returns a
 // new SourceDriverConfig stub.
 func (s *SourceDriverConfigSchema) Normalize(
-	ctx sourcedriver.ConfigNormalizeContext,
+	nc sourcedriver.ConfigNormalizeContext,
 ) (sourcedriver.Config, error) {
 	if s.NormalizeFunc != nil {
-		return s.NormalizeFunc(ctx)
+		return s.NormalizeFunc(nc, s)
 	}
 
 	return &SourceDriverConfig{}, nil
@@ -40,6 +41,7 @@ type SourceDriverConfig struct {
 
 	ArbitraryAttribute string
 	FilesystemPath     string
+	VCSs               map[string]vcsdriver.Config
 }
 
 // NewDriver returns s.NewDriverFunc() if it is non-nil; otherwise, it returns a

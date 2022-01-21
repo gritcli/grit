@@ -8,6 +8,9 @@ import (
 
 	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/registry"
+	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -168,8 +171,13 @@ func newRegistry() *registry.Registry {
 	reg := &registry.Registry{}
 
 	reg.RegisterSourceDriver(
-		testSourceRegistration.Name,
-		testSourceRegistration,
+		"test_source_driver",
+		sourcedriver.Registration{
+			Name: "test_source_driver",
+			NewConfigSchema: func() sourcedriver.ConfigSchema {
+				return newSourceStub()
+			},
+		},
 	)
 
 	reg.RegisterVCSDriver(
@@ -178,4 +186,37 @@ func newRegistry() *registry.Registry {
 	)
 
 	return reg
+}
+
+func newSourceStub() *stubs.SourceDriverConfigSchema {
+	return &stubs.SourceDriverConfigSchema{
+		NormalizeFunc: func(
+			nc sourcedriver.ConfigNormalizeContext,
+			s *stubs.SourceDriverConfigSchema,
+		) (sourcedriver.Config, error) {
+			cfg := &stubs.SourceDriverConfig{
+				ArbitraryAttribute: s.ArbitraryAttribute,
+				FilesystemPath:     s.FilesystemPath,
+			}
+
+			if cfg.ArbitraryAttribute == "" {
+				cfg.ArbitraryAttribute = "<default>"
+			}
+
+			if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
+				return nil, err
+			}
+
+			var vcsConfig vcsConfigStub
+			if err := nc.UnmarshalVCSConfig(testVCSRegistration.Name, &vcsConfig); err != nil {
+				return nil, err
+			}
+
+			cfg.VCSs = map[string]vcsdriver.Config{
+				testVCSRegistration.Name: vcsConfig,
+			}
+
+			return cfg, nil
+		},
+	}
 }

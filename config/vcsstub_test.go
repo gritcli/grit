@@ -30,7 +30,7 @@ type vcsConfigSchemaStub struct {
 // NormalizeGlobals validates the global configuration as parsed by this schema,
 // and returns a normalized Config.
 func (s *vcsConfigSchemaStub) NormalizeGlobals(
-	ctx vcsdriver.ConfigNormalizeContext,
+	nc vcsdriver.ConfigNormalizeContext,
 ) (vcsdriver.Config, error) {
 	cfg := vcsConfigStub{
 		Value:          s.Value,
@@ -41,7 +41,7 @@ func (s *vcsConfigSchemaStub) NormalizeGlobals(
 		cfg.Value = "<default>"
 	}
 
-	if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
+	if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
 		return nil, err
 	}
 
@@ -51,7 +51,7 @@ func (s *vcsConfigSchemaStub) NormalizeGlobals(
 // NormalizeSourceSpecific validates the configuration as parsed by this schema
 // within a "source" block and returns a normalized Config.
 func (s *vcsConfigSchemaStub) NormalizeSourceSpecific(
-	ctx vcsdriver.ConfigNormalizeContext,
+	nc vcsdriver.ConfigNormalizeContext,
 	g vcsdriver.Config,
 ) (vcsdriver.Config, error) {
 	cfg := g.(vcsConfigStub)
@@ -66,7 +66,7 @@ func (s *vcsConfigSchemaStub) NormalizeSourceSpecific(
 		cfg.FilesystemPath = s.FilesystemPath
 	}
 
-	if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
+	if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
 		return nil, err
 	}
 

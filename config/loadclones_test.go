@@ -2,6 +2,8 @@ package config_test
 
 import (
 	. "github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 )
@@ -25,9 +27,11 @@ var _ = Describe("func Load() (clones configuration)", func() {
 				Clones: Clones{
 					Dir: "/path/to/clones/test_source",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<default>",
-					VCSConfig: vcsConfigStub{Value: "<default>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<default>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+					},
 				},
 			}),
 		),
@@ -46,9 +50,11 @@ var _ = Describe("func Load() (clones configuration)", func() {
 				Clones: Clones{
 					Dir: "/path/to/clones",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<default>",
-					VCSConfig: vcsConfigStub{Value: "<default>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<default>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+					},
 				},
 			}),
 		),
@@ -71,9 +77,11 @@ var _ = Describe("func Load() (clones configuration)", func() {
 				Clones: Clones{
 					Dir: "/path/to/elsewhere",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<default>",
-					VCSConfig: vcsConfigStub{Value: "<default>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<default>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+					},
 				},
 			}),
 		),

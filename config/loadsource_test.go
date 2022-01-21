@@ -4,6 +4,8 @@ import (
 	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 )
@@ -25,9 +27,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<default>",
-					VCSConfig: vcsConfigStub{Value: "<default>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<default>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+					},
 				},
 			}),
 		),
@@ -44,9 +48,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<default>",
-					VCSConfig: vcsConfigStub{Value: "<default>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<default>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+					},
 				},
 			}),
 		),
@@ -54,7 +60,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 			"driver-specific configuration",
 			[]string{
 				`source "test_source" "test_source_driver" {
-					value = "<explicit>"
+					arbitrary_attribute = "<explicit>"
 				}`,
 			},
 			withSource(defaultConfig, Source{
@@ -63,9 +69,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<explicit>",
-					VCSConfig: vcsConfigStub{Value: "<default>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<explicit>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+					},
 				},
 			}),
 		),
@@ -78,9 +86,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/implicit",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<implicit>",
-					VCSConfig: vcsConfigStub{Value: "<default>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<implicit>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+					},
 				},
 			}),
 			func(reg *registry.Registry) {
@@ -89,13 +99,13 @@ var _ = Describe("func Load() (source configuration)", func() {
 					sourcedriver.Registration{
 						Name: "test_source_driver",
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return &sourceConfigSchemaStub{}
+							return newSourceStub()
 						},
 						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
 							"implicit": func() sourcedriver.ConfigSchema {
-								return &sourceConfigSchemaStub{
-									Value: "<implicit>",
-								}
+								s := newSourceStub()
+								s.ArbitraryAttribute = "<implicit>"
+								return s
 							},
 						},
 					},
@@ -106,7 +116,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 			`implicit source does not override explicit source`,
 			[]string{
 				`source "implicit" "test_source_driver" {
-					value = "<explicit>"
+					arbitrary_attribute = "<explicit>"
 				}`,
 			},
 			withSource(defaultConfig, Source{
@@ -115,9 +125,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/implicit",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<explicit>",
-					VCSConfig: vcsConfigStub{Value: "<default>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<explicit>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default>"},
+					},
 				},
 			}),
 			func(reg *registry.Registry) {
@@ -126,13 +138,13 @@ var _ = Describe("func Load() (source configuration)", func() {
 					sourcedriver.Registration{
 						Name: "test_source_driver",
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return &sourceConfigSchemaStub{}
+							return newSourceStub()
 						},
 						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
 							"implicit": func() sourcedriver.ConfigSchema {
-								return &sourceConfigSchemaStub{
-									Value: "<implicit>",
-								}
+								s := newSourceStub()
+								s.ArbitraryAttribute = "<implicit>"
+								return s
 							},
 						},
 					},
@@ -216,13 +228,13 @@ var _ = Describe("func Load() (source configuration)", func() {
 					sourcedriver.Registration{
 						Name: "test_source_driver",
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return &sourceConfigSchemaStub{}
+							return newSourceStub()
 						},
 						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
 							"implicit": func() sourcedriver.ConfigSchema {
-								return &sourceConfigSchemaStub{
-									FilesystemPath: "~someuser/path/to/nowhere",
-								}
+								s := newSourceStub()
+								s.FilesystemPath = "~someuser/path/to/nowhere"
+								return s
 							},
 						},
 					},
@@ -230,29 +242,4 @@ var _ = Describe("func Load() (source configuration)", func() {
 			},
 		),
 	)
-
-	When("a source driver is implemented incorrectly", func() {
-		When("unmarshaling a VCS config", func() {
-			It("panics if the target is not a pointer", func() {
-				reg := &registry.Registry{}
-
-				reg.RegisterSourceDriver(
-					"test_source_driver",
-					sourcedriver.Registration{
-						Name: "test_source_driver",
-						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return &sourceConfigSchemaStub{}
-						},
-						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
-							"implicit": func() sourcedriver.ConfigSchema {
-								return &sourceConfigSchemaStub{
-									FilesystemPath: "~someuser/path/to/nowhere",
-								}
-							},
-						},
-					},
-				)
-			})
-		})
-	})
 })

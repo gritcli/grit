@@ -4,6 +4,7 @@ import (
 	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 )
@@ -27,9 +28,11 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<default>",
-					VCSConfig: vcsConfigStub{Value: "<explicit>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<default>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<explicit>"},
+					},
 				},
 			}),
 		),
@@ -48,9 +51,11 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<default>",
-					VCSConfig: vcsConfigStub{Value: "<default><explicit>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<default>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<default><explicit>"},
+					},
 				},
 			}),
 		),
@@ -73,9 +78,11 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: sourceConfigStub{
-					Value:     "<default>",
-					VCSConfig: vcsConfigStub{Value: "<explicit global><override>"},
+				Driver: &stubs.SourceDriverConfig{
+					ArbitraryAttribute: "<default>",
+					VCSs: map[string]vcsdriver.Config{
+						"test_vcs_driver": vcsConfigStub{Value: "<explicit global><override>"},
+					},
 				},
 			}),
 		),

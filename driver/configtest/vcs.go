@@ -153,9 +153,9 @@ type vcsTestSourceConfigSchema struct {
 }
 
 func (s *vcsTestSourceConfigSchema) Normalize(
-	ctx sourcedriver.ConfigNormalizeContext,
+	nc sourcedriver.ConfigNormalizeContext,
 ) (sourcedriver.Config, error) {
-	if err := ctx.UnmarshalVCSConfig(
+	if err := nc.UnmarshalVCSConfig(
 		s.driverName,
 		s.unmarshalTarget,
 	); err != nil {

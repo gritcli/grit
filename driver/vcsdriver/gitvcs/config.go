@@ -51,27 +51,27 @@ type configSchema struct {
 }
 
 func (s *configSchema) NormalizeGlobals(
-	ctx vcsdriver.ConfigNormalizeContext,
+	nc vcsdriver.ConfigNormalizeContext,
 ) (vcsdriver.Config, error) {
-	return s.normalize(ctx, Config{})
+	return s.normalize(nc, Config{})
 }
 
 func (s *configSchema) NormalizeSourceSpecific(
-	ctx vcsdriver.ConfigNormalizeContext,
+	nc vcsdriver.ConfigNormalizeContext,
 	def vcsdriver.Config,
 ) (vcsdriver.Config, error) {
-	return s.normalize(ctx, def.(Config))
+	return s.normalize(nc, def.(Config))
 }
 
 func (s *configSchema) normalize(
-	ctx vcsdriver.ConfigNormalizeContext,
+	nc vcsdriver.ConfigNormalizeContext,
 	cfg Config,
 ) (Config, error) {
 	if s.SSHKey != nil {
 		cfg.SSHKeyFile = s.SSHKey.File
 		cfg.SSHKeyPassphrase = s.SSHKey.Passphrase
 
-		if err := ctx.NormalizePath(&cfg.SSHKeyFile); err != nil {
+		if err := nc.NormalizePath(&cfg.SSHKeyFile); err != nil {
 			return Config{}, err
 		}
 	}
