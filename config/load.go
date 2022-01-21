@@ -230,7 +230,6 @@ func (l *loader) finalize() (Config, error) {
 				return Config{}, fmt.Errorf("%s: %w", i.File, err)
 			}
 
-			// TODO: handle implicit sources that don't have a file
 			return Config{}, err
 		}
 
