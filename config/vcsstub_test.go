@@ -1,4 +1,4 @@
-package fixtures
+package config_test
 
 import (
 	"fmt"
@@ -6,33 +6,33 @@ import (
 	"github.com/gritcli/grit/driver/vcsdriver"
 )
 
-// VCSConfigStub is a test implementation of vcsdriver.Config.
-type VCSConfigStub struct {
+// vcsConfigStub is a test implementation of vcsdriver.Config.
+type vcsConfigStub struct {
 	Value          string
 	FilesystemPath string
 }
 
 // DescribeVCSConfig returns a human-readable description of the
 // configuration.
-func (c VCSConfigStub) DescribeVCSConfig() string {
+func (c vcsConfigStub) DescribeVCSConfig() string {
 	return fmt.Sprintf(
 		"test vcs (%s)",
 		c.Value,
 	)
 }
 
-// VCSConfigSchemaStub is a test implementation of vcsdriver.ConfigSchema.
-type VCSConfigSchemaStub struct {
+// vcsConfigSchemaStub is a test implementation of vcsdriver.ConfigSchema.
+type vcsConfigSchemaStub struct {
 	Value          string `hcl:"value,optional"`
 	FilesystemPath string `hcl:"filesystem_path,optional"`
 }
 
 // NormalizeGlobals validates the global configuration as parsed by this schema,
 // and returns a normalized Config.
-func (s *VCSConfigSchemaStub) NormalizeGlobals(
+func (s *vcsConfigSchemaStub) NormalizeGlobals(
 	ctx vcsdriver.ConfigNormalizeContext,
 ) (vcsdriver.Config, error) {
-	cfg := VCSConfigStub{
+	cfg := vcsConfigStub{
 		Value:          s.Value,
 		FilesystemPath: s.FilesystemPath,
 	}
@@ -50,11 +50,11 @@ func (s *VCSConfigSchemaStub) NormalizeGlobals(
 
 // NormalizeSourceSpecific validates the configuration as parsed by this schema
 // within a "source" block and returns a normalized Config.
-func (s *VCSConfigSchemaStub) NormalizeSourceSpecific(
+func (s *vcsConfigSchemaStub) NormalizeSourceSpecific(
 	ctx vcsdriver.ConfigNormalizeContext,
 	g vcsdriver.Config,
 ) (vcsdriver.Config, error) {
-	cfg := g.(VCSConfigStub)
+	cfg := g.(vcsConfigStub)
 
 	if s.Value != "" {
 		// Note, we concat here (not replace) so that tests can verify that the
@@ -73,11 +73,11 @@ func (s *VCSConfigSchemaStub) NormalizeSourceSpecific(
 	return cfg, nil
 }
 
-// VCSRegistration contains registration info for the test VCS driver.
-var VCSRegistration = vcsdriver.Registration{
+// testVCSRegistration contains registration info for the test VCS driver.
+var testVCSRegistration = vcsdriver.Registration{
 	Name:        "test_vcs_driver",
 	Description: "test VCS driver",
 	NewConfigSchema: func() vcsdriver.ConfigSchema {
-		return &VCSConfigSchemaStub{}
+		return &vcsConfigSchemaStub{}
 	},
 }

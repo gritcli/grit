@@ -2,7 +2,6 @@ package config_test
 
 import (
 	. "github.com/gritcli/grit/config"
-	. "github.com/gritcli/grit/config/internal/fixtures"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 )
@@ -24,9 +23,9 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: SourceConfigStub{
+				Driver: sourceConfigStub{
 					Value:     "<default>",
-					VCSConfig: VCSConfigStub{Value: "<default>"},
+					VCSConfig: vcsConfigStub{Value: "<default>"},
 				},
 			}),
 		),
@@ -43,9 +42,9 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: SourceConfigStub{
+				Driver: sourceConfigStub{
 					Value:     "<default>",
-					VCSConfig: VCSConfigStub{Value: "<default>"},
+					VCSConfig: vcsConfigStub{Value: "<default>"},
 				},
 			}),
 		),
@@ -62,9 +61,9 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: SourceConfigStub{
+				Driver: sourceConfigStub{
 					Value:     "<explicit>",
-					VCSConfig: VCSConfigStub{Value: "<default>"},
+					VCSConfig: vcsConfigStub{Value: "<default>"},
 				},
 			}),
 		),

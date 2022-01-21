@@ -1,4 +1,4 @@
-package fixtures
+package config_test
 
 import (
 	"fmt"
@@ -6,39 +6,39 @@ import (
 	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
-// SourceConfigStub is a test implementation of sourcedriver.Config.
-type SourceConfigStub struct {
+// sourceConfigStub is a test implementation of sourcedriver.Config.
+type sourceConfigStub struct {
 	Value          string
 	FilesystemPath string
-	VCSConfig      VCSConfigStub
+	VCSConfig      vcsConfigStub
 }
 
 // NewDriver constructs a new driver that uses this configuration.
-func (c SourceConfigStub) NewDriver() sourcedriver.Driver {
+func (c sourceConfigStub) NewDriver() sourcedriver.Driver {
 	panic("not implemented")
 }
 
 // DescribeSourceConfig returns a human-readable description of the
 // configuration.
-func (c SourceConfigStub) DescribeSourceConfig() string {
+func (c sourceConfigStub) DescribeSourceConfig() string {
 	return fmt.Sprintf(
 		"test source (%s)",
 		c.Value,
 	)
 }
 
-// SourceConfigSchemaStub is a test implementation of sourcedriver.ConfigSchema.
-type SourceConfigSchemaStub struct {
+// sourceConfigSchemaStub is a test implementation of sourcedriver.ConfigSchema.
+type sourceConfigSchemaStub struct {
 	Value          string `hcl:"value,optional"`
 	FilesystemPath string `hcl:"filesystem_path,optional"`
 }
 
 // Normalize validates the configuration as parsed by this schema and
 // returns a normalized Config.
-func (s *SourceConfigSchemaStub) Normalize(
+func (s *sourceConfigSchemaStub) Normalize(
 	ctx sourcedriver.ConfigNormalizeContext,
 ) (sourcedriver.Config, error) {
-	cfg := SourceConfigStub{
+	cfg := sourceConfigStub{
 		Value:          s.Value,
 		FilesystemPath: s.FilesystemPath,
 	}
@@ -51,18 +51,18 @@ func (s *SourceConfigSchemaStub) Normalize(
 		return nil, err
 	}
 
-	if err := ctx.UnmarshalVCSConfig(VCSRegistration.Name, &cfg.VCSConfig); err != nil {
+	if err := ctx.UnmarshalVCSConfig(testVCSRegistration.Name, &cfg.VCSConfig); err != nil {
 		return nil, err
 	}
 
 	return cfg, nil
 }
 
-// SourceRegistration contains registration info for the test source driver.
-var SourceRegistration = sourcedriver.Registration{
+// testSourceRegistration contains registration info for the test source driver.
+var testSourceRegistration = sourcedriver.Registration{
 	Name:        "test_source_driver",
 	Description: "test source driver",
 	NewConfigSchema: func() sourcedriver.ConfigSchema {
-		return &SourceConfigSchemaStub{}
+		return &sourceConfigSchemaStub{}
 	},
 }

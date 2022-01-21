@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	. "github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/config/internal/fixtures"
 	"github.com/gritcli/grit/driver/registry"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -151,13 +150,13 @@ func newRegistry() *registry.Registry {
 	reg := &registry.Registry{}
 
 	reg.RegisterSourceDriver(
-		fixtures.SourceRegistration.Name,
-		fixtures.SourceRegistration,
+		testSourceRegistration.Name,
+		testSourceRegistration,
 	)
 
 	reg.RegisterVCSDriver(
-		fixtures.VCSRegistration.Name,
-		fixtures.VCSRegistration,
+		testVCSRegistration.Name,
+		testVCSRegistration,
 	)
 
 	return reg

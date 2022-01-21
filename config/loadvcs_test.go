@@ -2,7 +2,6 @@ package config_test
 
 import (
 	. "github.com/gritcli/grit/config"
-	. "github.com/gritcli/grit/config/internal/fixtures"
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	. "github.com/onsi/ginkgo"
@@ -29,9 +28,9 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: SourceConfigStub{
+				Driver: sourceConfigStub{
 					Value:     "<default>",
-					VCSConfig: VCSConfigStub{Value: "<explicit>"},
+					VCSConfig: vcsConfigStub{Value: "<explicit>"},
 				},
 			}),
 		),
@@ -50,9 +49,9 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: SourceConfigStub{
+				Driver: sourceConfigStub{
 					Value:     "<default>",
-					VCSConfig: VCSConfigStub{Value: "<default><explicit>"},
+					VCSConfig: vcsConfigStub{Value: "<default><explicit>"},
 				},
 			}),
 		),
@@ -75,9 +74,9 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: SourceConfigStub{
+				Driver: sourceConfigStub{
 					Value:     "<default>",
-					VCSConfig: VCSConfigStub{Value: "<explicit global><override>"},
+					VCSConfig: vcsConfigStub{Value: "<explicit global><override>"},
 				},
 			}),
 		),
@@ -192,7 +191,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Name:        "test_vcs_driver",
 				Description: "test VCS driver (with broken defaults)",
 				NewConfigSchema: func() vcsdriver.ConfigSchema {
-					return &VCSConfigSchemaStub{
+					return &vcsConfigSchemaStub{
 						FilesystemPath: "~someuser/path/to/nowhere",
 					}
 				},
