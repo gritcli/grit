@@ -1,6 +1,8 @@
 package config_test
 
 import (
+	"reflect"
+
 	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
@@ -8,6 +10,7 @@ import (
 	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("func Load() (source configuration)", func() {
@@ -252,4 +255,65 @@ var _ = Describe("func Load() (source configuration)", func() {
 			},
 		),
 	)
+
+	When("the source driver uses UnmarshalVCSConfig() incorrectly", func() {
+		DescribeTable(
+			"it panics",
+			func(target interface{}, expect string) {
+				schema := &stubs.SourceDriverConfigSchema{
+					NormalizeFunc: func(
+						nc sourcedriver.ConfigNormalizeContext,
+						s *stubs.SourceDriverConfigSchema,
+					) (sourcedriver.Config, error) {
+						nc.UnmarshalVCSConfig(testVCSDriverName, target)
+						return nil, nil
+					},
+				}
+
+				reg := &registry.Registry{}
+				reg.RegisterSourceDriver(
+					"test_source_driver",
+					sourcedriver.Registration{
+						Name: "test_source_driver",
+						NewConfigSchema: func() sourcedriver.ConfigSchema {
+							return schema
+						},
+						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
+							"implicit": func() sourcedriver.ConfigSchema {
+								return schema
+							},
+						},
+					},
+				)
+
+				Expect(func() {
+					Load("./does-not-exist", reg)
+				}).To(PanicWith(expect))
+			},
+			Entry(
+				`nil`,
+				nil,
+				`v must be a pointer to a concrete implementation of the vcsdriver.Config interface, but it is nil`,
+			),
+			Entry(
+				`not a pointer`,
+				"<not a pointer>",
+				`v must be a pointer to a concrete implementation of the vcsdriver.Config interface, but string is not a pointer`,
+			),
+			Entry(
+				`not a VCS config`,
+				&struct{}{},
+				`v must be a pointer to a concrete implementation of the vcsdriver.Config interface, but struct {} does not implement that interface`,
+			),
+			Entry(
+				`not concrete`,
+				reflect.New(
+					reflect.TypeOf(
+						(*vcsdriver.Config)(nil),
+					).Elem(),
+				).Interface(),
+				`v must be a pointer to a concrete implementation of the vcsdriver.Config interface, but vcsdriver.Config is not a concrete type (it's an interface)`,
+			),
+		)
+	})
 })
