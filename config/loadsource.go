@@ -101,7 +101,7 @@ func (l *loader) mergeSource(file string, s sourceSchema) error {
 // configuration files is ignored.
 func (l *loader) populateImplicitSources() {
 	for alias, reg := range l.Registry.SourceDrivers() {
-		for name, newSchema := range reg.ImplicitSources {
+		for name, schema := range reg.ImplicitSources {
 			lowerName := strings.ToLower(name)
 
 			if l.sources == nil {
@@ -115,7 +115,7 @@ func (l *loader) populateImplicitSources() {
 					Name:   name,
 					Driver: alias,
 				},
-				Driver: newSchema(),
+				Driver: schema,
 			}
 		}
 	}

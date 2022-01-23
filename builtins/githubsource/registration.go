@@ -12,11 +12,9 @@ var Registration = sourcedriver.Registration{
 	NewConfigSchema: func() sourcedriver.ConfigSchema {
 		return &configSchema{}
 	},
-	ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
-		"github": func() sourcedriver.ConfigSchema {
-			return &configSchema{
-				Domain: "github.com",
-			}
+	ImplicitSources: map[string]sourcedriver.ConfigSchema{
+		"github": &configSchema{
+			Domain: "github.com",
 		},
 	},
 }

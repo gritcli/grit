@@ -109,6 +109,9 @@ var _ = Describe("func Load() (source configuration)", func() {
 				},
 			}),
 			func(reg *registry.Registry) {
+				schema := newSourceStub()
+				schema.ArbitraryAttribute = "<implicit>"
+
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
@@ -116,12 +119,8 @@ var _ = Describe("func Load() (source configuration)", func() {
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return newSourceStub()
 						},
-						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
-							"implicit": func() sourcedriver.ConfigSchema {
-								s := newSourceStub()
-								s.ArbitraryAttribute = "<implicit>"
-								return s
-							},
+						ImplicitSources: map[string]sourcedriver.ConfigSchema{
+							"implicit": schema,
 						},
 					},
 				)
@@ -150,6 +149,9 @@ var _ = Describe("func Load() (source configuration)", func() {
 				},
 			}),
 			func(reg *registry.Registry) {
+				schema := newSourceStub()
+				schema.ArbitraryAttribute = "<implicit>"
+
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
@@ -157,12 +159,8 @@ var _ = Describe("func Load() (source configuration)", func() {
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return newSourceStub()
 						},
-						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
-							"implicit": func() sourcedriver.ConfigSchema {
-								s := newSourceStub()
-								s.ArbitraryAttribute = "<implicit>"
-								return s
-							},
+						ImplicitSources: map[string]sourcedriver.ConfigSchema{
+							"implicit": schema,
 						},
 					},
 				)
@@ -303,6 +301,9 @@ var _ = Describe("func Load() (source configuration)", func() {
 			[]string{},
 			`the configuration for the implicit 'implicit' source (provided by the 'test_source_driver_with_implicit_source' driver) cannot be loaded: cannot expand user-specific home dir`,
 			func(reg *registry.Registry) {
+				schema := newSourceStub()
+				schema.FilesystemPath = "~someuser/path/to/nowhere"
+
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
@@ -310,12 +311,8 @@ var _ = Describe("func Load() (source configuration)", func() {
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return newSourceStub()
 						},
-						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
-							"implicit": func() sourcedriver.ConfigSchema {
-								s := newSourceStub()
-								s.FilesystemPath = "~someuser/path/to/nowhere"
-								return s
-							},
+						ImplicitSources: map[string]sourcedriver.ConfigSchema{
+							"implicit": schema,
 						},
 					},
 				)
@@ -395,12 +392,10 @@ var _ = Describe("func Load() (source configuration)", func() {
 					sourcedriver.Registration{
 						Name: "test_source_driver",
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return schema
+							return &stubs.SourceDriverConfigSchema{} // DOUBLE CHECK
 						},
-						ImplicitSources: map[string]func() sourcedriver.ConfigSchema{
-							"implicit": func() sourcedriver.ConfigSchema {
-								return schema
-							},
+						ImplicitSources: map[string]sourcedriver.ConfigSchema{
+							"implicit": schema,
 						},
 					},
 				)

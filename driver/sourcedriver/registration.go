@@ -15,5 +15,5 @@ type Registration struct {
 
 	// ImplicitSources is a set of sources that should be added to the
 	// configuration automatically.
-	ImplicitSources map[string]func() ConfigSchema
+	ImplicitSources map[string]ConfigSchema
 }
