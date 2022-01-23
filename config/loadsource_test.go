@@ -14,6 +14,10 @@ import (
 )
 
 var _ = Describe("func Load() (source configuration)", func() {
+	type aDifferentVCSConfigConcreteType struct {
+		*stubs.VCSDriverConfig
+	}
+
 	DescribeTable(
 		"it returns the expected configuration",
 		testLoadSuccess,
@@ -164,6 +168,69 @@ var _ = Describe("func Load() (source configuration)", func() {
 				)
 			},
 		),
+		Entry(
+			`disambiguate VCS drivers with the same name`,
+			[]string{
+				`source "test_source" "test_source_driver_uses_ambiguous_vcs" {}`,
+			},
+			withSource(defaultConfig, Source{
+				Name:    "test_source",
+				Enabled: true,
+				Clones: Clones{
+					Dir: "~/grit/test_source",
+				},
+				Driver: &stubs.SourceDriverConfig{
+					VCSs: map[string]vcsdriver.Config{
+						testVCSDriverName: aDifferentVCSConfigConcreteType{},
+					},
+				},
+			}),
+			func(reg *registry.Registry) {
+				// Register another VCS driver with the same name but a
+				// different alias.
+				reg.RegisterVCSDriver(
+					testVCSDriverName+"_alias",
+					vcsdriver.Registration{
+						Name: testVCSDriverName,
+						NewConfigSchema: func() vcsdriver.ConfigSchema {
+							return &stubs.VCSDriverConfigSchema{
+								NormalizeGlobalsFunc: func(
+									vcsdriver.ConfigNormalizeContext,
+									*stubs.VCSDriverConfigSchema,
+								) (vcsdriver.Config, error) {
+									return aDifferentVCSConfigConcreteType{}, nil
+								},
+							}
+						},
+					},
+				)
+
+				reg.RegisterSourceDriver(
+					"test_source_driver_uses_ambiguous_vcs",
+					sourcedriver.Registration{
+						Name: "test_source_driver_uses_ambiguous_vcs",
+						NewConfigSchema: func() sourcedriver.ConfigSchema {
+							return &stubs.SourceDriverConfigSchema{
+								NormalizeFunc: func(
+									nc sourcedriver.ConfigNormalizeContext,
+									s *stubs.SourceDriverConfigSchema,
+								) (sourcedriver.Config, error) {
+									var target aDifferentVCSConfigConcreteType
+									if err := nc.UnmarshalVCSConfig(testVCSDriverName, &target); err != nil {
+										return nil, err
+									}
+									return &stubs.SourceDriverConfig{
+										VCSs: map[string]vcsdriver.Config{
+											"test_vcs_driver": target,
+										},
+									}, nil
+								},
+							}
+						},
+					},
+				)
+			},
+		),
 	)
 
 	DescribeTable(
@@ -249,6 +316,58 @@ var _ = Describe("func Load() (source configuration)", func() {
 								s.FilesystemPath = "~someuser/path/to/nowhere"
 								return s
 							},
+						},
+					},
+				)
+			},
+		),
+		Entry(
+			`unregocnizzed VCS driver dependency`,
+			[]string{
+				`source "test_source" "test_source_driver_uses_unrecognized_vcs" {}`,
+			},
+			`<dir>/config-0.hcl: the configuration for the 'test_source' source cannot be loaded: dependency on unrecognized version control system ('<unrecognized>')`,
+			func(reg *registry.Registry) {
+				reg.RegisterSourceDriver(
+					"test_source_driver_uses_unrecognized_vcs",
+					sourcedriver.Registration{
+						Name: "test_source_driver_uses_unrecognized_vcs",
+						NewConfigSchema: func() sourcedriver.ConfigSchema {
+							return &stubs.SourceDriverConfigSchema{
+								NormalizeFunc: func(
+									nc sourcedriver.ConfigNormalizeContext,
+									s *stubs.SourceDriverConfigSchema,
+								) (sourcedriver.Config, error) {
+									target := &stubs.VCSDriverConfig{}
+									return nil, nc.UnmarshalVCSConfig("<unrecognized>", &target)
+								},
+							}
+						},
+					},
+				)
+			},
+		),
+		Entry(
+			`VCS driver config type mismatch`,
+			[]string{
+				`source "test_source" "test_source_driver_uses_unrecognized_vcs" {}`,
+			},
+			`<dir>/config-0.hcl: the configuration for the 'test_source' source cannot be loaded: depends on incompatible version control system ('test_vcs_driver'), none of the matching drivers ('test_vcs_driver') use the same configuration structure`,
+			func(reg *registry.Registry) {
+				reg.RegisterSourceDriver(
+					"test_source_driver_uses_unrecognized_vcs",
+					sourcedriver.Registration{
+						Name: "test_source_driver_uses_unrecognized_vcs",
+						NewConfigSchema: func() sourcedriver.ConfigSchema {
+							return &stubs.SourceDriverConfigSchema{
+								NormalizeFunc: func(
+									nc sourcedriver.ConfigNormalizeContext,
+									s *stubs.SourceDriverConfigSchema,
+								) (sourcedriver.Config, error) {
+									target := aDifferentVCSConfigConcreteType{}
+									return nil, nc.UnmarshalVCSConfig(testVCSDriverName, &target)
+								},
+							}
 						},
 					},
 				)
