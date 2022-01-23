@@ -1,8 +1,8 @@
 package gitvcs_test
 
 import (
+	. "github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/configtest"
-	. "github.com/gritcli/grit/driver/vcsdriver/gitvcs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"

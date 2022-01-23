@@ -1,8 +1,8 @@
 package githubsource
 
 import (
+	"github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/driver/vcsdriver/gitvcs"
 )
 
 // Config contains configuration specific to the GitHub driver.

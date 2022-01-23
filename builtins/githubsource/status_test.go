@@ -3,8 +3,8 @@ package githubsource_test
 import (
 	"context"
 
+	. "github.com/gritcli/grit/builtins/githubsource"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/gritcli/grit/driver/sourcedriver/githubsource"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

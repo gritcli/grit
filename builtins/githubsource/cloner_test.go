@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/driver/vcsdriver/gitvcs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

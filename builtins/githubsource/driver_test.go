@@ -7,8 +7,8 @@ import (
 
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
+	. "github.com/gritcli/grit/builtins/githubsource"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/gritcli/grit/driver/sourcedriver/githubsource"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

@@ -3,10 +3,10 @@ package deps
 import (
 	"os"
 
+	"github.com/gritcli/grit/builtins/githubsource"
+	"github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/registry"
-	"github.com/gritcli/grit/driver/sourcedriver/githubsource"
-	"github.com/gritcli/grit/driver/vcsdriver/gitvcs"
 )
 
 func init() {
