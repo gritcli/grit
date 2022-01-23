@@ -23,7 +23,7 @@ jobs:
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.GRIT_TEST_DEPLOY_KEY }}
+          ssh-private-key: ${{ secrets.GRIT_INTEGRATION_TEST_GITHUB_DEPLOY_KEY }}
 
       - name: Make
         run: make ci
