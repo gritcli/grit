@@ -21,11 +21,10 @@ func (d *impl) Resolve(
 		return nil, nil
 	}
 
-	reposByOwner := d.cache.ReposByOwner()
 	var repos []*github.Repository
 
 	if ownerName == "" {
-		for _, reposByName := range reposByOwner {
+		for _, reposByName := range d.reposByOwner {
 			if r, ok := reposByName[repoName]; ok {
 				repos = append(repos, r)
 			}
@@ -36,7 +35,7 @@ func (d *impl) Resolve(
 			"found %d match(es) for '%s' in the repository list for @%s",
 			len(repos),
 			query,
-			d.cache.CurrentUser().GetLogin(),
+			d.user.GetLogin(),
 		)
 
 		if len(repos) == 0 {
@@ -50,12 +49,12 @@ func (d *impl) Resolve(
 		return toRemoteRepos(repos...), nil
 	}
 
-	if r, ok := reposByOwner[ownerName][repoName]; ok {
+	if r, ok := d.reposByOwner[ownerName][repoName]; ok {
 		logging.Debug(
 			logger,
 			"found an exact match for '%s' in the repository list for @%s",
 			query,
-			d.cache.CurrentUser().GetLogin(),
+			d.user.GetLogin(),
 		)
 
 		return toRemoteRepos(r), nil

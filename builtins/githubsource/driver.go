@@ -11,7 +11,10 @@ import (
 type impl struct {
 	config Config
 	client *github.Client
-	cache  cache
+
+	user         *github.User
+	reposByID    map[int64]*github.Repository
+	reposByOwner map[string]map[string]*github.Repository
 }
 
 // isEnterpriseServer returns true if domain seems to refer to a GitHub

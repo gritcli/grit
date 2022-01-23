@@ -51,7 +51,7 @@ func (d *impl) Init(
 	}
 
 	logging.Log(logger, "authenticated as %s", user.GetLogin())
-	d.cache.SetCurrentUser(user)
+	d.user = user
 
 	if err := d.populateRepoCache(ctx, logger); err != nil {
 		return err
@@ -73,7 +73,8 @@ func (d *impl) populateRepoCache(
 		},
 	}
 
-	var repos []*github.Repository
+	d.reposByID = map[int64]*github.Repository{}
+	d.reposByOwner = map[string]map[string]*github.Repository{}
 
 	for opts.Page != 0 {
 		repoPage, res, err := d.client.Repositories.List(ctx, "", opts)
@@ -83,7 +84,16 @@ func (d *impl) populateRepoCache(
 
 		for _, r := range repoPage {
 			logging.Debug(logger, "discovered %s", r.GetFullName())
-			repos = append(repos, r)
+
+			owner := r.GetOwner().GetLogin()
+			reposByName := d.reposByOwner[owner]
+			if reposByName == nil {
+				reposByName = map[string]*github.Repository{}
+				d.reposByOwner[owner] = reposByName
+			}
+
+			reposByName[r.GetName()] = r
+			d.reposByID[r.GetID()] = r
 		}
 
 		opts.Page = res.NextPage
@@ -92,11 +102,9 @@ func (d *impl) populateRepoCache(
 	logging.Log(
 		logger,
 		"added %d repositories to the repository list for @%s",
-		len(repos),
-		d.cache.CurrentUser().GetLogin(),
+		len(d.reposByID),
+		d.user.GetLogin(),
 	)
-
-	d.cache.SetRepos(repos)
 
 	return nil
 }

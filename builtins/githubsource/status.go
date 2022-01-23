@@ -37,7 +37,7 @@ func (d *impl) Status(ctx context.Context) (string, error) {
 	if invalidToken {
 		info = append(info, "unauthenticated (invalid token)")
 	} else {
-		if u := d.cache.CurrentUser(); u != nil {
+		if u := d.user; u != nil {
 			info = append(info, "@"+u.GetLogin())
 		} else {
 			info = append(info, "unauthenticated")

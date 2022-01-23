@@ -19,7 +19,7 @@ func (d *impl) NewCloner(
 		return nil, "", err
 	}
 
-	r, ok := d.cache.RepoByID(intID)
+	r, ok := d.reposByID[intID]
 	if !ok {
 		var err error
 		r, _, err = d.client.Repositories.GetByID(ctx, intID)
