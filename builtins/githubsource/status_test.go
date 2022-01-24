@@ -64,7 +64,7 @@ var _ = Describe("func impl.Status()", func() {
 		It("indicates that the user is authenticated", func() {
 			status, err := drv.Status(ctx)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(status).To(MatchRegexp(`@jmalloc, \d+ API requests remaining \(resets .+ from now\)`))
+			Expect(status).To(MatchRegexp(`@grit-integration-tests, \d+ API requests remaining \(resets .+ from now\)`))
 		})
 	})
 })

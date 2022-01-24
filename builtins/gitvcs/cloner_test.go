@@ -27,8 +27,8 @@ var _ = Describe("type Cloner", func() {
 		logger.Reset()
 
 		cloner = &Cloner{
-			SSHEndpoint:  "git@github.com:gritcli/test-public.git",
-			HTTPEndpoint: "https://github.com/gritcli/test-public.git",
+			SSHEndpoint:  "git@github.com:grit-integration-tests/test-private.git",
+			HTTPEndpoint: "https://github.com/grit-integration-tests/test-private.git",
 		}
 
 		var err error
@@ -85,16 +85,14 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("clones via HTTP with authentication", func() {
-			// TODO: https://github.com/gritcli/grit/issues/13
-			//
-			// Test cloning a private repository instead.
 			token := os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
 			if token == "" {
 				Skip("GRIT_INTEGRATION_TEST_GITHUB_TOKEN is not set")
 			}
 
 			cloner.PreferHTTP = true
-			cloner.HTTPPassword = token // username ignored by github
+			cloner.HTTPUsername = "<ignored-by-github>"
+			cloner.HTTPPassword = token
 
 			err := cloner.Clone(ctx, tempDir, &logger)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -317,9 +315,10 @@ func expectCloneWithURL(dir, url string, logger *logging.BufferedLogger) {
 	rem, err := repo.Remote("origin")
 	Expect(err).ShouldNot(HaveOccurred())
 	Expect(rem.Config().URLs).To(ConsistOf(url))
-	Expect(logger.Messages()).To(ContainElement(
-		logging.BufferedLogMessage{
-			Message: "git: Total 3 (delta 0), reused 3 (delta 0), pack-reused 0",
-		},
-	))
+
+	messages := logger.Messages()
+	Expect(messages).NotTo(BeEmpty())
+	Expect(messages[len(messages)-1].Message).To(
+		MatchRegexp(`git: Total \d+ \(delta \d+\), reused \d+ \(delta \d+\), pack-reused \d+`),
+	)
 }
