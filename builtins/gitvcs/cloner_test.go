@@ -131,14 +131,13 @@ var _ = Describe("type Cloner", func() {
 
 				cloner.PreferHTTP = preferHTTP
 
+				orig := os.Getenv("SSH_AUTH_SOCK")
+				defer os.Setenv("SSH_AUTH_SOCK", orig)
+
 				if hasSSHAgent {
-					if os.Getenv("SSH_AUTH_SOCK") == "" {
-						Skip("the SSH agent is unavailable")
-					}
+					os.Setenv("SSH_AUTH_SOCK", "<ssh auth socket>")
 				} else {
-					orig := os.Getenv("SSH_AUTH_SOCK")
 					os.Setenv("SSH_AUTH_SOCK", "")
-					defer os.Setenv("SSH_AUTH_SOCK", orig)
 				}
 
 				if hasSSHPrivateKey {
