@@ -26,10 +26,7 @@ var _ = Describe("type Cloner", func() {
 
 		logger.Reset()
 
-		cloner = &Cloner{
-			SSHEndpoint:  "git@github.com:grit-integration-tests/test-private.git",
-			HTTPEndpoint: "https://github.com/grit-integration-tests/test-private.git",
-		}
+		cloner = &Cloner{}
 
 		var err error
 		tempDir, err = os.MkdirTemp("", "")
@@ -54,12 +51,19 @@ var _ = Describe("type Cloner", func() {
 				Skip("SSH agent is not available")
 			}
 
+			// Use the public test repo; it makes it easier to run the tests
+			// locally using the developer's SSH agent.
+			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-public.git"
+
 			err := cloner.Clone(ctx, tempDir, &logger)
 			Expect(err).ShouldNot(HaveOccurred())
 			expectCloneWithURL(tempDir, cloner.SSHEndpoint, &logger)
 		})
 
 		It("clones via SSH using an explicit private key", func() {
+			// Use the private test repo to ensure the private key was
+			// definitely used.
+			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-private.git"
 			cloner.SSHKeyFile = "./testdata/deploy-key-no-passphrase"
 
 			err := cloner.Clone(ctx, tempDir, &logger)
@@ -68,6 +72,9 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("clones via SSH using an explicit private key with a passphrase", func() {
+			// Use the private test repo to ensure the private key was
+			// definitely used.
+			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-private.git"
 			cloner.SSHKeyFile = "./testdata/deploy-key-with-passphrase"
 			cloner.SSHKeyPassphrase = "passphrase"
 
@@ -77,6 +84,9 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("clones via HTTP without authentication", func() {
+			// Use the public test repo so that it's accessible without
+			// authentication.
+			cloner.HTTPEndpoint = "https://github.com/grit-integration-tests/test-public.git"
 			cloner.PreferHTTP = true
 
 			err := cloner.Clone(ctx, tempDir, &logger)
@@ -90,9 +100,12 @@ var _ = Describe("type Cloner", func() {
 				Skip("GRIT_INTEGRATION_TEST_GITHUB_TOKEN is not set")
 			}
 
-			cloner.PreferHTTP = true
+			// Use the private test repo to ensure the basic authentication
+			// details were actually used.
+			cloner.HTTPEndpoint = "https://github.com/grit-integration-tests/test-private.git"
 			cloner.HTTPUsername = "<ignored-by-github>"
 			cloner.HTTPPassword = token
+			cloner.PreferHTTP = true
 
 			err := cloner.Clone(ctx, tempDir, &logger)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -108,12 +121,12 @@ var _ = Describe("type Cloner", func() {
 				hasSSHAgent, hasSSHPrivateKey, preferHTTP bool,
 				expect string, // "ssh", "http" or an error message
 			) {
-				if !hasSSH {
-					cloner.SSHEndpoint = ""
+				if hasSSH {
+					cloner.SSHEndpoint = "<ssh endpoint>"
 				}
 
-				if !hasHTTP {
-					cloner.HTTPEndpoint = ""
+				if hasHTTP {
+					cloner.HTTPEndpoint = "<http endpoint>"
 				}
 
 				cloner.PreferHTTP = preferHTTP
