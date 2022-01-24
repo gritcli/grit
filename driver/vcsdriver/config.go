@@ -1,38 +1,28 @@
 package vcsdriver
 
-// ConfigSchema is an interface for parsing driver-specific configuration within
-// a "vcs" block in a Grit configuration file.
-//
-// It must be implemented as a pointer-to-struct that uses the field tags
-// described by https://pkg.go.dev/github.com/hashicorp/hcl/v2/gohcl, thus it
-// defines the HCL schema that is allowed when configuring version control
-// systems that use this driver.
-//
-// When Grit parses a "vcs" block within a configuration, any unrecognized
-// attributes or blocks within that "vcs" block are parsed into this schema.
-type ConfigSchema interface {
-	// NormalizeGlobals validates the global configuration as parsed by this
-	// schema, and returns a normalized Config.
-	//
-	// The "global" VCS configuration is a "vcs" block that appears at the
-	// "top-level" of a configuration file. Such global configuration informs
-	// the source-specific VCS configuration.
-	//
-	// If there is no "vcs" block for this driver at the top-level of the Grit
-	// configuration, the method is called on a zero-value ConfigSchema.
-	NormalizeGlobals(ctx ConfigNormalizeContext) (Config, error)
+import "github.com/hashicorp/hcl/v2"
 
-	// NormalizeSourceSpecific validates the configuration as parsed by this
-	// schema within a "source" block and returns a normalized Config.
+// ConfigNormalizer is an interface for normalizing driver-specific
+// configuration within a "vcs" block in a Grit configuration file.
+type ConfigNormalizer interface {
+	// Defaults returns the default configuration to use for this driver.
+	Defaults(nc ConfigNormalizeContext) (Config, error)
+
+	// Merge returns a new Config that is the result of merging an existing
+	// Config with the contents of a "vcs" block.
 	//
-	// g is the global configuration for this VCS, as returned by
-	// NormalizeGlobals().
-	NormalizeSourceSpecific(ctx ConfigNormalizeContext, g Config) (Config, error)
+	// c is the existing configuration, b is the body of the "vcs" block. c must
+	// not be modified.
+	Merge(nc ConfigNormalizeContext, c Config, b hcl.Body) (Config, error)
 }
 
 // ConfigNormalizeContext provides operations used to normalize a
 // ConfigSchema.
 type ConfigNormalizeContext interface {
+	// EvalContext returns the HCL evaluation context to be used when to
+	// decoding HCL content.
+	EvalContext() *hcl.EvalContext
+
 	// NormalizePath normalizes a filesystem encountered within the
 	// configuration.
 	//

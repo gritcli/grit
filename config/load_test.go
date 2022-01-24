@@ -11,6 +11,8 @@ import (
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/gritcli/grit/internal/stubs"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -188,10 +190,8 @@ func newRegistry() *registry.Registry {
 	reg.RegisterVCSDriver(
 		testVCSDriverName,
 		vcsdriver.Registration{
-			Name: testVCSDriverName,
-			NewConfigSchema: func() vcsdriver.ConfigSchema {
-				return newVCSStub()
-			},
+			Name:             testVCSDriverName,
+			ConfigNormalizer: newVCSNormalizer(),
 		},
 	)
 
@@ -233,42 +233,33 @@ func newSourceStub() *stubs.SourceDriverConfigSchema {
 	}
 }
 
-// newVCSStub returns a new stub of vcsdriver.ConfigSchema for testing VCS
-// driver configuration.
-func newVCSStub() *stubs.VCSDriverConfigSchema {
-	return &stubs.VCSDriverConfigSchema{
-		NormalizeGlobalsFunc: func(
+func newVCSNormalizer() *stubs.VCSDriverConfigNormalizer {
+	return &stubs.VCSDriverConfigNormalizer{
+		DefaultsFunc: func(
 			nc vcsdriver.ConfigNormalizeContext,
-			s *stubs.VCSDriverConfigSchema,
 		) (vcsdriver.Config, error) {
-			cfg := &stubs.VCSDriverConfig{
-				ArbitraryAttribute: s.ArbitraryAttribute,
-				FilesystemPath:     s.FilesystemPath,
-			}
-
-			if cfg.ArbitraryAttribute == "" {
-				cfg.ArbitraryAttribute = "<default>"
-			}
-
-			if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
-				return nil, err
-			}
-
-			return cfg, nil
+			return &stubs.VCSDriverConfig{
+				ArbitraryAttribute: "<default>",
+			}, nil
 		},
-
-		NormalizeSourceSpecificFunc: func(
+		MergeFunc: func(
 			nc vcsdriver.ConfigNormalizeContext,
-			g vcsdriver.Config,
-			s *stubs.VCSDriverConfigSchema,
+			c vcsdriver.Config,
+			b hcl.Body,
 		) (vcsdriver.Config, error) {
-			cfg := *g.(*stubs.VCSDriverConfig) // clone
+			cfg := *c.(*stubs.VCSDriverConfig) // clone
+
+			var s stubs.VCSDriverConfigSchema
+
+			if diags := gohcl.DecodeBody(b, nc.EvalContext(), &s); diags.HasErrors() {
+				return nil, diags
+			}
 
 			if s.ArbitraryAttribute != "" {
-				// Note, we concat to the default here (not replace) so that
-				// tests can verify that the defaults are made available to
-				// NormalizeSourceSpecific()
-				cfg.ArbitraryAttribute += s.ArbitraryAttribute
+				// Note, we concat to the existing config here (not replace) so
+				// that tests can verify that the right configs are made
+				// available to Merge().
+				cfg.ArbitraryAttribute += " + " + s.ArbitraryAttribute
 			}
 
 			if s.FilesystemPath != "" {

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	homedir "github.com/mitchellh/go-homedir"
 )
@@ -167,11 +169,8 @@ func isConfigFile(e fs.DirEntry) bool {
 // representation of the configuration.
 func (l *loader) mergeFile(file string, f fileSchema) (err error) {
 	defer func() {
-		if err != nil {
-			prefix := file + ":"
-			if !strings.HasPrefix(err.Error(), prefix) {
-				err = fmt.Errorf("%s %w", prefix, err)
-			}
+		if err != nil && !isHCLError(err) {
+			err = fmt.Errorf("%s: %w", file, err)
 		}
 	}()
 
@@ -226,7 +225,7 @@ func (l *loader) finalize() (Config, error) {
 	for _, i := range l.sources {
 		src, err := l.finalizeSource(i)
 		if err != nil {
-			if i.File != "" {
+			if i.File != "" && !isHCLError(err) {
 				return Config{}, fmt.Errorf("%s: %w", i.File, err)
 			}
 
@@ -265,4 +264,11 @@ func (l *loader) normalizePath(p *string) error {
 	*p = filepath.Clean(result)
 
 	return nil
+}
+
+// isHCLError returns true if err is an hcl.Diagnostics error, in which case it
+// will already contain file/line information.
+func isHCLError(err error) bool {
+	var diag hcl.Diagnostics
+	return errors.As(err, &diag)
 }

@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
 )
 
 // Config is the configuration that controls how Grit uses the Git VCS.
@@ -42,6 +44,7 @@ func (c Config) DescribeVCSConfig() string {
 	return desc
 }
 
+// configSchema is the HCL schema for a "vcs" block for the Git driver.
 type configSchema struct {
 	SSHKey *struct {
 		File       string `hcl:"file"`
@@ -50,23 +53,21 @@ type configSchema struct {
 	PreferHTTP *bool `hcl:"prefer_http"`
 }
 
-func (s *configSchema) NormalizeGlobals(
-	nc vcsdriver.ConfigNormalizeContext,
-) (vcsdriver.Config, error) {
-	return s.normalize(nc, Config{})
+// configNormalizer is an implementation of vcsdriver.ConfigNormalizer for Git.
+type configNormalizer struct{}
+
+func (configNormalizer) Defaults(nc vcsdriver.ConfigNormalizeContext) (vcsdriver.Config, error) {
+	return Config{}, nil
 }
 
-func (s *configSchema) NormalizeSourceSpecific(
-	nc vcsdriver.ConfigNormalizeContext,
-	def vcsdriver.Config,
-) (vcsdriver.Config, error) {
-	return s.normalize(nc, def.(Config))
-}
+func (configNormalizer) Merge(nc vcsdriver.ConfigNormalizeContext, c vcsdriver.Config, b hcl.Body) (vcsdriver.Config, error) {
+	var s configSchema
+	if diag := gohcl.DecodeBody(b, nc.EvalContext(), &s); diag.HasErrors() {
+		return nil, diag
+	}
 
-func (s *configSchema) normalize(
-	nc vcsdriver.ConfigNormalizeContext,
-	cfg Config,
-) (Config, error) {
+	cfg := c.(Config) // clone
+
 	if s.SSHKey != nil {
 		cfg.SSHKeyFile = s.SSHKey.File
 		cfg.SSHKeyPassphrase = s.SSHKey.Passphrase

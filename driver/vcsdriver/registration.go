@@ -10,6 +10,7 @@ type Registration struct {
 	// Description is a short human-readable description of the driver.
 	Description string
 
-	// NewConfigSchema returns a zero-value ConfigSchema for this driver.
-	NewConfigSchema func() ConfigSchema
+	// ConfigNormalizer is the normalizer used to produce configuration values
+	// for this driver.
+	ConfigNormalizer ConfigNormalizer
 }

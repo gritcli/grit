@@ -1,7 +1,10 @@
 package stubs
 
 import (
+	"errors"
+
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/hashicorp/hcl/v2"
 )
 
 // VCSDriverConfigSchema is a test implementation of vcsdriver.ConfigSchema.
@@ -39,6 +42,37 @@ func (s *VCSDriverConfigSchema) NormalizeSourceSpecific(
 	}
 
 	return g, nil
+}
+
+// VCSDriverConfigNormalizer is a test implementation of vcsdriver.ConfigNormalizer.
+type VCSDriverConfigNormalizer struct {
+	DefaultsFunc func(vcsdriver.ConfigNormalizeContext) (vcsdriver.Config, error)
+	MergeFunc    func(vcsdriver.ConfigNormalizeContext, vcsdriver.Config, hcl.Body) (vcsdriver.Config, error)
+}
+
+// Defaults returns s.DefaultsFunc() if it is non-nil; otherwise, it returns an
+// error.
+func (s *VCSDriverConfigNormalizer) Defaults(
+	nc vcsdriver.ConfigNormalizeContext,
+) (vcsdriver.Config, error) {
+	if s.DefaultsFunc != nil {
+		return s.DefaultsFunc(nc)
+	}
+
+	return nil, errors.New("<not implemented>")
+}
+
+// Merge returns s.MergeFunc() if it is non-nil; otherwise, it returns an error.
+func (s *VCSDriverConfigNormalizer) Merge(
+	nc vcsdriver.ConfigNormalizeContext,
+	c vcsdriver.Config,
+	b hcl.Body,
+) (vcsdriver.Config, error) {
+	if s.MergeFunc != nil {
+		return s.MergeFunc(nc, c, b)
+	}
+
+	return nil, errors.New("<not implemented>")
 }
 
 // VCSDriverConfig is a test implementation of vcsdriver.Config.

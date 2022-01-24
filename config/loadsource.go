@@ -10,6 +10,7 @@ import (
 
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 )
 
@@ -23,7 +24,7 @@ var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
 type intermediateSource struct {
 	Schema sourceSchema
 	Driver sourcedriver.ConfigSchema
-	VCSs   map[string]vcsdriver.ConfigSchema
+	VCSs   map[string]hcl.Body
 	File   string
 }
 
@@ -75,7 +76,7 @@ func (l *loader) mergeSource(file string, s sourceSchema) error {
 	i := intermediateSource{
 		Schema: s,
 		Driver: bodySchema,
-		VCSs:   map[string]vcsdriver.ConfigSchema{},
+		VCSs:   map[string]hcl.Body{},
 		File:   file,
 	}
 

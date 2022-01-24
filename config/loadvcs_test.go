@@ -1,6 +1,8 @@
 package config_test
 
 import (
+	"errors"
+
 	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/vcsdriver"
@@ -32,7 +34,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
 						testVCSDriverName: &stubs.VCSDriverConfig{
-							ArbitraryAttribute: "<explicit>",
+							ArbitraryAttribute: "<default> + <explicit>",
 						},
 					},
 				},
@@ -57,7 +59,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
 						testVCSDriverName: &stubs.VCSDriverConfig{
-							ArbitraryAttribute: "<default><explicit>",
+							ArbitraryAttribute: "<default> + <explicit>",
 						},
 					},
 				},
@@ -86,7 +88,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
 						testVCSDriverName: &stubs.VCSDriverConfig{
-							ArbitraryAttribute: "<explicit global><override>",
+							ArbitraryAttribute: "<default> + <explicit global> + <override>",
 						},
 					},
 				},
@@ -140,16 +142,18 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 		Entry(
 			`error normalizing default driver configuration`,
 			[]string{},
-			`unable to produce default global configuration for the 'test_vcs_driver_with_broken_default' version control system: cannot expand user-specific home dir`,
+			`unable to produce default global configuration for the 'test_vcs_driver_with_broken_default' version control system: <error>`,
 			func(reg *registry.Registry) {
 				reg.RegisterVCSDriver(
 					"test_vcs_driver_with_broken_default",
 					vcsdriver.Registration{
 						Name: testVCSDriverName,
-						NewConfigSchema: func() vcsdriver.ConfigSchema {
-							s := newVCSStub()
-							s.FilesystemPath = "~someuser/path/to/nowhere"
-							return s
+						ConfigNormalizer: &stubs.VCSDriverConfigNormalizer{
+							DefaultsFunc: func(
+								vcsdriver.ConfigNormalizeContext,
+							) (vcsdriver.Config, error) {
+								return nil, errors.New("<error>")
+							},
 						},
 					},
 				)

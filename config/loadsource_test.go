@@ -190,15 +190,12 @@ var _ = Describe("func Load() (source configuration)", func() {
 					testVCSDriverName+"_alias",
 					vcsdriver.Registration{
 						Name: testVCSDriverName,
-						NewConfigSchema: func() vcsdriver.ConfigSchema {
-							return &stubs.VCSDriverConfigSchema{
-								NormalizeGlobalsFunc: func(
-									vcsdriver.ConfigNormalizeContext,
-									*stubs.VCSDriverConfigSchema,
-								) (vcsdriver.Config, error) {
-									return aDifferentVCSConfigConcreteType{}, nil
-								},
-							}
+						ConfigNormalizer: &stubs.VCSDriverConfigNormalizer{
+							DefaultsFunc: func(
+								vcsdriver.ConfigNormalizeContext,
+							) (vcsdriver.Config, error) {
+								return aDifferentVCSConfigConcreteType{}, nil
+							},
 						},
 					},
 				)
