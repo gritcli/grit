@@ -27,15 +27,15 @@ var _ = Describe("func impl.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner", func() {
-			cloner, dir, err := drv.NewCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
+			cloner, dir, err := drv.NewCloner(ctx, publicUserRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
-				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
-				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
+				SSHEndpoint:  "git@github.com:grit-integration-tests/test-public.git",
+				HTTPEndpoint: "https://github.com/grit-integration-tests/test-public.git",
 			}))
 
-			Expect(dir).To(Equal("gritcli/test-public"))
+			Expect(dir).To(Equal("grit-integration-tests/test-public"))
 		})
 	})
 
@@ -51,19 +51,16 @@ var _ = Describe("func impl.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {
-			// TODO: https://github.com/gritcli/grit/issues/13
-			//
-			// Test with a private repository instead.
-			cloner, dir, err := drv.NewCloner(ctx, gritPublicTestRepo.ID, logging.SilentLogger)
+			cloner, dir, err := drv.NewCloner(ctx, privateUserRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
-				SSHEndpoint:  "git@github.com:gritcli/test-public.git",
-				HTTPEndpoint: "https://github.com/gritcli/test-public.git",
+				SSHEndpoint:  "git@github.com:grit-integration-tests/test-private.git",
+				HTTPEndpoint: "https://github.com/grit-integration-tests/test-private.git",
 				HTTPPassword: token,
 			}))
 
-			Expect(dir).To(Equal("gritcli/test-public"))
+			Expect(dir).To(Equal("grit-integration-tests/test-private"))
 		})
 	})
 })
