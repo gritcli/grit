@@ -190,8 +190,8 @@ func newRegistry() *registry.Registry {
 	reg.RegisterVCSDriver(
 		testVCSDriverName,
 		vcsdriver.Registration{
-			Name:             testVCSDriverName,
-			ConfigNormalizer: newVCSNormalizer(),
+			Name:         testVCSDriverName,
+			ConfigLoader: newVCSLoader(),
 		},
 	)
 
@@ -233,17 +233,17 @@ func newSourceStub() *stubs.SourceDriverConfigSchema {
 	}
 }
 
-func newVCSNormalizer() *stubs.VCSDriverConfigNormalizer {
-	return &stubs.VCSDriverConfigNormalizer{
+func newVCSLoader() *stubs.VCSDriverConfigLoader {
+	return &stubs.VCSDriverConfigLoader{
 		DefaultsFunc: func(
-			nc vcsdriver.ConfigNormalizeContext,
+			vcsdriver.ConfigContext,
 		) (vcsdriver.Config, error) {
 			return &stubs.VCSDriverConfig{
 				ArbitraryAttribute: "<default>",
 			}, nil
 		},
 		MergeFunc: func(
-			nc vcsdriver.ConfigNormalizeContext,
+			ctx vcsdriver.ConfigContext,
 			c vcsdriver.Config,
 			b hcl.Body,
 		) (vcsdriver.Config, error) {
@@ -251,7 +251,7 @@ func newVCSNormalizer() *stubs.VCSDriverConfigNormalizer {
 
 			var s stubs.VCSDriverConfigSchema
 
-			if diags := gohcl.DecodeBody(b, nc.EvalContext(), &s); diags.HasErrors() {
+			if diags := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diags.HasErrors() {
 				return nil, diags
 			}
 
@@ -266,7 +266,7 @@ func newVCSNormalizer() *stubs.VCSDriverConfigNormalizer {
 				cfg.FilesystemPath = s.FilesystemPath
 			}
 
-			if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
+			if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
 				return nil, err
 			}
 

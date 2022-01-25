@@ -53,16 +53,16 @@ type configSchema struct {
 	PreferHTTP *bool `hcl:"prefer_http"`
 }
 
-// configNormalizer is an implementation of vcsdriver.ConfigNormalizer for Git.
-type configNormalizer struct{}
+// configLoader is an implementation of vcsdriver.ConfigLoader for Git.
+type configLoader struct{}
 
-func (configNormalizer) Defaults(nc vcsdriver.ConfigNormalizeContext) (vcsdriver.Config, error) {
+func (configLoader) Defaults(ctx vcsdriver.ConfigContext) (vcsdriver.Config, error) {
 	return Config{}, nil
 }
 
-func (configNormalizer) Merge(nc vcsdriver.ConfigNormalizeContext, c vcsdriver.Config, b hcl.Body) (vcsdriver.Config, error) {
+func (configLoader) Merge(ctx vcsdriver.ConfigContext, c vcsdriver.Config, b hcl.Body) (vcsdriver.Config, error) {
 	var s configSchema
-	if diag := gohcl.DecodeBody(b, nc.EvalContext(), &s); diag.HasErrors() {
+	if diag := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diag.HasErrors() {
 		return nil, diag
 	}
 
@@ -72,7 +72,7 @@ func (configNormalizer) Merge(nc vcsdriver.ConfigNormalizeContext, c vcsdriver.C
 		cfg.SSHKeyFile = s.SSHKey.File
 		cfg.SSHKeyPassphrase = s.SSHKey.Passphrase
 
-		if err := nc.NormalizePath(&cfg.SSHKeyFile); err != nil {
+		if err := ctx.NormalizePath(&cfg.SSHKeyFile); err != nil {
 			return Config{}, err
 		}
 	}

@@ -148,9 +148,9 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 					"test_vcs_driver_with_broken_default",
 					vcsdriver.Registration{
 						Name: testVCSDriverName,
-						ConfigNormalizer: &stubs.VCSDriverConfigNormalizer{
+						ConfigLoader: &stubs.VCSDriverConfigLoader{
 							DefaultsFunc: func(
-								vcsdriver.ConfigNormalizeContext,
+								vcsdriver.ConfigContext,
 							) (vcsdriver.Config, error) {
 								return nil, errors.New("<error>")
 							},

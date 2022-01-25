@@ -32,9 +32,8 @@ func (l *loader) mergeGlobalVCS(file string, s vcsSchema) error {
 		)
 	}
 
-	nc := &vcsNormalizeContext{l}
-
-	cfg, err := reg.ConfigNormalizer.Defaults(nc)
+	ctx := &vcsContext{l}
+	cfg, err := reg.ConfigLoader.Defaults(ctx)
 	if err != nil {
 		if isHCLError(err) {
 			return err
@@ -47,8 +46,8 @@ func (l *loader) mergeGlobalVCS(file string, s vcsSchema) error {
 		)
 	}
 
-	cfg, err = reg.ConfigNormalizer.Merge(
-		nc,
+	cfg, err = reg.ConfigLoader.Merge(
+		ctx,
 		cfg,
 		s.DriverBody,
 	)
@@ -87,8 +86,8 @@ func (l *loader) populateImplicitGlobalVCSs() error {
 			continue
 		}
 
-		nc := &vcsNormalizeContext{l}
-		cfg, err := reg.ConfigNormalizer.Defaults(nc)
+		ctx := &vcsContext{l}
+		cfg, err := reg.ConfigLoader.Defaults(ctx)
 		if err != nil {
 			return fmt.Errorf(
 				"unable to produce default global configuration for the '%s' version control system: %w",
@@ -143,8 +142,8 @@ func (l *loader) finalizeSourceSpecificVCSs(
 			)
 		}
 
-		nc := &vcsNormalizeContext{l}
-		cfg, err := reg.ConfigNormalizer.Merge(nc, l.globalVCSs[driver], body)
+		ctx := &vcsContext{l}
+		cfg, err := reg.ConfigLoader.Merge(ctx, l.globalVCSs[driver], body)
 		if err != nil {
 			if isHCLError(err) {
 				return nil, err
@@ -164,16 +163,15 @@ func (l *loader) finalizeSourceSpecificVCSs(
 	return configs, nil
 }
 
-// vcsNormalizeContext is an implementation of the
-// vcsdriver.ConfigNormalizeContext interface.
-type vcsNormalizeContext struct {
+// vcsContext is an implementation of the vcsdriver.ConfigContext interface.
+type vcsContext struct {
 	loader *loader
 }
 
-func (nc *vcsNormalizeContext) EvalContext() *hcl.EvalContext {
+func (nc *vcsContext) EvalContext() *hcl.EvalContext {
 	return &hcl.EvalContext{}
 }
 
-func (nc *vcsNormalizeContext) NormalizePath(p *string) error {
+func (nc *vcsContext) NormalizePath(p *string) error {
 	return nc.loader.normalizePath(p)
 }

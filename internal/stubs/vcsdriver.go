@@ -7,72 +7,41 @@ import (
 	"github.com/hashicorp/hcl/v2"
 )
 
-// VCSDriverConfigSchema is a test implementation of vcsdriver.ConfigSchema.
-type VCSDriverConfigSchema struct {
-	NormalizeGlobalsFunc        func(vcsdriver.ConfigNormalizeContext, *VCSDriverConfigSchema) (vcsdriver.Config, error)
-	NormalizeSourceSpecificFunc func(vcsdriver.ConfigNormalizeContext, vcsdriver.Config, *VCSDriverConfigSchema) (vcsdriver.Config, error)
-
-	// These attributes must be defined in _this_ struct in order to use it as
-	// the HCL schema.
-
-	ArbitraryAttribute string `hcl:"arbitrary_attribute,optional"`
-	FilesystemPath     string `hcl:"filesystem_path,optional"`
-}
-
-// NormalizeGlobals returns s.NormalizeGlobalsFunc() if it is non-nil, otherwise
-// returns a new VCSDriverConfig stub.
-func (s *VCSDriverConfigSchema) NormalizeGlobals(
-	nc vcsdriver.ConfigNormalizeContext,
-) (vcsdriver.Config, error) {
-	if s.NormalizeGlobalsFunc != nil {
-		return s.NormalizeGlobalsFunc(nc, s)
-	}
-
-	return &VCSDriverConfig{}, nil
-}
-
-// NormalizeSourceSpecific returns s.NormalizeSourceSpecificFunc() if it is
-// non-nil, otherwise returns g.
-func (s *VCSDriverConfigSchema) NormalizeSourceSpecific(
-	nc vcsdriver.ConfigNormalizeContext,
-	g vcsdriver.Config,
-) (vcsdriver.Config, error) {
-	if s.NormalizeSourceSpecificFunc != nil {
-		return s.NormalizeSourceSpecificFunc(nc, g, s)
-	}
-
-	return g, nil
-}
-
-// VCSDriverConfigNormalizer is a test implementation of vcsdriver.ConfigNormalizer.
-type VCSDriverConfigNormalizer struct {
-	DefaultsFunc func(vcsdriver.ConfigNormalizeContext) (vcsdriver.Config, error)
-	MergeFunc    func(vcsdriver.ConfigNormalizeContext, vcsdriver.Config, hcl.Body) (vcsdriver.Config, error)
+// VCSDriverConfigLoader is a test implementation of vcsdriver.ConfigLoader.
+type VCSDriverConfigLoader struct {
+	DefaultsFunc func(vcsdriver.ConfigContext) (vcsdriver.Config, error)
+	MergeFunc    func(vcsdriver.ConfigContext, vcsdriver.Config, hcl.Body) (vcsdriver.Config, error)
 }
 
 // Defaults returns s.DefaultsFunc() if it is non-nil; otherwise, it returns an
 // error.
-func (s *VCSDriverConfigNormalizer) Defaults(
-	nc vcsdriver.ConfigNormalizeContext,
+func (s *VCSDriverConfigLoader) Defaults(
+	ctx vcsdriver.ConfigContext,
 ) (vcsdriver.Config, error) {
 	if s.DefaultsFunc != nil {
-		return s.DefaultsFunc(nc)
+		return s.DefaultsFunc(ctx)
 	}
 
 	return nil, errors.New("<not implemented>")
 }
 
 // Merge returns s.MergeFunc() if it is non-nil; otherwise, it returns an error.
-func (s *VCSDriverConfigNormalizer) Merge(
-	nc vcsdriver.ConfigNormalizeContext,
+func (s *VCSDriverConfigLoader) Merge(
+	ctx vcsdriver.ConfigContext,
 	c vcsdriver.Config,
 	b hcl.Body,
 ) (vcsdriver.Config, error) {
 	if s.MergeFunc != nil {
-		return s.MergeFunc(nc, c, b)
+		return s.MergeFunc(ctx, c, b)
 	}
 
 	return nil, errors.New("<not implemented>")
+}
+
+// VCSDriverConfigSchema is the HCL schema for VCSConfig.
+type VCSDriverConfigSchema struct {
+	ArbitraryAttribute string `hcl:"arbitrary_attribute,optional"`
+	FilesystemPath     string `hcl:"filesystem_path,optional"`
 }
 
 // VCSDriverConfig is a test implementation of vcsdriver.Config.
