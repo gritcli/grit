@@ -203,7 +203,7 @@ func newRegistry() *registry.Registry {
 func newSourceStub() *stubs.SourceDriverConfigSchema {
 	return &stubs.SourceDriverConfigSchema{
 		NormalizeFunc: func(
-			nc sourcedriver.ConfigNormalizeContext,
+			ctx sourcedriver.ConfigContext,
 			s *stubs.SourceDriverConfigSchema,
 		) (sourcedriver.Config, error) {
 			cfg := &stubs.SourceDriverConfig{
@@ -215,12 +215,12 @@ func newSourceStub() *stubs.SourceDriverConfigSchema {
 				cfg.ArbitraryAttribute = "<default>"
 			}
 
-			if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
+			if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
 				return nil, err
 			}
 
 			vcsConfig := &stubs.VCSDriverConfig{}
-			if err := nc.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
+			if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
 				return nil, err
 			}
 

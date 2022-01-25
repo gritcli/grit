@@ -1,5 +1,7 @@
 package sourcedriver
 
+import "github.com/hashicorp/hcl/v2"
+
 // ConfigSchema is an interface for parsing driver-specific configuration within
 // a "source" block in a Grit configuration file.
 //
@@ -16,14 +18,17 @@ type ConfigSchema interface {
 	//
 	// The implementation must call ctx.ReadVCSConfig() for each VCS driver
 	// that is supported, even if they are not currently in use.
-	Normalize(ctx ConfigNormalizeContext) (Config, error)
+	Normalize(ctx ConfigContext) (Config, error)
 }
 
-// ConfigNormalizeContext provides operations used to normalize a
-// ConfigSchema.
-type ConfigNormalizeContext interface {
-	// NormalizePath normalizes a filesystem encountered within the
-	// configuration.
+// ConfigContext provides operations used when loading source configuration.
+type ConfigContext interface {
+	// EvalContext returns the HCL evaluation context to be used when to
+	// decoding HCL content.
+	EvalContext() *hcl.EvalContext
+
+	// NormalizePath resolves a (potentially relative) filesystem path to an
+	// absolute path.
 	//
 	// If *p begins with a tilde (~), it is resolved relative to the user's home
 	// directory.

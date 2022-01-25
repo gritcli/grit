@@ -43,7 +43,7 @@ type configSchema struct {
 }
 
 func (s *configSchema) Normalize(
-	nc sourcedriver.ConfigNormalizeContext,
+	ctx sourcedriver.ConfigContext,
 ) (sourcedriver.Config, error) {
 	if s.Domain == "" {
 		s.Domain = "github.com"
@@ -54,7 +54,7 @@ func (s *configSchema) Normalize(
 		Token:  s.Token,
 	}
 
-	if err := nc.UnmarshalVCSConfig(gitvcs.Registration.Name, &cfg.Git); err != nil {
+	if err := ctx.UnmarshalVCSConfig(gitvcs.Registration.Name, &cfg.Git); err != nil {
 		return nil, err
 	}
 

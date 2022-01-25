@@ -134,13 +134,13 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 		return Source{}, err
 	}
 
-	nc := &sourceNormalizeContext{
+	ctx := &sourceContext{
 		loader:     l,
 		globalVCSs: l.globalVCSs,
 		sourceVCSs: sourceVCSs,
 	}
 
-	cfg, err := i.Driver.Normalize(nc)
+	cfg, err := i.Driver.Normalize(ctx)
 	if err != nil {
 		if i.File == "" {
 			return Source{}, fmt.Errorf(
@@ -174,19 +174,22 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 	}, nil
 }
 
-// sourceNormalizeContext is an implementation of
-// sourcedriver.ConfigNormalizeContext.
-type sourceNormalizeContext struct {
+// sourceContext is an implementation of sourcedriver.ConfigContext.
+type sourceContext struct {
 	loader     *loader
 	globalVCSs map[string]vcsdriver.Config
 	sourceVCSs map[string]vcsdriver.Config
 }
 
-func (nc *sourceNormalizeContext) NormalizePath(p *string) error {
-	return nc.loader.normalizePath(p)
+func (c *sourceContext) EvalContext() *hcl.EvalContext {
+	return &hcl.EvalContext{}
 }
 
-func (nc *sourceNormalizeContext) UnmarshalVCSConfig(driver string, v interface{}) error {
+func (c *sourceContext) NormalizePath(p *string) error {
+	return c.loader.normalizePath(p)
+}
+
+func (c *sourceContext) UnmarshalVCSConfig(driver string, v interface{}) error {
 	configInterfaceType := reflect.TypeOf((*vcsdriver.Config)(nil)).Elem()
 
 	target := reflect.ValueOf(v)
@@ -226,16 +229,16 @@ func (nc *sourceNormalizeContext) UnmarshalVCSConfig(driver string, v interface{
 
 	var matches []string
 
-	for alias, reg := range nc.loader.Registry.VCSDrivers() {
+	for alias, reg := range c.loader.Registry.VCSDrivers() {
 		if reg.Name != driver {
 			continue
 		}
 
 		matches = append(matches, alias)
 
-		cfg, ok := nc.sourceVCSs[alias]
+		cfg, ok := c.sourceVCSs[alias]
 		if !ok {
-			cfg = nc.globalVCSs[alias]
+			cfg = c.globalVCSs[alias]
 		}
 
 		rv := reflect.ValueOf(cfg)

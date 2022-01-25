@@ -168,10 +168,10 @@ type vcsContext struct {
 	loader *loader
 }
 
-func (nc *vcsContext) EvalContext() *hcl.EvalContext {
+func (c *vcsContext) EvalContext() *hcl.EvalContext {
 	return &hcl.EvalContext{}
 }
 
-func (nc *vcsContext) NormalizePath(p *string) error {
-	return nc.loader.normalizePath(p)
+func (c *vcsContext) NormalizePath(p *string) error {
+	return c.loader.normalizePath(p)
 }

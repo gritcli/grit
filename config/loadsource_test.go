@@ -207,11 +207,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return &stubs.SourceDriverConfigSchema{
 								NormalizeFunc: func(
-									nc sourcedriver.ConfigNormalizeContext,
+									ctx sourcedriver.ConfigContext,
 									s *stubs.SourceDriverConfigSchema,
 								) (sourcedriver.Config, error) {
 									var target aDifferentVCSConfigConcreteType
-									if err := nc.UnmarshalVCSConfig(testVCSDriverName, &target); err != nil {
+									if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &target); err != nil {
 										return nil, err
 									}
 									return &stubs.SourceDriverConfig{
@@ -329,11 +329,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return &stubs.SourceDriverConfigSchema{
 								NormalizeFunc: func(
-									nc sourcedriver.ConfigNormalizeContext,
+									ctx sourcedriver.ConfigContext,
 									s *stubs.SourceDriverConfigSchema,
 								) (sourcedriver.Config, error) {
 									target := &stubs.VCSDriverConfig{}
-									return nil, nc.UnmarshalVCSConfig("<unrecognized>", &target)
+									return nil, ctx.UnmarshalVCSConfig("<unrecognized>", &target)
 								},
 							}
 						},
@@ -355,11 +355,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 						NewConfigSchema: func() sourcedriver.ConfigSchema {
 							return &stubs.SourceDriverConfigSchema{
 								NormalizeFunc: func(
-									nc sourcedriver.ConfigNormalizeContext,
+									ctx sourcedriver.ConfigContext,
 									s *stubs.SourceDriverConfigSchema,
 								) (sourcedriver.Config, error) {
 									target := aDifferentVCSConfigConcreteType{}
-									return nil, nc.UnmarshalVCSConfig(testVCSDriverName, &target)
+									return nil, ctx.UnmarshalVCSConfig(testVCSDriverName, &target)
 								},
 							}
 						},
@@ -375,10 +375,10 @@ var _ = Describe("func Load() (source configuration)", func() {
 			func(target interface{}, expect string) {
 				schema := &stubs.SourceDriverConfigSchema{
 					NormalizeFunc: func(
-						nc sourcedriver.ConfigNormalizeContext,
+						ctx sourcedriver.ConfigContext,
 						s *stubs.SourceDriverConfigSchema,
 					) (sourcedriver.Config, error) {
-						nc.UnmarshalVCSConfig(testVCSDriverName, target)
+						ctx.UnmarshalVCSConfig(testVCSDriverName, target)
 						return nil, nil
 					},
 				}
