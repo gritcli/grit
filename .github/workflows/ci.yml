@@ -20,10 +20,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
+      - name: Read deploy key for SSH agent
+        id: privatekey
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ./builtins/gitvcs/testdata/deploy-key-no-passphrase
+
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.GRIT_INTEGRATION_TEST_GITHUB_DEPLOY_KEY }}
+          ssh-private-key: ${{ steps.privatekey.outputs.content }}
 
       - name: Make
         run: make ci
