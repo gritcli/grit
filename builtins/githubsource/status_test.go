@@ -13,7 +13,7 @@ var _ = Describe("func impl.Status()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
-		drv    sourcedriver.Driver
+		src    sourcedriver.Source
 	)
 
 	When("unauthenticated", func() {
@@ -24,7 +24,7 @@ var _ = Describe("func impl.Status()", func() {
 		})
 
 		JustBeforeEach(func() {
-			ctx, cancel, drv = beforeEachUnauthenticated(configure)
+			ctx, cancel, src = beforeEachUnauthenticated(configure)
 		})
 
 		AfterEach(func() {
@@ -32,7 +32,7 @@ var _ = Describe("func impl.Status()", func() {
 		})
 
 		It("indicates that the user is unauthenticated", func() {
-			status, err := drv.Status(ctx)
+			status, err := src.Status(ctx)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(status).To(MatchRegexp(`unauthenticated, \d+ API requests remaining \(resets .+ from now\)`))
 		})
@@ -45,7 +45,7 @@ var _ = Describe("func impl.Status()", func() {
 			})
 
 			It("indicates that the token is invalid", func() {
-				status, err := drv.Status(ctx)
+				status, err := src.Status(ctx)
 				Expect(err).ShouldNot(HaveOccurred())
 				Expect(status).To(Equal(`unauthenticated (invalid token)`))
 			})
@@ -54,7 +54,7 @@ var _ = Describe("func impl.Status()", func() {
 
 	When("authenticated", func() {
 		BeforeEach(func() {
-			ctx, cancel, drv, _ = beforeEachAuthenticated()
+			ctx, cancel, src, _ = beforeEachAuthenticated()
 		})
 
 		AfterEach(func() {
@@ -62,7 +62,7 @@ var _ = Describe("func impl.Status()", func() {
 		})
 
 		It("indicates that the user is authenticated", func() {
-			status, err := drv.Status(ctx)
+			status, err := src.Status(ctx)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(status).To(MatchRegexp(`@grit-integration-tests, \d+ API requests remaining \(resets .+ from now\)`))
 		})

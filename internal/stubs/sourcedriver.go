@@ -49,7 +49,7 @@ type SourceConfigSchema struct {
 
 // SourceConfig is a test implementation of the sourcedriver.Config interface.
 type SourceConfig struct {
-	NewDriverFunc            func() sourcedriver.Driver
+	NewSourceFunc            func() sourcedriver.Source
 	DescribeSourceConfigFunc func() string
 
 	ArbitraryAttribute string
@@ -57,14 +57,14 @@ type SourceConfig struct {
 	VCSs               map[string]vcsdriver.Config
 }
 
-// NewDriver returns s.NewDriverFunc() if it is non-nil; otherwise, it returns a
+// NewSource returns s.NewSourceFunc() if it is non-nil; otherwise, it returns a
 // new SourceDriver stub.
-func (s *SourceConfig) NewDriver() sourcedriver.Driver {
-	if s.NewDriverFunc != nil {
-		return s.NewDriverFunc()
+func (s *SourceConfig) NewSource() sourcedriver.Source {
+	if s.NewSourceFunc != nil {
+		return s.NewSourceFunc()
 	}
 
-	return &SourceDriver{}
+	return &Source{}
 }
 
 // DescribeSourceConfig returns s.DescribeSourceConfigFunc() if it is non-nil;
@@ -77,8 +77,8 @@ func (s *SourceConfig) DescribeSourceConfig() string {
 	return "<description>"
 }
 
-// SourceDriver is a test implementation of the sourcedriver.Driver interface.
-type SourceDriver struct {
+// Source is a test implementation of the sourcedriver.Source interface.
+type Source struct {
 	InitFunc      func(context.Context, logging.Logger) error
 	RunFunc       func(context.Context, logging.Logger) error
 	StatusFunc    func(context.Context) (string, error)
@@ -87,7 +87,7 @@ type SourceDriver struct {
 }
 
 // Init returns s.InitFunc() if it is non-nil; otherwise, it returns nil.
-func (s *SourceDriver) Init(ctx context.Context, logger logging.Logger) error {
+func (s *Source) Init(ctx context.Context, logger logging.Logger) error {
 	if s.InitFunc != nil {
 		return s.InitFunc(ctx, logger)
 	}
@@ -96,7 +96,7 @@ func (s *SourceDriver) Init(ctx context.Context, logger logging.Logger) error {
 }
 
 // Run returns s.RunFunc() if it is non-nil; otherwise, it returns nil.
-func (s *SourceDriver) Run(ctx context.Context, logger logging.Logger) error {
+func (s *Source) Run(ctx context.Context, logger logging.Logger) error {
 	if s.RunFunc != nil {
 		return s.RunFunc(ctx, logger)
 	}
@@ -106,7 +106,7 @@ func (s *SourceDriver) Run(ctx context.Context, logger logging.Logger) error {
 
 // Status returns s.StatusFunc() if it is non-nil; otherwise, it returns a fixed
 // value.
-func (s *SourceDriver) Status(ctx context.Context) (string, error) {
+func (s *Source) Status(ctx context.Context) (string, error) {
 	if s.StatusFunc != nil {
 		return s.StatusFunc(ctx)
 	}
@@ -116,7 +116,7 @@ func (s *SourceDriver) Status(ctx context.Context) (string, error) {
 
 // Resolve returns s.ResolveFunc() if it is non-nil; otherwise, it returns a
 // (nil, nil).
-func (s *SourceDriver) Resolve(
+func (s *Source) Resolve(
 	ctx context.Context,
 	query string,
 	logger logging.Logger,
@@ -130,7 +130,7 @@ func (s *SourceDriver) Resolve(
 
 // NewCloner returns s.NewClonerFunc() if it is non-nil; otherwise, it returns
 // an error.
-func (s *SourceDriver) NewCloner(
+func (s *Source) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,

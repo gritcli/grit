@@ -20,9 +20,9 @@ type Config struct {
 	Git gitvcs.Config
 }
 
-// NewDriver constructs a new driver that uses this configuration.
-func (c Config) NewDriver() sourcedriver.Driver {
-	return &impl{config: c}
+// NewSource constructs a new source from  this configuration.
+func (c Config) NewSource() sourcedriver.Source {
+	return &source{config: c}
 }
 
 // DescribeSourceConfig returns a human-readable description of the

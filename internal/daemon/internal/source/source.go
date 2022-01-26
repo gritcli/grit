@@ -14,6 +14,7 @@ type Source struct {
 	// source.
 	CloneDir string
 
-	// Driver is the driver used to perform repository operations.
-	Driver sourcedriver.Driver
+	// Driver is the source implementation provided by the driver, used to
+	// perform repository operations for this source.
+	Driver sourcedriver.Source
 }

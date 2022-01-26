@@ -9,37 +9,37 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Init initializes the driver.
-func (d *impl) Init(
+// Init initializes the source.
+func (s *source) Init(
 	ctx context.Context,
 	logger logging.Logger,
 ) error {
 	httpClient := http.DefaultClient
-	if d.config.Token != "" {
+	if s.config.Token != "" {
 		httpClient = oauth2.NewClient(
 			context.Background(),
 			oauth2.StaticTokenSource(
-				&oauth2.Token{AccessToken: d.config.Token},
+				&oauth2.Token{AccessToken: s.config.Token},
 			),
 		)
 	}
 
-	if isEnterpriseServer(d.config.Domain) {
+	if isEnterpriseServer(s.config.Domain) {
 		var err error
-		d.client, err = github.NewEnterpriseClient(d.config.Domain, "", httpClient)
+		s.client, err = github.NewEnterpriseClient(s.config.Domain, "", httpClient)
 		if err != nil {
 			return err
 		}
 	} else {
-		d.client = github.NewClient(httpClient)
+		s.client = github.NewClient(httpClient)
 	}
 
-	if d.config.Token == "" {
+	if s.config.Token == "" {
 		logging.Log(logger, "not authenticated (no token specified)")
 		return nil
 	}
 
-	user, res, err := d.client.Users.Get(ctx, "")
+	user, res, err := s.client.Users.Get(ctx, "")
 	if err != nil {
 		if res.StatusCode != http.StatusUnauthorized {
 			return err
@@ -51,9 +51,9 @@ func (d *impl) Init(
 	}
 
 	logging.Log(logger, "authenticated as %s", user.GetLogin())
-	d.user = user
+	s.user = user
 
-	if err := d.populateRepoCache(ctx, logger); err != nil {
+	if err := s.populateRepoCache(ctx, logger); err != nil {
 		return err
 	}
 
@@ -62,7 +62,7 @@ func (d *impl) Init(
 
 // populateRepoCache populates s.populateRepoCache with the repositories to
 // which the authenticated user has explicit read, write or admin access.
-func (d *impl) populateRepoCache(
+func (s *source) populateRepoCache(
 	ctx context.Context,
 	logger logging.Logger,
 ) error {
@@ -73,11 +73,11 @@ func (d *impl) populateRepoCache(
 		},
 	}
 
-	d.reposByID = map[int64]*github.Repository{}
-	d.reposByOwner = map[string]map[string]*github.Repository{}
+	s.reposByID = map[int64]*github.Repository{}
+	s.reposByOwner = map[string]map[string]*github.Repository{}
 
 	for opts.Page != 0 {
-		repoPage, res, err := d.client.Repositories.List(ctx, "", opts)
+		repoPage, res, err := s.client.Repositories.List(ctx, "", opts)
 		if err != nil {
 			return err
 		}
@@ -86,14 +86,14 @@ func (d *impl) populateRepoCache(
 			logging.Debug(logger, "discovered %s", r.GetFullName())
 
 			owner := r.GetOwner().GetLogin()
-			reposByName := d.reposByOwner[owner]
+			reposByName := s.reposByOwner[owner]
 			if reposByName == nil {
 				reposByName = map[string]*github.Repository{}
-				d.reposByOwner[owner] = reposByName
+				s.reposByOwner[owner] = reposByName
 			}
 
 			reposByName[r.GetName()] = r
-			d.reposByID[r.GetID()] = r
+			s.reposByID[r.GetID()] = r
 		}
 
 		opts.Page = res.NextPage
@@ -102,8 +102,8 @@ func (d *impl) populateRepoCache(
 	logging.Log(
 		logger,
 		"added %d repositories to the repository list for @%s",
-		len(d.reposByID),
-		d.user.GetLogin(),
+		len(s.reposByID),
+		s.user.GetLogin(),
 	)
 
 	return nil

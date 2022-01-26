@@ -6,9 +6,9 @@ import (
 	"github.com/google/go-github/github"
 )
 
-// impl is an implementation of sourcedriver.Driver that provides repositories
+// source is an implementation of sourcedriver.Source that provides repositories
 // from GitHub.com or a GitHub Enterprise Server installation.
-type impl struct {
+type source struct {
 	config Config
 	client *github.Client
 

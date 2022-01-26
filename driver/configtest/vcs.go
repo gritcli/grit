@@ -180,13 +180,10 @@ type vcsTestSourceConfig struct {
 	VCSConfig vcsdriver.Config
 }
 
-// NewDriver constructs a new driver that uses this configuration.
-func (vcsTestSourceConfig) NewDriver() sourcedriver.Driver {
+func (vcsTestSourceConfig) NewSource() sourcedriver.Source {
 	panic("not implemented")
 }
 
-// DescribeSourceConfig returns a human-readable description of the
-// configuration.
 func (vcsTestSourceConfig) DescribeSourceConfig() string {
 	panic("not implemented")
 }

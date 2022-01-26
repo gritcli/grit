@@ -18,7 +18,7 @@ import (
 var _ = Describe("type Cloner", func() {
 	var (
 		tempDir string
-		drv     *stubs.SourceDriver
+		src     *stubs.Source
 		cloner  *Cloner
 	)
 
@@ -27,14 +27,14 @@ var _ = Describe("type Cloner", func() {
 		tempDir, err = os.MkdirTemp("", "")
 		Expect(err).ShouldNot(HaveOccurred())
 
-		drv = &stubs.SourceDriver{}
+		src = &stubs.Source{}
 
 		cloner = &Cloner{
 			Sources: List{
 				{
 					Name:     "<source>",
 					CloneDir: tempDir,
-					Driver:   drv,
+					Driver:   src,
 				},
 			},
 			Logger: logging.SilentLogger,
@@ -49,7 +49,7 @@ var _ = Describe("type Cloner", func() {
 
 	Describe("func Clone()", func() {
 		It("returns the clone directory", func() {
-			drv.NewClonerFunc = func(
+			src.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
@@ -80,7 +80,7 @@ var _ = Describe("type Cloner", func() {
 			err := os.Mkdir(dir, 0700)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			drv.NewClonerFunc = func(
+			src.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
@@ -103,7 +103,7 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("returns an error if the directory can not be created", func() {
-			drv.NewClonerFunc = func(
+			src.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
@@ -136,7 +136,7 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("returns an error if the driver returns an error", func() {
-			drv.NewClonerFunc = func(
+			src.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,
@@ -154,7 +154,7 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("returns an error if the bound cloner returns an error", func() {
-			drv.NewClonerFunc = func(
+			src.NewClonerFunc = func(
 				context.Context,
 				string,
 				logging.Logger,

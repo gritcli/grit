@@ -9,7 +9,7 @@ import (
 )
 
 // NewCloner returns a cloner that clones the repository with the given ID.
-func (d *impl) NewCloner(
+func (s *source) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,
@@ -19,10 +19,10 @@ func (d *impl) NewCloner(
 		return nil, "", err
 	}
 
-	r, ok := d.reposByID[intID]
+	r, ok := s.reposByID[intID]
 	if !ok {
 		var err error
-		r, _, err = d.client.Repositories.GetByID(ctx, intID)
+		r, _, err = s.client.Repositories.GetByID(ctx, intID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -37,14 +37,14 @@ func (d *impl) NewCloner(
 
 	c := &gitvcs.Cloner{
 		SSHEndpoint:      r.GetSSHURL(),
-		SSHKeyFile:       d.config.Git.SSHKeyFile,
-		SSHKeyPassphrase: d.config.Git.SSHKeyPassphrase,
+		SSHKeyFile:       s.config.Git.SSHKeyFile,
+		SSHKeyPassphrase: s.config.Git.SSHKeyPassphrase,
 		HTTPEndpoint:     r.GetCloneURL(),
-		PreferHTTP:       d.config.Git.PreferHTTP,
+		PreferHTTP:       s.config.Git.PreferHTTP,
 	}
 
-	if d.config.Token != "" {
-		c.HTTPPassword = d.config.Token
+	if s.config.Token != "" {
+		c.HTTPPassword = s.config.Token
 	}
 
 	return c, r.GetFullName(), nil

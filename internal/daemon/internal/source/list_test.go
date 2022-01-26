@@ -14,7 +14,7 @@ var _ = Describe("type List", func() {
 
 	Describe("func NewList()", func() {
 		It("constructs the source from the configuration", func() {
-			d := &stubs.SourceDriver{}
+			src := &stubs.Source{}
 
 			list = NewList([]config.Source{
 				{
@@ -24,8 +24,8 @@ var _ = Describe("type List", func() {
 						Dir: "/path/to/clones",
 					},
 					Driver: &stubs.SourceConfig{
-						NewDriverFunc: func() sourcedriver.Driver {
-							return d
+						NewSourceFunc: func() sourcedriver.Source {
+							return src
 						},
 					},
 				},
@@ -36,7 +36,7 @@ var _ = Describe("type List", func() {
 					Name:        "<source>",
 					Description: "<description>",
 					CloneDir:    "/path/to/clones",
-					Driver:      d,
+					Driver:      src,
 				},
 			}))
 

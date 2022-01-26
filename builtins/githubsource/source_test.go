@@ -13,17 +13,17 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// beforeEachAuthenticated returns the context and driver used for running
+// beforeEachAuthenticated returns the context and source used for running
 // integration tests with an authenticated user.
 func beforeEachAuthenticated(configure ...func(*Config)) (
 	_ context.Context,
 	_ context.CancelFunc,
-	_ sourcedriver.Driver,
+	_ sourcedriver.Source,
 	token string,
 ) {
 	token = os.Getenv("GRIT_INTEGRATION_TEST_GITHUB_TOKEN")
 
-	ctx, cancel, drv := initDriver(
+	ctx, cancel, s := initSource(
 		func() Config {
 			if token == "" {
 				Skip("set GRIT_INTEGRATION_TEST_GITHUB_TOKEN to enable tests that use the GitHub API as an authenticated user")
@@ -37,17 +37,17 @@ func beforeEachAuthenticated(configure ...func(*Config)) (
 		configure,
 	)
 
-	return ctx, cancel, drv, token
+	return ctx, cancel, s, token
 }
 
-// beforeEachUnauthenticated returns the context and driver used for running
+// beforeEachUnauthenticated returns the context and source used for running
 // integration tests without an authenticated user.
 func beforeEachUnauthenticated(configure ...func(*Config)) (
 	context.Context,
 	context.CancelFunc,
-	sourcedriver.Driver,
+	sourcedriver.Source,
 ) {
-	return initDriver(
+	return initSource(
 		func() Config {
 			return Config{
 				Domain: "github.com",
@@ -57,19 +57,19 @@ func beforeEachUnauthenticated(configure ...func(*Config)) (
 	)
 }
 
-// initDriver creates and initializes a driver.
+// initSource creates and initializes a source.
 //
 // The configuration is built starting with the result of cfg(), and then
 // calling each function in configure in order to mutate the config as desired.
 //
 // It is intended for use in the beforeEachXXX() helper functions.
-func initDriver(
+func initSource(
 	cfg func() Config,
 	configure []func(*Config),
 ) (
 	context.Context,
 	context.CancelFunc,
-	sourcedriver.Driver,
+	sourcedriver.Source,
 ) {
 	if os.Getenv("GRIT_INTEGRATION_TEST_USE_GITHUB_API") == "" {
 		Skip("set GRIT_INTEGRATION_TEST_USE_GITHUB_API to enable tests that use the GitHub API")
@@ -80,11 +80,11 @@ func initDriver(
 		fn(&c)
 	}
 
-	d := c.NewDriver()
+	s := c.NewSource()
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	if err := d.Init(ctx, logging.SilentLogger); err != nil {
+	if err := s.Init(ctx, logging.SilentLogger); err != nil {
 		cancel()
 		skipIfRateLimited(err)
 	}
@@ -95,7 +95,7 @@ func initDriver(
 		defer GinkgoRecover()
 		defer close(done)
 
-		err := d.Run(ctx, logging.SilentLogger)
+		err := s.Run(ctx, logging.SilentLogger)
 		if err != context.Canceled {
 			Expect(err).ShouldNot(HaveOccurred())
 		}
@@ -108,7 +108,7 @@ func initDriver(
 		case <-time.After(3 * time.Second):
 			Fail("timed out waiting for Run() goroutine to finish")
 		}
-	}, d
+	}, s
 }
 
 // skipIfRateLimited asserts that err is nil, or skips the test if err is a

@@ -11,7 +11,7 @@ import (
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
 // possible repositories.
-func (d *impl) Resolve(
+func (s *source) Resolve(
 	ctx context.Context,
 	query string,
 	logger logging.Logger,
@@ -24,7 +24,7 @@ func (d *impl) Resolve(
 	var repos []*github.Repository
 
 	if ownerName == "" {
-		for _, reposByName := range d.reposByOwner {
+		for _, reposByName := range s.reposByOwner {
 			if r, ok := reposByName[repoName]; ok {
 				repos = append(repos, r)
 			}
@@ -35,7 +35,7 @@ func (d *impl) Resolve(
 			"found %d match(es) for '%s' in the repository list for @%s",
 			len(repos),
 			query,
-			d.user.GetLogin(),
+			s.user.GetLogin(),
 		)
 
 		if len(repos) == 0 {
@@ -49,18 +49,18 @@ func (d *impl) Resolve(
 		return toRemoteRepos(repos...), nil
 	}
 
-	if r, ok := d.reposByOwner[ownerName][repoName]; ok {
+	if r, ok := s.reposByOwner[ownerName][repoName]; ok {
 		logging.Debug(
 			logger,
 			"found an exact match for '%s' in the repository list for @%s",
 			query,
-			d.user.GetLogin(),
+			s.user.GetLogin(),
 		)
 
 		return toRemoteRepos(r), nil
 	}
 
-	r, res, err := d.client.Repositories.Get(ctx, ownerName, repoName)
+	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
 		if res.StatusCode == http.StatusNotFound {
 			logging.Debug(

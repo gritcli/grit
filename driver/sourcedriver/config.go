@@ -63,8 +63,8 @@ type ConfigContext interface {
 //
 // The underlying implementation must not be used by more than one driver.
 type Config interface {
-	// NewDriver constructs a new driver that uses this configuration.
-	NewDriver() Driver
+	// NewSource constructs a new source from this configuration.
+	NewSource() Source
 
 	// DescribeSourceConfig returns a human-readable description of the
 	// configuration.

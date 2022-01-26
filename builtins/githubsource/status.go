@@ -11,10 +11,10 @@ import (
 	"github.com/google/go-github/github"
 )
 
-// Status returns a brief description of the status of the driver.
-func (d *impl) Status(ctx context.Context) (string, error) {
+// Status returns a brief description of the current state of the source.
+func (s *source) Status(ctx context.Context) (string, error) {
 	invalidToken := false
-	limits, _, err := d.client.RateLimits(ctx)
+	limits, _, err := s.client.RateLimits(ctx)
 	if err != nil {
 		var e *github.ErrorResponse
 
@@ -37,7 +37,7 @@ func (d *impl) Status(ctx context.Context) (string, error) {
 	if invalidToken {
 		info = append(info, "unauthenticated (invalid token)")
 	} else {
-		if u := d.user; u != nil {
+		if u := s.user; u != nil {
 			info = append(info, "@"+u.GetLogin())
 		} else {
 			info = append(info, "unauthenticated")

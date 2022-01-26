@@ -14,12 +14,12 @@ var _ = Describe("func impl.NewCloner()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc
-		drv    sourcedriver.Driver
+		src    sourcedriver.Source
 	)
 
 	When("unauthenticated", func() {
 		BeforeEach(func() {
-			ctx, cancel, drv = beforeEachUnauthenticated()
+			ctx, cancel, src = beforeEachUnauthenticated()
 		})
 
 		AfterEach(func() {
@@ -27,7 +27,7 @@ var _ = Describe("func impl.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner", func() {
-			cloner, dir, err := drv.NewCloner(ctx, publicUserRepo.ID, logging.SilentLogger)
+			cloner, dir, err := src.NewCloner(ctx, publicUserRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
@@ -43,7 +43,7 @@ var _ = Describe("func impl.NewCloner()", func() {
 		var token string
 
 		BeforeEach(func() {
-			ctx, cancel, drv, token = beforeEachAuthenticated()
+			ctx, cancel, src, token = beforeEachAuthenticated()
 		})
 
 		AfterEach(func() {
@@ -51,7 +51,7 @@ var _ = Describe("func impl.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {
-			cloner, dir, err := drv.NewCloner(ctx, privateUserRepo.ID, logging.SilentLogger)
+			cloner, dir, err := src.NewCloner(ctx, privateUserRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
