@@ -196,18 +196,18 @@ func newRegistry() *registry.Registry {
 	return reg
 }
 
-func newSourceLoader() *stubs.SourceDriverConfigLoader {
-	return &stubs.SourceDriverConfigLoader{
+func newSourceLoader() *stubs.SourceConfigLoader {
+	return &stubs.SourceConfigLoader{
 		UnmarshalFunc: func(
 			ctx sourcedriver.ConfigContext,
 			b hcl.Body,
 		) (sourcedriver.Config, error) {
-			var s stubs.SourceDriverConfigSchema
+			var s stubs.SourceConfigSchema
 			if diags := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diags.HasErrors() {
 				return nil, diags
 			}
 
-			cfg := &stubs.SourceDriverConfig{
+			cfg := &stubs.SourceConfig{
 				ArbitraryAttribute: "<default>",
 			}
 
@@ -223,7 +223,7 @@ func newSourceLoader() *stubs.SourceDriverConfigLoader {
 				return nil, err
 			}
 
-			vcsConfig := &stubs.VCSDriverConfig{}
+			vcsConfig := &stubs.VCSConfig{}
 			if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
 				return nil, err
 			}
@@ -237,12 +237,12 @@ func newSourceLoader() *stubs.SourceDriverConfigLoader {
 	}
 }
 
-func newVCSLoader() *stubs.VCSDriverConfigLoader {
-	return &stubs.VCSDriverConfigLoader{
+func newVCSLoader() *stubs.VCSConfigLoader {
+	return &stubs.VCSConfigLoader{
 		DefaultsFunc: func(
 			vcsdriver.ConfigContext,
 		) (vcsdriver.Config, error) {
-			return &stubs.VCSDriverConfig{
+			return &stubs.VCSConfig{
 				ArbitraryAttribute: "<default>",
 			}, nil
 		},
@@ -251,12 +251,12 @@ func newVCSLoader() *stubs.VCSDriverConfigLoader {
 			c vcsdriver.Config,
 			b hcl.Body,
 		) (vcsdriver.Config, error) {
-			var s stubs.VCSDriverConfigSchema
+			var s stubs.VCSConfigSchema
 			if diags := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diags.HasErrors() {
 				return nil, diags
 			}
 
-			cfg := *c.(*stubs.VCSDriverConfig) // clone
+			cfg := *c.(*stubs.VCSConfig) // clone
 
 			if s.ArbitraryAttribute != "" {
 				// Note, we concat to the existing config here (not replace) so

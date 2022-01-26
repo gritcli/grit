@@ -10,16 +10,15 @@ import (
 	"github.com/hashicorp/hcl/v2"
 )
 
-// SourceDriverConfigLoader is a test implementation of
-// sourcedriver.ConfigLoader.
-type SourceDriverConfigLoader struct {
+// SourceConfigLoader is a test implementation of sourcedriver.ConfigLoader.
+type SourceConfigLoader struct {
 	UnmarshalFunc       func(sourcedriver.ConfigContext, hcl.Body) (sourcedriver.Config, error)
 	ImplicitSourcesFunc func(sourcedriver.ConfigContext) ([]sourcedriver.ImplicitSource, error)
 }
 
 // Unmarshal returns s.UnmarshalFunc() if it is non-nil; otherwise, it returns
 // an error.
-func (s *SourceDriverConfigLoader) Unmarshal(
+func (s *SourceConfigLoader) Unmarshal(
 	ctx sourcedriver.ConfigContext,
 	b hcl.Body,
 ) (sourcedriver.Config, error) {
@@ -32,7 +31,7 @@ func (s *SourceDriverConfigLoader) Unmarshal(
 
 // ImplicitSources returns s.ImplicitSourcesFunc() if it is non-nil; otherwise,
 // it returns (nil, nil).
-func (s *SourceDriverConfigLoader) ImplicitSources(
+func (s *SourceConfigLoader) ImplicitSources(
 	ctx sourcedriver.ConfigContext,
 ) ([]sourcedriver.ImplicitSource, error) {
 	if s.ImplicitSourcesFunc != nil {
@@ -42,15 +41,14 @@ func (s *SourceDriverConfigLoader) ImplicitSources(
 	return nil, nil
 }
 
-// SourceDriverConfigSchema is the HCL schema for SourceDriverConfig.
-type SourceDriverConfigSchema struct {
+// SourceConfigSchema is the HCL schema for SourceConfig.
+type SourceConfigSchema struct {
 	ArbitraryAttribute string `hcl:"arbitrary_attribute,optional"`
 	FilesystemPath     string `hcl:"filesystem_path,optional"`
 }
 
-// SourceDriverConfig is a test implementation of the sourcedriver.Config
-// interface.
-type SourceDriverConfig struct {
+// SourceConfig is a test implementation of the sourcedriver.Config interface.
+type SourceConfig struct {
 	NewDriverFunc            func() sourcedriver.Driver
 	DescribeSourceConfigFunc func() string
 
@@ -61,7 +59,7 @@ type SourceDriverConfig struct {
 
 // NewDriver returns s.NewDriverFunc() if it is non-nil; otherwise, it returns a
 // new SourceDriver stub.
-func (s *SourceDriverConfig) NewDriver() sourcedriver.Driver {
+func (s *SourceConfig) NewDriver() sourcedriver.Driver {
 	if s.NewDriverFunc != nil {
 		return s.NewDriverFunc()
 	}
@@ -71,7 +69,7 @@ func (s *SourceDriverConfig) NewDriver() sourcedriver.Driver {
 
 // DescribeSourceConfig returns s.DescribeSourceConfigFunc() if it is non-nil;
 // otherwise, it returns a new fixed value.
-func (s *SourceDriverConfig) DescribeSourceConfig() string {
+func (s *SourceConfig) DescribeSourceConfig() string {
 	if s.DescribeSourceConfigFunc != nil {
 		return s.DescribeSourceConfigFunc()
 	}

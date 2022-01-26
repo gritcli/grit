@@ -30,10 +30,10 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						testVCSDriverName: &stubs.VCSDriverConfig{
+						testVCSDriverName: &stubs.VCSConfig{
 							ArbitraryAttribute: "<default> + <explicit>",
 						},
 					},
@@ -55,10 +55,10 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						testVCSDriverName: &stubs.VCSDriverConfig{
+						testVCSDriverName: &stubs.VCSConfig{
 							ArbitraryAttribute: "<default> + <explicit>",
 						},
 					},
@@ -84,10 +84,10 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						testVCSDriverName: &stubs.VCSDriverConfig{
+						testVCSDriverName: &stubs.VCSConfig{
 							ArbitraryAttribute: "<default> + <explicit global> + <override>",
 						},
 					},
@@ -148,7 +148,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 					"test_vcs_driver_with_broken_default",
 					vcsdriver.Registration{
 						Name: testVCSDriverName,
-						ConfigLoader: &stubs.VCSDriverConfigLoader{
+						ConfigLoader: &stubs.VCSConfigLoader{
 							DefaultsFunc: func(
 								vcsdriver.ConfigContext,
 							) (vcsdriver.Config, error) {

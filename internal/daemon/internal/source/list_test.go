@@ -23,7 +23,7 @@ var _ = Describe("type List", func() {
 					Clones: config.Clones{
 						Dir: "/path/to/clones",
 					},
-					Driver: &stubs.SourceDriverConfig{
+					Driver: &stubs.SourceConfig{
 						NewDriverFunc: func() sourcedriver.Driver {
 							return d
 						},
@@ -47,17 +47,17 @@ var _ = Describe("type List", func() {
 				{
 					Name:    "<b>",
 					Enabled: true,
-					Driver:  &stubs.SourceDriverConfig{},
+					Driver:  &stubs.SourceConfig{},
 				},
 				{
 					Name:    "<c>",
 					Enabled: true,
-					Driver:  &stubs.SourceDriverConfig{},
+					Driver:  &stubs.SourceConfig{},
 				},
 				{
 					Name:    "<a>",
 					Enabled: true,
-					Driver:  &stubs.SourceDriverConfig{},
+					Driver:  &stubs.SourceConfig{},
 				},
 			})
 

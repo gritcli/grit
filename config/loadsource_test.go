@@ -16,7 +16,7 @@ import (
 
 var _ = Describe("func Load() (source configuration)", func() {
 	type aDifferentVCSConfigConcreteType struct {
-		*stubs.VCSDriverConfig
+		*stubs.VCSConfig
 	}
 
 	DescribeTable(
@@ -35,10 +35,10 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						testVCSDriverName: &stubs.VCSDriverConfig{
+						testVCSDriverName: &stubs.VCSConfig{
 							ArbitraryAttribute: "<default>",
 						},
 					},
@@ -58,10 +58,10 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					ArbitraryAttribute: "<default>",
 					VCSs: map[string]vcsdriver.Config{
-						testVCSDriverName: &stubs.VCSDriverConfig{
+						testVCSDriverName: &stubs.VCSConfig{
 							ArbitraryAttribute: "<default>",
 						},
 					},
@@ -81,10 +81,10 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/test_source",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					ArbitraryAttribute: "<explicit>",
 					VCSs: map[string]vcsdriver.Config{
-						testVCSDriverName: &stubs.VCSDriverConfig{
+						testVCSDriverName: &stubs.VCSConfig{
 							ArbitraryAttribute: "<default>",
 						},
 					},
@@ -100,10 +100,10 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/implicit",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					ArbitraryAttribute: "<implicit>",
 					VCSs: map[string]vcsdriver.Config{
-						testVCSDriverName: &stubs.VCSDriverConfig{
+						testVCSDriverName: &stubs.VCSConfig{
 							ArbitraryAttribute: "<default>",
 						},
 					},
@@ -114,11 +114,11 @@ var _ = Describe("func Load() (source configuration)", func() {
 				loader.ImplicitSourcesFunc = func(
 					ctx sourcedriver.ConfigContext,
 				) ([]sourcedriver.ImplicitSource, error) {
-					cfg := &stubs.SourceDriverConfig{
+					cfg := &stubs.SourceConfig{
 						ArbitraryAttribute: "<implicit>",
 					}
 
-					vcsConfig := &stubs.VCSDriverConfig{}
+					vcsConfig := &stubs.VCSConfig{}
 					if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
 						return nil, err
 					}
@@ -157,10 +157,10 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/implicit",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					ArbitraryAttribute: "<explicit>",
 					VCSs: map[string]vcsdriver.Config{
-						testVCSDriverName: &stubs.VCSDriverConfig{
+						testVCSDriverName: &stubs.VCSConfig{
 							ArbitraryAttribute: "<default>",
 						},
 					},
@@ -174,7 +174,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					return []sourcedriver.ImplicitSource{
 						{
 							Name: "implicit",
-							Config: &stubs.SourceDriverConfig{
+							Config: &stubs.SourceConfig{
 								ArbitraryAttribute: "<implicit>",
 							},
 						},
@@ -199,7 +199,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 				Clones: Clones{
 					Dir: "~/grit/implicit",
 				},
-				Driver: &stubs.SourceDriverConfig{
+				Driver: &stubs.SourceConfig{
 					VCSs: map[string]vcsdriver.Config{
 						testVCSDriverName: aDifferentVCSConfigConcreteType{},
 					},
@@ -212,7 +212,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					testVCSDriverName+"_alias",
 					vcsdriver.Registration{
 						Name: testVCSDriverName,
-						ConfigLoader: &stubs.VCSDriverConfigLoader{
+						ConfigLoader: &stubs.VCSConfigLoader{
 							DefaultsFunc: func(
 								vcsdriver.ConfigContext,
 							) (vcsdriver.Config, error) {
@@ -234,7 +234,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					return []sourcedriver.ImplicitSource{
 						{
 							Name: "implicit",
-							Config: &stubs.SourceDriverConfig{
+							Config: &stubs.SourceConfig{
 								VCSs: map[string]vcsdriver.Config{
 									testVCSDriverName: target,
 								},
@@ -352,7 +352,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 				loader.ImplicitSourcesFunc = func(
 					ctx sourcedriver.ConfigContext,
 				) ([]sourcedriver.ImplicitSource, error) {
-					target := &stubs.VCSDriverConfig{}
+					target := &stubs.VCSConfig{}
 					return nil, ctx.UnmarshalVCSConfig("<unrecognized>", &target)
 				}
 
@@ -400,7 +400,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					"test_source_driver",
 					sourcedriver.Registration{
 						Name: "test_source_driver",
-						ConfigLoader: &stubs.SourceDriverConfigLoader{
+						ConfigLoader: &stubs.SourceConfigLoader{
 							ImplicitSourcesFunc: func(
 								ctx sourcedriver.ConfigContext,
 							) ([]sourcedriver.ImplicitSource, error) {
