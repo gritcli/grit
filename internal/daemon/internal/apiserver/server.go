@@ -15,6 +15,7 @@ import (
 type Server struct {
 	SourceList source.List
 	Cloner     *source.Cloner
+	Suggester  *source.Suggester
 	Logger     logging.Logger
 }
 
@@ -132,5 +133,16 @@ func (s *Server) SuggestRepo(
 	ctx context.Context,
 	req *api.SuggestRepoRequest,
 ) (*api.SuggestResponse, error) {
-	return &api.SuggestResponse{}, nil
+	repos := s.Suggester.Suggest(
+		req.Word,
+		req.IncludeCloned,
+		req.IncludeUncloned,
+	)
+
+	res := &api.SuggestResponse{}
+	for _, r := range repos {
+		res.Words = append(res.Words, r.Name)
+	}
+
+	return res, nil
 }

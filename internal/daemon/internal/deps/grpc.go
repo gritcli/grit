@@ -12,11 +12,13 @@ func init() {
 	Container.Provide(func(
 		sources source.List,
 		c *source.Cloner,
+		s *source.Suggester,
 		logger logging.Logger,
 	) api.APIServer {
 		return &apiserver.Server{
 			SourceList: sources,
 			Cloner:     c,
+			Suggester:  s,
 			Logger:     logging.Prefix(logger, "api: "),
 		}
 	})
