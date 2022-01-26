@@ -246,7 +246,10 @@ func (c *sourceContext) UnmarshalVCSConfig(driver string, v interface{}) error {
 
 		cfg, ok := c.sourceVCSs[alias]
 		if !ok {
-			cfg = c.loader.globalVCSs[alias]
+			cfg, ok = c.loader.globalVCSs[alias]
+		}
+		if !ok {
+			cfg = c.loader.defaultVCSs[alias]
 		}
 
 		rv := reflect.ValueOf(cfg)

@@ -91,6 +91,10 @@ type loader struct {
 	// global configuration for that driver.
 	globalVCSFiles map[string]string
 
+	// defaultVCSs is a map of VCS driver name to the default configuration for
+	// that driver.
+	defaultVCSs map[string]vcsdriver.Config
+
 	// globalVCSs is a map of VCS driver name to the global configuration for
 	// that driver.
 	globalVCSs map[string]vcsdriver.Config
@@ -108,11 +112,24 @@ type loader struct {
 // Files that begin with and underscore (_) or dot (.) are ignored. It does not
 // descend into sub-directories.
 func (l *loader) Load() (Config, error) {
+	if err := l.prepare(); err != nil {
+		return Config{}, err
+	}
+
 	if err := l.load(); err != nil {
 		return Config{}, err
 	}
 
 	return l.finalize()
+}
+
+// prepare prepares the loader to load configuration.
+func (l *loader) prepare() error {
+	if err := l.populateDefaultVCSs(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (l *loader) load() error {
@@ -209,10 +226,6 @@ func (l *loader) finalize() (Config, error) {
 	}
 
 	if err := l.populateGlobalClonesDefaults(); err != nil {
-		return Config{}, err
-	}
-
-	if err := l.populateImplicitGlobalVCSs(); err != nil {
 		return Config{}, err
 	}
 
