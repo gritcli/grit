@@ -78,8 +78,8 @@ copy of a repository is referred to as a "clone".
 A source is some remote system that hosts VCS repositories that can be cloned by
 Grit.
 
-Grit can be configured to consume any number of sources. Each source uses a
-specific [driver](#driver) to communicate with the remote system.
+Grit can be configured to consume from any number of sources. Each source uses a
+specific [source driver](#source-driver) to communicate with the remote system.
 
 Each source is identified by a unique name. There are several built-in sources:
 
@@ -107,10 +107,17 @@ Grit ships with several built-in source drivers:
 Additionally, custom drivers can be implemented as plugins. There is no
 requirement that a source driver use Git as its underlying VCS.
 
+### VCS Driver
+
+A VCS driver provides low-level integration with version control systems. Each
+VCS driver can be used by multiple sources; for example, the built-in `git` VCS
+driver is used by, among others, the `github` and `bitbucket` [source
+drivers](#source-driver).
+
 ## Configuration
 
-Grit works out-of-the-box with zero configuration, however more powerful
-features can be enabled with some configuration.
+Grit works out-of-the-box with zero configuration, however custom sources and
+more powerful features can be enabled with some configuration.
 
 Grit configuration files are written in
 [HCL](https://github.com/hashicorp/hcl#why). Grit loads all `.hcl` files in the
