@@ -12,7 +12,10 @@ func SetupShellExecutorOutput(cmd *cobra.Command) {
 	// directly.
 	f := cmd.PersistentFlags()
 	f.String("shell-executor-output", "", "output file for shell commands to execute")
-	f.MarkHidden("shell-executor-output") //nolint:errcheck
+
+	if err := f.MarkHidden("shell-executor-output"); err != nil {
+		panic(err)
+	}
 }
 
 // ShellExecutorOutputFile returns the path to the file that the shell.Executor
