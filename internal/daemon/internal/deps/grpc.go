@@ -1,6 +1,7 @@
 package deps
 
 import (
+	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/internal/common/api"
 	"github.com/gritcli/grit/internal/daemon/internal/apiserver"
 	"github.com/gritcli/grit/internal/daemon/internal/source"
@@ -11,10 +12,12 @@ func init() {
 	Container.Provide(func(
 		sources source.List,
 		c *source.Cloner,
+		logger logging.Logger,
 	) api.APIServer {
 		return &apiserver.Server{
 			SourceList: sources,
 			Cloner:     c,
+			Logger:     logging.Prefix(logger, "api: "),
 		}
 	})
 
