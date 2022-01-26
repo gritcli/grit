@@ -10,7 +10,6 @@ type Registration struct {
 	// Description is a short human-readable description of the driver.
 	Description string
 
-	// ConfigNormalizer is the normalizer used to produce configuration values
-	// for this driver.
-	ConfigNormalizer ConfigNormalizer
+	// ConfigLoader loads configuration for this driver.
+	ConfigLoader ConfigLoader
 }

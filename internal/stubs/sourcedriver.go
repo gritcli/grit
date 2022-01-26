@@ -7,35 +7,48 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/hashicorp/hcl/v2"
 )
 
-// SourceDriverConfigSchema is a test implementation of
-// sourcedriver.ConfigSchema.
-type SourceDriverConfigSchema struct {
-	NormalizeFunc func(sourcedriver.ConfigNormalizeContext, *SourceDriverConfigSchema) (sourcedriver.Config, error)
+// SourceConfigLoader is a test implementation of sourcedriver.ConfigLoader.
+type SourceConfigLoader struct {
+	UnmarshalFunc       func(sourcedriver.ConfigContext, hcl.Body) (sourcedriver.Config, error)
+	ImplicitSourcesFunc func(sourcedriver.ConfigContext) ([]sourcedriver.ImplicitSource, error)
+}
 
-	// These attributes must be defined in _this_ struct in order to use it as
-	// the HCL schema.
+// Unmarshal returns s.UnmarshalFunc() if it is non-nil; otherwise, it returns
+// an error.
+func (s *SourceConfigLoader) Unmarshal(
+	ctx sourcedriver.ConfigContext,
+	b hcl.Body,
+) (sourcedriver.Config, error) {
+	if s.UnmarshalFunc != nil {
+		return s.UnmarshalFunc(ctx, b)
+	}
 
+	return nil, errors.New("<not implemented>")
+}
+
+// ImplicitSources returns s.ImplicitSourcesFunc() if it is non-nil; otherwise,
+// it returns (nil, nil).
+func (s *SourceConfigLoader) ImplicitSources(
+	ctx sourcedriver.ConfigContext,
+) ([]sourcedriver.ImplicitSource, error) {
+	if s.ImplicitSourcesFunc != nil {
+		return s.ImplicitSourcesFunc(ctx)
+	}
+
+	return nil, nil
+}
+
+// SourceConfigSchema is the HCL schema for SourceConfig.
+type SourceConfigSchema struct {
 	ArbitraryAttribute string `hcl:"arbitrary_attribute,optional"`
 	FilesystemPath     string `hcl:"filesystem_path,optional"`
 }
 
-// Normalize returns s.NormalizeFunc() if it is non-nil, otherwise returns a
-// new SourceDriverConfig stub.
-func (s *SourceDriverConfigSchema) Normalize(
-	nc sourcedriver.ConfigNormalizeContext,
-) (sourcedriver.Config, error) {
-	if s.NormalizeFunc != nil {
-		return s.NormalizeFunc(nc, s)
-	}
-
-	return &SourceDriverConfig{}, nil
-}
-
-// SourceDriverConfig is a test implementation of the sourcedriver.Config
-// interface.
-type SourceDriverConfig struct {
+// SourceConfig is a test implementation of the sourcedriver.Config interface.
+type SourceConfig struct {
 	NewDriverFunc            func() sourcedriver.Driver
 	DescribeSourceConfigFunc func() string
 
@@ -46,7 +59,7 @@ type SourceDriverConfig struct {
 
 // NewDriver returns s.NewDriverFunc() if it is non-nil; otherwise, it returns a
 // new SourceDriver stub.
-func (s *SourceDriverConfig) NewDriver() sourcedriver.Driver {
+func (s *SourceConfig) NewDriver() sourcedriver.Driver {
 	if s.NewDriverFunc != nil {
 		return s.NewDriverFunc()
 	}
@@ -56,7 +69,7 @@ func (s *SourceDriverConfig) NewDriver() sourcedriver.Driver {
 
 // DescribeSourceConfig returns s.DescribeSourceConfigFunc() if it is non-nil;
 // otherwise, it returns a new fixed value.
-func (s *SourceDriverConfig) DescribeSourceConfig() string {
+func (s *SourceConfig) DescribeSourceConfig() string {
 	if s.DescribeSourceConfigFunc != nil {
 		return s.DescribeSourceConfigFunc()
 	}

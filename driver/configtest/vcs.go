@@ -9,6 +9,7 @@ import (
 	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/extensions/table"
 	"github.com/onsi/gomega"
@@ -37,13 +38,11 @@ func TestVCSDriver(
 				"driver_under_test",
 				sourcedriver.Registration{
 					Name: "driver_under_test",
-					NewConfigSchema: func() sourcedriver.ConfigSchema {
-						return &vcsTestSourceConfigSchema{
-							driverName: r.Name,
-							unmarshalTarget: reflect.New(
-								reflect.TypeOf(zero),
-							).Interface(),
-						}
+					ConfigLoader: &vcsTestSourceConfigLoader{
+						driverName: r.Name,
+						unmarshalTarget: reflect.New(
+							reflect.TypeOf(zero),
+						).Interface(),
 					},
 				},
 			)
@@ -147,27 +146,34 @@ func VCSFailure(
 	)
 }
 
-type vcsTestSourceConfigSchema struct {
+type vcsTestSourceConfigLoader struct {
 	driverName      string
 	unmarshalTarget interface{}
 }
 
-func (s *vcsTestSourceConfigSchema) Normalize(
-	nc sourcedriver.ConfigNormalizeContext,
+func (l vcsTestSourceConfigLoader) Unmarshal(
+	ctx sourcedriver.ConfigContext,
+	b hcl.Body,
 ) (sourcedriver.Config, error) {
-	if err := nc.UnmarshalVCSConfig(
-		s.driverName,
-		s.unmarshalTarget,
+	if err := ctx.UnmarshalVCSConfig(
+		l.driverName,
+		l.unmarshalTarget,
 	); err != nil {
 		return nil, err
 	}
 
 	return vcsTestSourceConfig{
 		VCSConfig: reflect.
-			ValueOf(s.unmarshalTarget).
+			ValueOf(l.unmarshalTarget).
 			Elem().
 			Interface().(vcsdriver.Config),
 	}, nil
+}
+
+func (l vcsTestSourceConfigLoader) ImplicitSources(
+	ctx sourcedriver.ConfigContext,
+) ([]sourcedriver.ImplicitSource, error) {
+	return nil, nil
 }
 
 type vcsTestSourceConfig struct {

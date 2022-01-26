@@ -1,29 +1,38 @@
 package sourcedriver
 
-// ConfigSchema is an interface for parsing driver-specific configuration within
-// a "source" block in a Grit configuration file.
-//
-// It must be implemented as a pointer-to-struct that uses the field tags
-// described by https://pkg.go.dev/github.com/hashicorp/hcl/v2/gohcl, thus it
-// defines the HCL schema that is allowed when configuring sources that use this
-// driver.
-//
-// When Grit parses a "source" block within a configuration, any unrecognized
-// attributes or blocks within that "source" block are parsed into this schema.
-type ConfigSchema interface {
-	// Normalize validates the configuration as parsed by this schema and
-	// returns a normalized Config.
+import "github.com/hashicorp/hcl/v2"
+
+// ImplicitSource represents a source that is provided by this driver without
+// explicit configuration.
+type ImplicitSource struct {
+	// Name is the unique name for the source.
 	//
-	// The implementation must call ctx.ReadVCSConfig() for each VCS driver
-	// that is supported, even if they are not currently in use.
-	Normalize(ctx ConfigNormalizeContext) (Config, error)
+	// If the user defines an explicit source with the same name, this implicit
+	// source is ignored.
+	Name string
+
+	// Config is the configuration of this source.
+	Config Config
 }
 
-// ConfigNormalizeContext provides operations used to normalize a
-// ConfigSchema.
-type ConfigNormalizeContext interface {
-	// NormalizePath normalizes a filesystem encountered within the
-	// configuration.
+// ConfigLoader is an interface for loading driver-specific source configuration.
+type ConfigLoader interface {
+	// Unmarshal unmarshals the contents of a "source" block.
+	Unmarshal(ctx ConfigContext, b hcl.Body) (Config, error)
+
+	// ImplicitSources returns the configuration to use for "implicit" sources
+	// provided by this driver without explicit configuration.
+	ImplicitSources(ctx ConfigContext) ([]ImplicitSource, error)
+}
+
+// ConfigContext provides operations used when loading source configuration.
+type ConfigContext interface {
+	// EvalContext returns the HCL evaluation context to be used when to
+	// decoding HCL content.
+	EvalContext() *hcl.EvalContext
+
+	// NormalizePath resolves a (potentially relative) filesystem path to an
+	// absolute path.
 	//
 	// If *p begins with a tilde (~), it is resolved relative to the user's home
 	// directory.

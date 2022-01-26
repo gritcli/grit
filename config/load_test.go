@@ -180,47 +180,51 @@ func newRegistry() *registry.Registry {
 	reg.RegisterSourceDriver(
 		testSourceDriverName,
 		sourcedriver.Registration{
-			Name: testSourceDriverName,
-			NewConfigSchema: func() sourcedriver.ConfigSchema {
-				return newSourceStub()
-			},
+			Name:         testSourceDriverName,
+			ConfigLoader: newSourceLoader(),
 		},
 	)
 
 	reg.RegisterVCSDriver(
 		testVCSDriverName,
 		vcsdriver.Registration{
-			Name:             testVCSDriverName,
-			ConfigNormalizer: newVCSNormalizer(),
+			Name:         testVCSDriverName,
+			ConfigLoader: newVCSLoader(),
 		},
 	)
 
 	return reg
 }
 
-// newSourceStub returns a new stub of sourcedriver.ConfigSchema for testing
-// source driver configuration.
-func newSourceStub() *stubs.SourceDriverConfigSchema {
-	return &stubs.SourceDriverConfigSchema{
-		NormalizeFunc: func(
-			nc sourcedriver.ConfigNormalizeContext,
-			s *stubs.SourceDriverConfigSchema,
+func newSourceLoader() *stubs.SourceConfigLoader {
+	return &stubs.SourceConfigLoader{
+		UnmarshalFunc: func(
+			ctx sourcedriver.ConfigContext,
+			b hcl.Body,
 		) (sourcedriver.Config, error) {
-			cfg := &stubs.SourceDriverConfig{
-				ArbitraryAttribute: s.ArbitraryAttribute,
-				FilesystemPath:     s.FilesystemPath,
+			var s stubs.SourceConfigSchema
+			if diags := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diags.HasErrors() {
+				return nil, diags
 			}
 
-			if cfg.ArbitraryAttribute == "" {
-				cfg.ArbitraryAttribute = "<default>"
+			cfg := &stubs.SourceConfig{
+				ArbitraryAttribute: "<default>",
 			}
 
-			if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
+			if s.ArbitraryAttribute != "" {
+				cfg.ArbitraryAttribute = s.ArbitraryAttribute
+			}
+
+			if s.FilesystemPath != "" {
+				cfg.FilesystemPath = s.FilesystemPath
+			}
+
+			if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
 				return nil, err
 			}
 
-			vcsConfig := &stubs.VCSDriverConfig{}
-			if err := nc.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
+			vcsConfig := &stubs.VCSConfig{}
+			if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
 				return nil, err
 			}
 
@@ -233,27 +237,26 @@ func newSourceStub() *stubs.SourceDriverConfigSchema {
 	}
 }
 
-func newVCSNormalizer() *stubs.VCSDriverConfigNormalizer {
-	return &stubs.VCSDriverConfigNormalizer{
+func newVCSLoader() *stubs.VCSConfigLoader {
+	return &stubs.VCSConfigLoader{
 		DefaultsFunc: func(
-			nc vcsdriver.ConfigNormalizeContext,
+			vcsdriver.ConfigContext,
 		) (vcsdriver.Config, error) {
-			return &stubs.VCSDriverConfig{
+			return &stubs.VCSConfig{
 				ArbitraryAttribute: "<default>",
 			}, nil
 		},
-		MergeFunc: func(
-			nc vcsdriver.ConfigNormalizeContext,
+		UnmarshalAndMergeFunc: func(
+			ctx vcsdriver.ConfigContext,
 			c vcsdriver.Config,
 			b hcl.Body,
 		) (vcsdriver.Config, error) {
-			cfg := *c.(*stubs.VCSDriverConfig) // clone
-
-			var s stubs.VCSDriverConfigSchema
-
-			if diags := gohcl.DecodeBody(b, nc.EvalContext(), &s); diags.HasErrors() {
+			var s stubs.VCSConfigSchema
+			if diags := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diags.HasErrors() {
 				return nil, diags
 			}
+
+			cfg := *c.(*stubs.VCSConfig) // clone
 
 			if s.ArbitraryAttribute != "" {
 				// Note, we concat to the existing config here (not replace) so
@@ -266,7 +269,7 @@ func newVCSNormalizer() *stubs.VCSDriverConfigNormalizer {
 				cfg.FilesystemPath = s.FilesystemPath
 			}
 
-			if err := nc.NormalizePath(&cfg.FilesystemPath); err != nil {
+			if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
 				return nil, err
 			}
 

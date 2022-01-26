@@ -3,6 +3,8 @@ package githubsource
 import (
 	"github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
 )
 
 // Config contains configuration specific to the GitHub driver.
@@ -42,21 +44,50 @@ type configSchema struct {
 	Token  string `hcl:"token,optional"`
 }
 
-func (s *configSchema) Normalize(
-	nc sourcedriver.ConfigNormalizeContext,
+// configLoader is an implementation of vcsdriver.ConfigLoader for Git.
+type configLoader struct{}
+
+func (configLoader) Unmarshal(
+	ctx sourcedriver.ConfigContext,
+	b hcl.Body,
 ) (sourcedriver.Config, error) {
-	if s.Domain == "" {
-		s.Domain = "github.com"
+	var s configSchema
+	if diag := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diag.HasErrors() {
+		return nil, diag
 	}
 
 	cfg := Config{
-		Domain: s.Domain,
-		Token:  s.Token,
+		Domain: "github.com",
 	}
 
-	if err := nc.UnmarshalVCSConfig(gitvcs.Registration.Name, &cfg.Git); err != nil {
+	if s.Domain != "" {
+		cfg.Domain = s.Domain
+	}
+
+	if s.Token != "" {
+		cfg.Token = s.Token
+	}
+
+	if err := ctx.UnmarshalVCSConfig(gitvcs.Registration.Name, &cfg.Git); err != nil {
 		return nil, err
 	}
 
 	return cfg, nil
+}
+
+func (l configLoader) ImplicitSources(ctx sourcedriver.ConfigContext) ([]sourcedriver.ImplicitSource, error) {
+	cfg := Config{
+		Domain: "github.com",
+	}
+
+	if err := ctx.UnmarshalVCSConfig(gitvcs.Registration.Name, &cfg.Git); err != nil {
+		return nil, err
+	}
+
+	return []sourcedriver.ImplicitSource{
+		{
+			Name:   "github",
+			Config: cfg,
+		},
+	}, nil
 }

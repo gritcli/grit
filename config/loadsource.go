@@ -8,10 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/gohcl"
 )
 
 // sourceNameRegexp is a regular expression used to validate source names.
@@ -23,7 +21,6 @@ var sourceNameRegexp = regexp.MustCompile(`(?i)^[a-z_]+$`)
 // configuration files have been loaded.
 type intermediateSource struct {
 	Schema sourceSchema
-	Driver sourcedriver.ConfigSchema
 	VCSs   map[string]hcl.Body
 	File   string
 }
@@ -58,24 +55,8 @@ func (l *loader) mergeSource(file string, s sourceSchema) error {
 		)
 	}
 
-	reg, ok := l.Registry.SourceDriverByAlias(s.Driver)
-	if !ok {
-		return fmt.Errorf(
-			"the '%s' source uses an unrecognized driver ('%s'), the supported source drivers are '%s'",
-			s.Name,
-			s.Driver,
-			strings.Join(l.Registry.SourceDriverAliases(), "', '"),
-		)
-	}
-
-	bodySchema := reg.NewConfigSchema()
-	if diag := gohcl.DecodeBody(s.DriverBody, nil, bodySchema); diag.HasErrors() {
-		return diag
-	}
-
 	i := intermediateSource{
 		Schema: s,
-		Driver: bodySchema,
 		VCSs:   map[string]hcl.Body{},
 		File:   file,
 	}
@@ -100,30 +81,51 @@ func (l *loader) mergeSource(file string, s sourceSchema) error {
 //
 // Any implicit source with a name that has already been defined in the
 // configuration files is ignored.
-func (l *loader) populateImplicitSources() {
-	for alias, reg := range l.Registry.SourceDrivers() {
-		for name, schema := range reg.ImplicitSources {
-			lowerName := strings.ToLower(name)
+func (l *loader) populateImplicitSources(cfg *Config) error {
+	ctx := &sourceContext{
+		loader: l,
+	}
 
-			if l.sources == nil {
-				l.sources = map[string]intermediateSource{}
-			} else if _, ok := l.sources[lowerName]; ok {
+	for alias, reg := range l.Registry.SourceDrivers() {
+		sources, err := reg.ConfigLoader.ImplicitSources(ctx)
+		if err != nil {
+			return fmt.Errorf(
+				"the implicit sources provided by the '%s' driver cannot be loaded: %w",
+				alias,
+				err,
+			)
+		}
+
+		for _, src := range sources {
+			lowerName := strings.ToLower(src.Name)
+			if _, ok := l.sources[lowerName]; ok {
 				continue
 			}
 
-			l.sources[lowerName] = intermediateSource{
-				Schema: sourceSchema{
-					Name:   name,
-					Driver: alias,
-				},
-				Driver: schema,
-			}
+			cfg.Sources = append(cfg.Sources, Source{
+				Name:    src.Name,
+				Enabled: true,
+				Clones:  l.finalizeImplicitSourceClones(src.Name),
+				Driver:  src.Config,
+			})
 		}
 	}
+
+	return nil
 }
 
 // finalizeSource returns a source built from its intermediate representation.
 func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
+	reg, ok := l.Registry.SourceDriverByAlias(i.Schema.Driver)
+	if !ok {
+		return Source{}, fmt.Errorf(
+			"the '%s' source uses an unrecognized driver ('%s'), the supported source drivers are '%s'",
+			i.Schema.Name,
+			i.Schema.Driver,
+			strings.Join(l.Registry.SourceDriverAliases(), "', '"),
+		)
+	}
+
 	clones, err := l.finalizeSourceSpecificClones(i, i.Schema.Clones)
 	if err != nil {
 		return Source{}, err
@@ -134,21 +136,15 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 		return Source{}, err
 	}
 
-	nc := &sourceNormalizeContext{
+	ctx := &sourceContext{
 		loader:     l,
-		globalVCSs: l.globalVCSs,
 		sourceVCSs: sourceVCSs,
 	}
 
-	cfg, err := i.Driver.Normalize(nc)
+	cfg, err := reg.ConfigLoader.Unmarshal(ctx, i.Schema.DriverBody)
 	if err != nil {
-		if i.File == "" {
-			return Source{}, fmt.Errorf(
-				"the configuration for the implicit '%s' source (provided by the '%s' driver) cannot be loaded: %w",
-				i.Schema.Name,
-				i.Schema.Driver,
-				err,
-			)
+		if isHCLError(err) {
+			return Source{}, err
 		}
 
 		return Source{}, fmt.Errorf(
@@ -158,8 +154,17 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 		)
 	}
 
-	// TODO: produce an error if the source has VCS configurations for
-	// unsupported VCS drivers.
+	// There should be no source-specific VCS configurations remaining as the
+	// driver is required to call ctx.UnmarshalVCSConfig() for all of the VCS
+	// drivers it supports.
+	for alias := range ctx.sourceVCSs {
+		return Source{}, fmt.Errorf(
+			"the '%s' source has configuration for the '%s' version control system but the source driver ('%s') does not support that VCS",
+			i.Schema.Name,
+			alias,
+			i.Schema.Driver,
+		)
+	}
 
 	enabled := true
 	if i.Schema.Enabled != nil {
@@ -174,19 +179,21 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 	}, nil
 }
 
-// sourceNormalizeContext is an implementation of
-// sourcedriver.ConfigNormalizeContext.
-type sourceNormalizeContext struct {
+// sourceContext is an implementation of sourcedriver.ConfigContext.
+type sourceContext struct {
 	loader     *loader
-	globalVCSs map[string]vcsdriver.Config
 	sourceVCSs map[string]vcsdriver.Config
 }
 
-func (nc *sourceNormalizeContext) NormalizePath(p *string) error {
-	return nc.loader.normalizePath(p)
+func (c *sourceContext) EvalContext() *hcl.EvalContext {
+	return &hcl.EvalContext{}
 }
 
-func (nc *sourceNormalizeContext) UnmarshalVCSConfig(driver string, v interface{}) error {
+func (c *sourceContext) NormalizePath(p *string) error {
+	return c.loader.normalizePath(p)
+}
+
+func (c *sourceContext) UnmarshalVCSConfig(driver string, v interface{}) error {
 	configInterfaceType := reflect.TypeOf((*vcsdriver.Config)(nil)).Elem()
 
 	target := reflect.ValueOf(v)
@@ -226,16 +233,25 @@ func (nc *sourceNormalizeContext) UnmarshalVCSConfig(driver string, v interface{
 
 	var matches []string
 
-	for alias, reg := range nc.loader.Registry.VCSDrivers() {
+	for alias, reg := range c.loader.Registry.VCSDrivers() {
 		if reg.Name != driver {
 			continue
 		}
 
 		matches = append(matches, alias)
 
-		cfg, ok := nc.sourceVCSs[alias]
+		cfg, ok := c.sourceVCSs[alias]
+
+		if ok {
+			// "consume" the source-specific configuration so we can identify
+			// any "leftovers".
+			delete(c.sourceVCSs, alias)
+		} else {
+			cfg, ok = c.loader.globalVCSs[alias]
+		}
+
 		if !ok {
-			cfg = nc.globalVCSs[alias]
+			cfg = c.loader.defaultVCSs[alias]
 		}
 
 		rv := reflect.ValueOf(cfg)

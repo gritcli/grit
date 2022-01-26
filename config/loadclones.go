@@ -47,8 +47,8 @@ func (l *loader) populateGlobalClonesDefaults() error {
 	return nil
 }
 
-// finalizeSouceSpecific returns the clones configuration to use for a specific
-// source.
+// finalizeSourceSpecificClones returns the clones configuration to use for a
+// specific source.
 func (l *loader) finalizeSourceSpecificClones(
 	i intermediateSource,
 	s *clonesSchema,
@@ -73,4 +73,12 @@ func (l *loader) finalizeSourceSpecificClones(
 	}
 
 	return cfg, nil
+}
+
+// finalizeImplicitSourceClones returns the clones configuration to use for an
+// implicit source.
+func (l *loader) finalizeImplicitSourceClones(name string) Clones {
+	return Clones{
+		Dir: filepath.Join(l.globalClones.Dir, name),
+	}
 }
