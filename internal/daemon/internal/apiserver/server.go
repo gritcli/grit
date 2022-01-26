@@ -125,3 +125,12 @@ func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		},
 	})
 }
+
+// SuggestRepo returns a list of repository names to be used as suggestions for
+// completing a partial repository name.
+func (s *Server) SuggestRepo(
+	ctx context.Context,
+	req *api.SuggestRepoRequest,
+) (*api.SuggestResponse, error) {
+	return &api.SuggestResponse{}, nil
+}

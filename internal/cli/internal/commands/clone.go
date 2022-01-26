@@ -71,6 +71,23 @@ func newCloneCommand() *cobra.Command {
 				return executor("cd", dir)
 			})
 		},
+		ValidArgsFunction: suggest(func(
+			ctx context.Context,
+			client api.APIClient,
+			cmd *cobra.Command,
+			args []string,
+			word string,
+		) (*api.SuggestResponse, error) {
+			if len(args) != 0 {
+				return nil, nil
+			}
+
+			return client.SuggestRepo(ctx, &api.SuggestRepoRequest{
+				Word:            word,
+				IncludeCloned:   false,
+				IncludeUncloned: true,
+			})
+		}),
 	}
 }
 
