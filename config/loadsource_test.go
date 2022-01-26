@@ -389,6 +389,24 @@ var _ = Describe("func Load() (source configuration)", func() {
 				)
 			},
 		),
+		Entry(
+			`configuration for unused VCS driver`,
+			[]string{
+				`source "test_source" "test_source_driver" {
+					vcs "unused_vcs_driver" {}
+				}`,
+			},
+			`<dir>/config-0.hcl: the 'test_source' source has configuration for the 'unused_vcs_driver' version control system but the source driver ('test_source_driver') does not support that VCS`,
+			func(reg *registry.Registry) {
+				reg.RegisterVCSDriver(
+					"unused_vcs_driver",
+					vcsdriver.Registration{
+						Name:         "unused_vcs_driver",
+						ConfigLoader: newVCSLoader(),
+					},
+				)
+			},
+		),
 	)
 
 	When("the source driver uses UnmarshalVCSConfig() incorrectly", func() {

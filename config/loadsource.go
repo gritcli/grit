@@ -154,8 +154,17 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 		)
 	}
 
-	// TODO: produce an error if the source has VCS configurations for
-	// unsupported VCS drivers.
+	// There should be no source-specific VCS configurations remaining as the
+	// driver is required to call ctx.UnmarshalVCSConfig() for all of the VCS
+	// drivers it supports.
+	for alias := range ctx.sourceVCSs {
+		return Source{}, fmt.Errorf(
+			"the '%s' source has configuration for the '%s' version control system but the source driver ('%s') does not support that VCS",
+			i.Schema.Name,
+			alias,
+			i.Schema.Driver,
+		)
+	}
 
 	enabled := true
 	if i.Schema.Enabled != nil {
@@ -232,9 +241,15 @@ func (c *sourceContext) UnmarshalVCSConfig(driver string, v interface{}) error {
 		matches = append(matches, alias)
 
 		cfg, ok := c.sourceVCSs[alias]
-		if !ok {
+
+		if ok {
+			// "consume" the source-specific configuration so we can identify
+			// any "leftovers".
+			delete(c.sourceVCSs, alias)
+		} else {
 			cfg, ok = c.loader.globalVCSs[alias]
 		}
+
 		if !ok {
 			cfg = c.loader.defaultVCSs[alias]
 		}

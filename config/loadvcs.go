@@ -32,11 +32,10 @@ func (l *loader) mergeGlobalVCS(file string, s vcsSchema) error {
 		)
 	}
 
-	lowerName := strings.ToLower(s.Driver)
 	ctx := &vcsContext{l}
 	cfg, err := reg.ConfigLoader.UnmarshalAndMerge(
 		ctx,
-		l.defaultVCSs[lowerName],
+		l.defaultVCSs[s.Driver],
 		s.DriverBody,
 	)
 	if err != nil {
