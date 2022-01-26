@@ -26,13 +26,15 @@ func Execute(ctx context.Context, c *di.Container, cmd *cobra.Command) (err erro
 	return cmd.ExecuteContext(ctx)
 }
 
-// Run returns a function that invokes fn with arguments populated by the
-// container. The returned function matches the signature of cobra.Command.RunE.
-func Run(fn interface{}) func(*cobra.Command, []string) error {
-	return func(cmd *cobra.Command, args []string) error {
-		ctx := cmd.Context()
-		con := ctx.Value(contextKey{}).(*di.Container)
+// Invoke invokes fn  with arguments populated by the container associated with
+// the given command.
+func Invoke(cmd *cobra.Command, fn interface{}) error {
+	ctx := cmd.Context()
+	con := ctx.Value(contextKey{}).(*di.Container)
 
-		return con.Invoke(fn)
-	}
+	con.Provide(func() context.Context {
+		return ctx
+	})
+
+	return con.Invoke(fn)
 }

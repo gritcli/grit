@@ -33,44 +33,44 @@ func newCloneCommand() *cobra.Command {
 		multiple matches and the shell is interactive the user is prompted to
 		select the desired repository.
 		`),
-		RunE: deps.Run(func(
-			ctx context.Context,
-			cmd *cobra.Command,
-			args []string,
-			client api.APIClient,
-			clientOptions *api.ClientOptions,
-			executor shell.Executor,
-		) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if args[0] == "" {
 				return errors.New("<repo> argument must not be empty")
 			}
 
-			repo, err := resolveRepo(
-				ctx,
-				cmd,
-				client,
-				clientOptions,
-				args[0],
-			)
-			if err != nil {
-				return err
-			}
+			return deps.Invoke(cmd, func(
+				ctx context.Context,
+				client api.APIClient,
+				clientOptions *api.ClientOptions,
+				executor shell.Executor,
+			) error {
+				repo, err := resolveRepo(
+					ctx,
+					cmd,
+					client,
+					clientOptions,
+					args[0],
+				)
+				if err != nil {
+					return err
+				}
 
-			dir, err := cloneRepo(
-				ctx,
-				cmd,
-				client,
-				clientOptions,
-				repo,
-			)
-			if err != nil {
-				return err
-			}
+				dir, err := cloneRepo(
+					ctx,
+					cmd,
+					client,
+					clientOptions,
+					repo,
+				)
+				if err != nil {
+					return err
+				}
 
-			cmd.Println(render.RelPath(dir))
+				cmd.Println(render.RelPath(dir))
 
-			return executor("cd", dir)
-		}),
+				return executor("cd", dir)
+			})
+		},
 	}
 }
 
