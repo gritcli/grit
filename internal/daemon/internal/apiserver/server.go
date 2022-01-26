@@ -15,6 +15,7 @@ import (
 type Server struct {
 	SourceList source.List
 	Cloner     *source.Cloner
+	Logger     logging.Logger
 }
 
 // Sources lists the configured repository sources.
@@ -48,7 +49,7 @@ func (s *Server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 	ctx := stream.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
-	log := newStreamLogger(
+	log := s.newStreamLogger(
 		stream,
 		req.ClientOptions,
 		func(out *api.ClientOutput) proto.Message {
@@ -102,7 +103,7 @@ func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		stream.Context(),
 		req.Source,
 		req.RepoId,
-		newStreamLogger(
+		s.newStreamLogger(
 			stream,
 			req.ClientOptions,
 			func(out *api.ClientOutput) proto.Message {

@@ -11,7 +11,7 @@ import (
 
 // newStreamLogger returns a logging.Logger that sends log messages over a gRPC
 // stream.
-func newStreamLogger(
+func (s *Server) newStreamLogger(
 	stream grpc.ServerStream,
 	options *api.ClientOptions,
 	wrap func(*api.ClientOutput) proto.Message,
@@ -22,7 +22,9 @@ func newStreamLogger(
 			IsDebug: false,
 		})
 
-		stream.SendMsg(m) //nolint:errcheck
+		if err := stream.SendMsg(m); err != nil {
+			logging.Log(s.Logger, "unable to write log to stream: %w", err)
+		}
 	}
 
 	var debugTarget logging.Callback
