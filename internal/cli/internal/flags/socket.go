@@ -13,6 +13,7 @@ func SetupSocket(cmd *cobra.Command) {
 		config.DefaultDaemonSocket,
 		"set the Unix socket address of the Grit daemon",
 	)
+	cmd.MarkPersistentFlagFilename("socket")
 }
 
 // Socket returns the path to the Unix socket address of the Grit daemon.
