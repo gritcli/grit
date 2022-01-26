@@ -34,7 +34,7 @@ func (l *loader) mergeGlobalVCS(file string, s vcsSchema) error {
 
 	lowerName := strings.ToLower(s.Driver)
 	ctx := &vcsContext{l}
-	cfg, err := reg.ConfigLoader.Merge(
+	cfg, err := reg.ConfigLoader.UnmarshalAndMerge(
 		ctx,
 		l.defaultVCSs[lowerName],
 		s.DriverBody,
@@ -130,7 +130,7 @@ func (l *loader) finalizeSourceSpecificVCSs(
 		}
 
 		ctx := &vcsContext{l}
-		cfg, err := reg.ConfigLoader.Merge(ctx, cfg, body)
+		cfg, err := reg.ConfigLoader.UnmarshalAndMerge(ctx, cfg, body)
 		if err != nil {
 			if isHCLError(err) {
 				return nil, err

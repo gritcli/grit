@@ -7,12 +7,12 @@ type ConfigLoader interface {
 	// Defaults returns the default configuration for this driver.
 	Defaults(ctx ConfigContext) (Config, error)
 
-	// Merge returns a configuration that is the result of merging an existing
-	// configuration with the contents of a "vcs" block.
+	// UnmarshalAndMerge unmarshals the contents of a "vcs" block and returns
+	// the result of merging it with an existing configuration.
 	//
 	// c is the existing configuration, b is the body of the "vcs" block. c must
 	// not be modified.
-	Merge(ctx ConfigContext, c Config, b hcl.Body) (Config, error)
+	UnmarshalAndMerge(ctx ConfigContext, c Config, b hcl.Body) (Config, error)
 }
 
 // ConfigContext provides operations used when loading VCS configuration.

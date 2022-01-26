@@ -9,8 +9,8 @@ import (
 
 // VCSDriverConfigLoader is a test implementation of vcsdriver.ConfigLoader.
 type VCSDriverConfigLoader struct {
-	DefaultsFunc func(vcsdriver.ConfigContext) (vcsdriver.Config, error)
-	MergeFunc    func(vcsdriver.ConfigContext, vcsdriver.Config, hcl.Body) (vcsdriver.Config, error)
+	DefaultsFunc          func(vcsdriver.ConfigContext) (vcsdriver.Config, error)
+	UnmarshalAndMergeFunc func(vcsdriver.ConfigContext, vcsdriver.Config, hcl.Body) (vcsdriver.Config, error)
 }
 
 // Defaults returns s.DefaultsFunc() if it is non-nil; otherwise, it returns an
@@ -25,14 +25,15 @@ func (s *VCSDriverConfigLoader) Defaults(
 	return nil, errors.New("<not implemented>")
 }
 
-// Merge returns s.MergeFunc() if it is non-nil; otherwise, it returns an error.
-func (s *VCSDriverConfigLoader) Merge(
+// UnmarshalAndMerge returns s.MergeFunc() if it is non-nil; otherwise, it
+// returns an error.
+func (s *VCSDriverConfigLoader) UnmarshalAndMerge(
 	ctx vcsdriver.ConfigContext,
 	c vcsdriver.Config,
 	b hcl.Body,
 ) (vcsdriver.Config, error) {
-	if s.MergeFunc != nil {
-		return s.MergeFunc(ctx, c, b)
+	if s.UnmarshalAndMergeFunc != nil {
+		return s.UnmarshalAndMergeFunc(ctx, c, b)
 	}
 
 	return nil, errors.New("<not implemented>")

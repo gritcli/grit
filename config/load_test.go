@@ -246,7 +246,7 @@ func newVCSLoader() *stubs.VCSDriverConfigLoader {
 				ArbitraryAttribute: "<default>",
 			}, nil
 		},
-		MergeFunc: func(
+		UnmarshalAndMergeFunc: func(
 			ctx vcsdriver.ConfigContext,
 			c vcsdriver.Config,
 			b hcl.Body,

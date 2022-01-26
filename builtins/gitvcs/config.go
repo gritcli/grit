@@ -60,7 +60,11 @@ func (configLoader) Defaults(ctx vcsdriver.ConfigContext) (vcsdriver.Config, err
 	return Config{}, nil
 }
 
-func (configLoader) Merge(ctx vcsdriver.ConfigContext, c vcsdriver.Config, b hcl.Body) (vcsdriver.Config, error) {
+func (configLoader) UnmarshalAndMerge(
+	ctx vcsdriver.ConfigContext,
+	c vcsdriver.Config,
+	b hcl.Body,
+) (vcsdriver.Config, error) {
 	var s configSchema
 	if diag := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diag.HasErrors() {
 		return nil, diag
