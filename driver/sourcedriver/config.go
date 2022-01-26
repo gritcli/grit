@@ -17,16 +17,8 @@ type ImplicitSource struct {
 
 // ConfigLoader is an interface for loading driver-specific source configuration.
 type ConfigLoader interface {
-	// Defaults returns the default configuration to use for a source that uses
-	// this driver.
-	Defaults(ctx ConfigContext) (Config, error)
-
-	// Merge returns a configuration that is the result of merging an existing
-	// configuration with the contents of a "source" block.
-	//
-	// c is the existing configuration, b is the body of the "source" block. c
-	// must not be modified.
-	Merge(ctx ConfigContext, c Config, b hcl.Body) (Config, error)
+	// Unmarshal unmarshals the contents of a "source" block.
+	Unmarshal(ctx ConfigContext, b hcl.Body) (Config, error)
 
 	// ImplicitSources returns the configuration to use for "implicit" sources
 	// provided by this driver without explicit configuration.

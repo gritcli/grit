@@ -82,7 +82,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					Dir: "~/grit/test_source",
 				},
 				Driver: &stubs.SourceDriverConfig{
-					ArbitraryAttribute: "<default> + <explicit>",
+					ArbitraryAttribute: "<explicit>",
 					VCSs: map[string]vcsdriver.Config{
 						testVCSDriverName: &stubs.VCSDriverConfig{
 							ArbitraryAttribute: "<default>",
@@ -118,8 +118,13 @@ var _ = Describe("func Load() (source configuration)", func() {
 						ArbitraryAttribute: "<implicit>",
 					}
 
-					if err := unmarshalVCSConfig(ctx, cfg, testVCSDriverName); err != nil {
+					vcsConfig := &stubs.VCSDriverConfig{}
+					if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
 						return nil, err
+					}
+
+					cfg.VCSs = map[string]vcsdriver.Config{
+						testVCSDriverName: vcsConfig,
 					}
 
 					return []sourcedriver.ImplicitSource{
@@ -153,7 +158,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					Dir: "~/grit/implicit",
 				},
 				Driver: &stubs.SourceDriverConfig{
-					ArbitraryAttribute: "<default> + <explicit>",
+					ArbitraryAttribute: "<explicit>",
 					VCSs: map[string]vcsdriver.Config{
 						testVCSDriverName: &stubs.VCSDriverConfig{
 							ArbitraryAttribute: "<default>",

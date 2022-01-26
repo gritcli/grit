@@ -198,22 +198,8 @@ func newRegistry() *registry.Registry {
 
 func newSourceLoader() *stubs.SourceDriverConfigLoader {
 	return &stubs.SourceDriverConfigLoader{
-		DefaultsFunc: func(
+		UnmarshalFunc: func(
 			ctx sourcedriver.ConfigContext,
-		) (sourcedriver.Config, error) {
-			cfg := &stubs.SourceDriverConfig{
-				ArbitraryAttribute: "<default>",
-			}
-
-			if err := unmarshalVCSConfig(ctx, cfg, testVCSDriverName); err != nil {
-				return nil, err
-			}
-
-			return cfg, nil
-		},
-		MergeFunc: func(
-			ctx sourcedriver.ConfigContext,
-			c sourcedriver.Config,
 			b hcl.Body,
 		) (sourcedriver.Config, error) {
 			var s stubs.SourceDriverConfigSchema
@@ -221,13 +207,12 @@ func newSourceLoader() *stubs.SourceDriverConfigLoader {
 				return nil, diags
 			}
 
-			cfg := *c.(*stubs.SourceDriverConfig) // clone
+			cfg := &stubs.SourceDriverConfig{
+				ArbitraryAttribute: "<default>",
+			}
 
 			if s.ArbitraryAttribute != "" {
-				// Note, we concat to the existing config here (not replace) so
-				// that tests can verify that the right configs are made
-				// available to Merge().
-				cfg.ArbitraryAttribute += " + " + s.ArbitraryAttribute
+				cfg.ArbitraryAttribute = s.ArbitraryAttribute
 			}
 
 			if s.FilesystemPath != "" {
@@ -238,31 +223,18 @@ func newSourceLoader() *stubs.SourceDriverConfigLoader {
 				return nil, err
 			}
 
-			if err := unmarshalVCSConfig(ctx, &cfg, testVCSDriverName); err != nil {
+			vcsConfig := &stubs.VCSDriverConfig{}
+			if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
 				return nil, err
 			}
 
-			return &cfg, nil
+			cfg.VCSs = map[string]vcsdriver.Config{
+				testVCSDriverName: vcsConfig,
+			}
+
+			return cfg, nil
 		},
 	}
-}
-
-//  unmarshalVCSConfig unmarshals the VCS config for the given driver into cfg.
-func unmarshalVCSConfig(
-	ctx sourcedriver.ConfigContext,
-	cfg *stubs.SourceDriverConfig,
-	driver string,
-) error {
-	vcsConfig := &stubs.VCSDriverConfig{}
-	if err := ctx.UnmarshalVCSConfig(driver, &vcsConfig); err != nil {
-		return err
-	}
-
-	cfg.VCSs = map[string]vcsdriver.Config{
-		driver: vcsConfig,
-	}
-
-	return nil
 }
 
 func newVCSLoader() *stubs.VCSDriverConfigLoader {

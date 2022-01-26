@@ -141,20 +141,7 @@ func (l *loader) finalizeSource(i intermediateSource) (Source, error) {
 		sourceVCSs: sourceVCSs,
 	}
 
-	cfg, err := reg.ConfigLoader.Defaults(ctx)
-	if err != nil {
-		if isHCLError(err) {
-			return Source{}, err
-		}
-
-		return Source{}, fmt.Errorf(
-			"the default configuration for the '%s' source driver cannot be loaded: %w",
-			i.Schema.Driver,
-			err,
-		)
-	}
-
-	cfg, err = reg.ConfigLoader.Merge(ctx, cfg, i.Schema.DriverBody)
+	cfg, err := reg.ConfigLoader.Unmarshal(ctx, i.Schema.DriverBody)
 	if err != nil {
 		if isHCLError(err) {
 			return Source{}, err

@@ -151,15 +151,8 @@ type vcsTestSourceConfigLoader struct {
 	unmarshalTarget interface{}
 }
 
-func (l vcsTestSourceConfigLoader) Defaults(
+func (l vcsTestSourceConfigLoader) Unmarshal(
 	ctx sourcedriver.ConfigContext,
-) (sourcedriver.Config, error) {
-	return vcsTestSourceConfig{}, nil
-}
-
-func (l vcsTestSourceConfigLoader) Merge(
-	ctx sourcedriver.ConfigContext,
-	c sourcedriver.Config,
 	b hcl.Body,
 ) (sourcedriver.Config, error) {
 	if err := ctx.UnmarshalVCSConfig(

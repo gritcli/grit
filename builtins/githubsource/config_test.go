@@ -31,7 +31,7 @@ var _ = Describe("type Config", func() {
 	})
 })
 
-var _ = Describe("type configSchema", func() {
+var _ = Describe("type configLoader", func() {
 	configtest.TestSourceDriver(
 		Registration,
 		Config{},

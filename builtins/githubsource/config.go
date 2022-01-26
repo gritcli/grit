@@ -47,25 +47,18 @@ type configSchema struct {
 // configLoader is an implementation of vcsdriver.ConfigLoader for Git.
 type configLoader struct{}
 
-func (configLoader) Defaults(ctx sourcedriver.ConfigContext) (sourcedriver.Config, error) {
-	cfg := Config{
-		Domain: "github.com",
-	}
-
-	if err := ctx.UnmarshalVCSConfig(gitvcs.Registration.Name, &cfg.Git); err != nil {
-		return nil, err
-	}
-
-	return cfg, nil
-}
-
-func (configLoader) Merge(ctx sourcedriver.ConfigContext, c sourcedriver.Config, b hcl.Body) (sourcedriver.Config, error) {
+func (configLoader) Unmarshal(
+	ctx sourcedriver.ConfigContext,
+	b hcl.Body,
+) (sourcedriver.Config, error) {
 	var s configSchema
 	if diag := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diag.HasErrors() {
 		return nil, diag
 	}
 
-	cfg := c.(Config) // clone
+	cfg := Config{
+		Domain: "github.com",
+	}
 
 	if s.Domain != "" {
 		cfg.Domain = s.Domain
@@ -83,8 +76,11 @@ func (configLoader) Merge(ctx sourcedriver.ConfigContext, c sourcedriver.Config,
 }
 
 func (l configLoader) ImplicitSources(ctx sourcedriver.ConfigContext) ([]sourcedriver.ImplicitSource, error) {
-	cfg, err := l.Defaults(ctx)
-	if err != nil {
+	cfg := Config{
+		Domain: "github.com",
+	}
+
+	if err := ctx.UnmarshalVCSConfig(gitvcs.Registration.Name, &cfg.Git); err != nil {
 		return nil, err
 	}
 

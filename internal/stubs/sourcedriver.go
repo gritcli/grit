@@ -13,31 +13,18 @@ import (
 // SourceDriverConfigLoader is a test implementation of
 // sourcedriver.ConfigLoader.
 type SourceDriverConfigLoader struct {
-	DefaultsFunc        func(sourcedriver.ConfigContext) (sourcedriver.Config, error)
-	MergeFunc           func(sourcedriver.ConfigContext, sourcedriver.Config, hcl.Body) (sourcedriver.Config, error)
+	UnmarshalFunc       func(sourcedriver.ConfigContext, hcl.Body) (sourcedriver.Config, error)
 	ImplicitSourcesFunc func(sourcedriver.ConfigContext) ([]sourcedriver.ImplicitSource, error)
 }
 
-// Defaults returns s.DefaultsFunc() if it is non-nil; otherwise, it returns an
-// error.
-func (s *SourceDriverConfigLoader) Defaults(
+// Unmarshal returns s.UnmarshalFunc() if it is non-nil; otherwise, it returns
+// an error.
+func (s *SourceDriverConfigLoader) Unmarshal(
 	ctx sourcedriver.ConfigContext,
-) (sourcedriver.Config, error) {
-	if s.DefaultsFunc != nil {
-		return s.DefaultsFunc(ctx)
-	}
-
-	return nil, errors.New("<not implemented>")
-}
-
-// Merge returns s.MergeFunc() if it is non-nil; otherwise, it returns an error.
-func (s *SourceDriverConfigLoader) Merge(
-	ctx sourcedriver.ConfigContext,
-	c sourcedriver.Config,
 	b hcl.Body,
 ) (sourcedriver.Config, error) {
-	if s.MergeFunc != nil {
-		return s.MergeFunc(ctx, c, b)
+	if s.UnmarshalFunc != nil {
+		return s.UnmarshalFunc(ctx, b)
 	}
 
 	return nil, errors.New("<not implemented>")
