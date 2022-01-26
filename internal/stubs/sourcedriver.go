@@ -7,30 +7,58 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/hashicorp/hcl/v2"
 )
 
-// SourceDriverConfigSchema is a test implementation of
-// sourcedriver.ConfigSchema.
-type SourceDriverConfigSchema struct {
-	NormalizeFunc func(sourcedriver.ConfigContext, *SourceDriverConfigSchema) (sourcedriver.Config, error)
-
-	// These attributes must be defined in _this_ struct in order to use it as
-	// the HCL schema.
-
-	ArbitraryAttribute string `hcl:"arbitrary_attribute,optional"`
-	FilesystemPath     string `hcl:"filesystem_path,optional"`
+// SourceDriverConfigLoader is a test implementation of
+// sourcedriver.ConfigLoader.
+type SourceDriverConfigLoader struct {
+	DefaultsFunc        func(sourcedriver.ConfigContext) (sourcedriver.Config, error)
+	MergeFunc           func(sourcedriver.ConfigContext, sourcedriver.Config, hcl.Body) (sourcedriver.Config, error)
+	ImplicitSourcesFunc func(sourcedriver.ConfigContext) ([]sourcedriver.ImplicitSource, error)
 }
 
-// Normalize returns s.NormalizeFunc() if it is non-nil, otherwise returns a
-// new SourceDriverConfig stub.
-func (s *SourceDriverConfigSchema) Normalize(
+// Defaults returns s.DefaultsFunc() if it is non-nil; otherwise, it returns an
+// error.
+func (s *SourceDriverConfigLoader) Defaults(
 	ctx sourcedriver.ConfigContext,
 ) (sourcedriver.Config, error) {
-	if s.NormalizeFunc != nil {
-		return s.NormalizeFunc(ctx, s)
+	if s.DefaultsFunc != nil {
+		return s.DefaultsFunc(ctx)
 	}
 
-	return &SourceDriverConfig{}, nil
+	return nil, errors.New("<not implemented>")
+}
+
+// Merge returns s.MergeFunc() if it is non-nil; otherwise, it returns an error.
+func (s *SourceDriverConfigLoader) Merge(
+	ctx sourcedriver.ConfigContext,
+	c sourcedriver.Config,
+	b hcl.Body,
+) (sourcedriver.Config, error) {
+	if s.MergeFunc != nil {
+		return s.MergeFunc(ctx, c, b)
+	}
+
+	return nil, errors.New("<not implemented>")
+}
+
+// ImplicitSources returns s.ImplicitSourcesFunc() if it is non-nil; otherwise,
+// it returns (nil, nil).
+func (s *SourceDriverConfigLoader) ImplicitSources(
+	ctx sourcedriver.ConfigContext,
+) ([]sourcedriver.ImplicitSource, error) {
+	if s.ImplicitSourcesFunc != nil {
+		return s.ImplicitSourcesFunc(ctx)
+	}
+
+	return nil, nil
+}
+
+// SourceDriverConfigSchema is the HCL schema for SourceDriverConfig.
+type SourceDriverConfigSchema struct {
+	ArbitraryAttribute string `hcl:"arbitrary_attribute,optional"`
+	FilesystemPath     string `hcl:"filesystem_path,optional"`
 }
 
 // SourceDriverConfig is a test implementation of the sourcedriver.Config

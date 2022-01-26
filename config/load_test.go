@@ -180,10 +180,8 @@ func newRegistry() *registry.Registry {
 	reg.RegisterSourceDriver(
 		testSourceDriverName,
 		sourcedriver.Registration{
-			Name: testSourceDriverName,
-			NewConfigSchema: func() sourcedriver.ConfigSchema {
-				return newSourceStub()
-			},
+			Name:         testSourceDriverName,
+			ConfigLoader: newSourceLoader(),
 		},
 	)
 
@@ -198,39 +196,73 @@ func newRegistry() *registry.Registry {
 	return reg
 }
 
-// newSourceStub returns a new stub of sourcedriver.ConfigSchema for testing
-// source driver configuration.
-func newSourceStub() *stubs.SourceDriverConfigSchema {
-	return &stubs.SourceDriverConfigSchema{
-		NormalizeFunc: func(
+func newSourceLoader() *stubs.SourceDriverConfigLoader {
+	return &stubs.SourceDriverConfigLoader{
+		DefaultsFunc: func(
 			ctx sourcedriver.ConfigContext,
-			s *stubs.SourceDriverConfigSchema,
 		) (sourcedriver.Config, error) {
 			cfg := &stubs.SourceDriverConfig{
-				ArbitraryAttribute: s.ArbitraryAttribute,
-				FilesystemPath:     s.FilesystemPath,
+				ArbitraryAttribute: "<default>",
 			}
 
-			if cfg.ArbitraryAttribute == "" {
-				cfg.ArbitraryAttribute = "<default>"
+			if err := unmarshalVCSConfig(ctx, cfg, testVCSDriverName); err != nil {
+				return nil, err
+			}
+
+			return cfg, nil
+		},
+		MergeFunc: func(
+			ctx sourcedriver.ConfigContext,
+			c sourcedriver.Config,
+			b hcl.Body,
+		) (sourcedriver.Config, error) {
+			var s stubs.SourceDriverConfigSchema
+			if diags := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diags.HasErrors() {
+				return nil, diags
+			}
+
+			cfg := *c.(*stubs.SourceDriverConfig) // clone
+
+			if s.ArbitraryAttribute != "" {
+				// Note, we concat to the existing config here (not replace) so
+				// that tests can verify that the right configs are made
+				// available to Merge().
+				cfg.ArbitraryAttribute += " + " + s.ArbitraryAttribute
+			}
+
+			if s.FilesystemPath != "" {
+				cfg.FilesystemPath = s.FilesystemPath
 			}
 
 			if err := ctx.NormalizePath(&cfg.FilesystemPath); err != nil {
 				return nil, err
 			}
 
-			vcsConfig := &stubs.VCSDriverConfig{}
-			if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &vcsConfig); err != nil {
+			if err := unmarshalVCSConfig(ctx, &cfg, testVCSDriverName); err != nil {
 				return nil, err
 			}
 
-			cfg.VCSs = map[string]vcsdriver.Config{
-				testVCSDriverName: vcsConfig,
-			}
-
-			return cfg, nil
+			return &cfg, nil
 		},
 	}
+}
+
+//  unmarshalVCSConfig unmarshals the VCS config for the given driver into cfg.
+func unmarshalVCSConfig(
+	ctx sourcedriver.ConfigContext,
+	cfg *stubs.SourceDriverConfig,
+	driver string,
+) error {
+	vcsConfig := &stubs.VCSDriverConfig{}
+	if err := ctx.UnmarshalVCSConfig(driver, &vcsConfig); err != nil {
+		return err
+	}
+
+	cfg.VCSs = map[string]vcsdriver.Config{
+		driver: vcsConfig,
+	}
+
+	return nil
 }
 
 func newVCSLoader() *stubs.VCSDriverConfigLoader {
@@ -247,13 +279,12 @@ func newVCSLoader() *stubs.VCSDriverConfigLoader {
 			c vcsdriver.Config,
 			b hcl.Body,
 		) (vcsdriver.Config, error) {
-			cfg := *c.(*stubs.VCSDriverConfig) // clone
-
 			var s stubs.VCSDriverConfigSchema
-
 			if diags := gohcl.DecodeBody(b, ctx.EvalContext(), &s); diags.HasErrors() {
 				return nil, diags
 			}
+
+			cfg := *c.(*stubs.VCSDriverConfig) // clone
 
 			if s.ArbitraryAttribute != "" {
 				// Note, we concat to the existing config here (not replace) so

@@ -2,23 +2,35 @@ package sourcedriver
 
 import "github.com/hashicorp/hcl/v2"
 
-// ConfigSchema is an interface for parsing driver-specific configuration within
-// a "source" block in a Grit configuration file.
-//
-// It must be implemented as a pointer-to-struct that uses the field tags
-// described by https://pkg.go.dev/github.com/hashicorp/hcl/v2/gohcl, thus it
-// defines the HCL schema that is allowed when configuring sources that use this
-// driver.
-//
-// When Grit parses a "source" block within a configuration, any unrecognized
-// attributes or blocks within that "source" block are parsed into this schema.
-type ConfigSchema interface {
-	// Normalize validates the configuration as parsed by this schema and
-	// returns a normalized Config.
+// ImplicitSource represents a source that is provided by this driver without
+// explicit configuration.
+type ImplicitSource struct {
+	// Name is the unique name for the source.
 	//
-	// The implementation must call ctx.ReadVCSConfig() for each VCS driver
-	// that is supported, even if they are not currently in use.
-	Normalize(ctx ConfigContext) (Config, error)
+	// If the user defines an explicit source with the same name, this implicit
+	// source is ignored.
+	Name string
+
+	// Config is the configuration of this source.
+	Config Config
+}
+
+// ConfigLoader is an interface for loading driver-specific source configuration.
+type ConfigLoader interface {
+	// Defaults returns the default configuration to use for a source that uses
+	// this driver.
+	Defaults(ctx ConfigContext) (Config, error)
+
+	// Merge returns a configuration that is the result of merging an existing
+	// configuration with the contents of a "source" block.
+	//
+	// c is the existing configuration, b is the body of the "source" block. c
+	// must not be modified.
+	Merge(ctx ConfigContext, c Config, b hcl.Body) (Config, error)
+
+	// ImplicitSources returns the configuration to use for "implicit" sources
+	// provided by this driver without explicit configuration.
+	ImplicitSources(ctx ConfigContext) ([]ImplicitSource, error)
 }
 
 // ConfigContext provides operations used when loading source configuration.

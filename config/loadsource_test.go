@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"errors"
 	"reflect"
 
 	. "github.com/gritcli/grit/config"
@@ -81,7 +82,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					Dir: "~/grit/test_source",
 				},
 				Driver: &stubs.SourceDriverConfig{
-					ArbitraryAttribute: "<explicit>",
+					ArbitraryAttribute: "<default> + <explicit>",
 					VCSs: map[string]vcsdriver.Config{
 						testVCSDriverName: &stubs.VCSDriverConfig{
 							ArbitraryAttribute: "<default>",
@@ -109,19 +110,31 @@ var _ = Describe("func Load() (source configuration)", func() {
 				},
 			}),
 			func(reg *registry.Registry) {
-				schema := newSourceStub()
-				schema.ArbitraryAttribute = "<implicit>"
+				loader := newSourceLoader()
+				loader.ImplicitSourcesFunc = func(
+					ctx sourcedriver.ConfigContext,
+				) ([]sourcedriver.ImplicitSource, error) {
+					cfg := &stubs.SourceDriverConfig{
+						ArbitraryAttribute: "<implicit>",
+					}
+
+					if err := unmarshalVCSConfig(ctx, cfg, testVCSDriverName); err != nil {
+						return nil, err
+					}
+
+					return []sourcedriver.ImplicitSource{
+						{
+							Name:   "implicit",
+							Config: cfg,
+						},
+					}, nil
+				}
 
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
-						Name: "test_source_driver",
-						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return newSourceStub()
-						},
-						ImplicitSources: map[string]sourcedriver.ConfigSchema{
-							"implicit": schema,
-						},
+						Name:         "test_source_driver",
+						ConfigLoader: loader,
 					},
 				)
 			},
@@ -140,7 +153,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					Dir: "~/grit/implicit",
 				},
 				Driver: &stubs.SourceDriverConfig{
-					ArbitraryAttribute: "<explicit>",
+					ArbitraryAttribute: "<default> + <explicit>",
 					VCSs: map[string]vcsdriver.Config{
 						testVCSDriverName: &stubs.VCSDriverConfig{
 							ArbitraryAttribute: "<default>",
@@ -149,33 +162,37 @@ var _ = Describe("func Load() (source configuration)", func() {
 				},
 			}),
 			func(reg *registry.Registry) {
-				schema := newSourceStub()
-				schema.ArbitraryAttribute = "<implicit>"
+				loader := newSourceLoader()
+				loader.ImplicitSourcesFunc = func(
+					ctx sourcedriver.ConfigContext,
+				) ([]sourcedriver.ImplicitSource, error) {
+					return []sourcedriver.ImplicitSource{
+						{
+							Name: "implicit",
+							Config: &stubs.SourceDriverConfig{
+								ArbitraryAttribute: "<implicit>",
+							},
+						},
+					}, nil
+				}
 
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
-						Name: "test_source_driver",
-						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return newSourceStub()
-						},
-						ImplicitSources: map[string]sourcedriver.ConfigSchema{
-							"implicit": schema,
-						},
+						Name:         "test_source_driver",
+						ConfigLoader: loader,
 					},
 				)
 			},
 		),
 		Entry(
 			`disambiguate VCS drivers with the same name`,
-			[]string{
-				`source "test_source" "test_source_driver_uses_ambiguous_vcs" {}`,
-			},
+			[]string{},
 			withSource(defaultConfig, Source{
-				Name:    "test_source",
+				Name:    "implicit",
 				Enabled: true,
 				Clones: Clones{
-					Dir: "~/grit/test_source",
+					Dir: "~/grit/implicit",
 				},
 				Driver: &stubs.SourceDriverConfig{
 					VCSs: map[string]vcsdriver.Config{
@@ -200,28 +217,33 @@ var _ = Describe("func Load() (source configuration)", func() {
 					},
 				)
 
+				loader := newSourceLoader()
+				loader.ImplicitSourcesFunc = func(
+					ctx sourcedriver.ConfigContext,
+				) ([]sourcedriver.ImplicitSource, error) {
+					var target aDifferentVCSConfigConcreteType
+					if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &target); err != nil {
+						return nil, err
+					}
+
+					return []sourcedriver.ImplicitSource{
+						{
+							Name: "implicit",
+							Config: &stubs.SourceDriverConfig{
+								VCSs: map[string]vcsdriver.Config{
+									testVCSDriverName: target,
+								},
+							},
+						},
+					}, nil
+
+				}
+
 				reg.RegisterSourceDriver(
 					"test_source_driver_uses_ambiguous_vcs",
 					sourcedriver.Registration{
-						Name: "test_source_driver_uses_ambiguous_vcs",
-						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return &stubs.SourceDriverConfigSchema{
-								NormalizeFunc: func(
-									ctx sourcedriver.ConfigContext,
-									s *stubs.SourceDriverConfigSchema,
-								) (sourcedriver.Config, error) {
-									var target aDifferentVCSConfigConcreteType
-									if err := ctx.UnmarshalVCSConfig(testVCSDriverName, &target); err != nil {
-										return nil, err
-									}
-									return &stubs.SourceDriverConfig{
-										VCSs: map[string]vcsdriver.Config{
-											"test_vcs_driver": target,
-										},
-									}, nil
-								},
-							}
-						},
+						Name:         "test_source_driver_uses_ambiguous_vcs",
+						ConfigLoader: loader,
 					},
 				)
 			},
@@ -294,49 +316,46 @@ var _ = Describe("func Load() (source configuration)", func() {
 			`<dir>/config-0.hcl: the configuration for the 'test_source' source cannot be loaded: cannot expand user-specific home dir`,
 		),
 		Entry(
-			`error normalizing implicit source's driver configuration`,
+			`error producing implicit sources`,
 			[]string{},
-			`the configuration for the implicit 'implicit' source (provided by the 'test_source_driver_with_implicit_source' driver) cannot be loaded: cannot expand user-specific home dir`,
+			`the implicit sources provided by the 'test_source_driver_with_implicit_source' driver cannot be loaded: <error>`,
 			func(reg *registry.Registry) {
-				schema := newSourceStub()
-				schema.FilesystemPath = "~someuser/path/to/nowhere"
+				loader := newSourceLoader()
+				loader.ImplicitSourcesFunc = func(
+					ctx sourcedriver.ConfigContext,
+				) ([]sourcedriver.ImplicitSource, error) {
+					return nil, errors.New("<error>")
+				}
 
 				reg.RegisterSourceDriver(
 					"test_source_driver_with_implicit_source",
 					sourcedriver.Registration{
-						Name: "test_source_driver",
-						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return newSourceStub()
-						},
-						ImplicitSources: map[string]sourcedriver.ConfigSchema{
-							"implicit": schema,
-						},
+						Name:         "test_source_driver",
+						ConfigLoader: loader,
 					},
 				)
 			},
 		),
 		Entry(
-			`unregocnizzed VCS driver dependency`,
+			`unrecognized VCS driver dependency`,
 			[]string{
 				`source "test_source" "test_source_driver_uses_unrecognized_vcs" {}`,
 			},
-			`<dir>/config-0.hcl: the configuration for the 'test_source' source cannot be loaded: dependency on unrecognized version control system ('<unrecognized>')`,
+			`the implicit sources provided by the 'test_source_driver_uses_unrecognized_vcs' driver cannot be loaded: dependency on unrecognized version control system ('<unrecognized>')`,
 			func(reg *registry.Registry) {
+				loader := newSourceLoader()
+				loader.ImplicitSourcesFunc = func(
+					ctx sourcedriver.ConfigContext,
+				) ([]sourcedriver.ImplicitSource, error) {
+					target := &stubs.VCSDriverConfig{}
+					return nil, ctx.UnmarshalVCSConfig("<unrecognized>", &target)
+				}
+
 				reg.RegisterSourceDriver(
 					"test_source_driver_uses_unrecognized_vcs",
 					sourcedriver.Registration{
-						Name: "test_source_driver_uses_unrecognized_vcs",
-						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return &stubs.SourceDriverConfigSchema{
-								NormalizeFunc: func(
-									ctx sourcedriver.ConfigContext,
-									s *stubs.SourceDriverConfigSchema,
-								) (sourcedriver.Config, error) {
-									target := &stubs.VCSDriverConfig{}
-									return nil, ctx.UnmarshalVCSConfig("<unrecognized>", &target)
-								},
-							}
-						},
+						Name:         "test_source_driver_uses_unrecognized_vcs",
+						ConfigLoader: loader,
 					},
 				)
 			},
@@ -346,23 +365,21 @@ var _ = Describe("func Load() (source configuration)", func() {
 			[]string{
 				`source "test_source" "test_source_driver_uses_unrecognized_vcs" {}`,
 			},
-			`<dir>/config-0.hcl: the configuration for the 'test_source' source cannot be loaded: depends on incompatible version control system ('test_vcs_driver'), none of the matching drivers ('test_vcs_driver') use the same configuration structure`,
+			`the implicit sources provided by the 'test_source_driver_uses_unrecognized_vcs' driver cannot be loaded: depends on incompatible version control system ('test_vcs_driver'), none of the matching drivers ('test_vcs_driver') use the same configuration structure`,
 			func(reg *registry.Registry) {
+				loader := newSourceLoader()
+				loader.ImplicitSourcesFunc = func(
+					ctx sourcedriver.ConfigContext,
+				) ([]sourcedriver.ImplicitSource, error) {
+					target := aDifferentVCSConfigConcreteType{}
+					return nil, ctx.UnmarshalVCSConfig(testVCSDriverName, &target)
+				}
+
 				reg.RegisterSourceDriver(
 					"test_source_driver_uses_unrecognized_vcs",
 					sourcedriver.Registration{
-						Name: "test_source_driver_uses_unrecognized_vcs",
-						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return &stubs.SourceDriverConfigSchema{
-								NormalizeFunc: func(
-									ctx sourcedriver.ConfigContext,
-									s *stubs.SourceDriverConfigSchema,
-								) (sourcedriver.Config, error) {
-									target := aDifferentVCSConfigConcreteType{}
-									return nil, ctx.UnmarshalVCSConfig(testVCSDriverName, &target)
-								},
-							}
-						},
+						Name:         "test_source_driver_uses_unrecognized_vcs",
+						ConfigLoader: loader,
 					},
 				)
 			},
@@ -373,26 +390,17 @@ var _ = Describe("func Load() (source configuration)", func() {
 		DescribeTable(
 			"it panics",
 			func(target interface{}, expect string) {
-				schema := &stubs.SourceDriverConfigSchema{
-					NormalizeFunc: func(
-						ctx sourcedriver.ConfigContext,
-						s *stubs.SourceDriverConfigSchema,
-					) (sourcedriver.Config, error) {
-						ctx.UnmarshalVCSConfig(testVCSDriverName, target)
-						return nil, nil
-					},
-				}
-
 				reg := &registry.Registry{}
 				reg.RegisterSourceDriver(
 					"test_source_driver",
 					sourcedriver.Registration{
 						Name: "test_source_driver",
-						NewConfigSchema: func() sourcedriver.ConfigSchema {
-							return &stubs.SourceDriverConfigSchema{} // DOUBLE CHECK
-						},
-						ImplicitSources: map[string]sourcedriver.ConfigSchema{
-							"implicit": schema,
+						ConfigLoader: &stubs.SourceDriverConfigLoader{
+							ImplicitSourcesFunc: func(
+								ctx sourcedriver.ConfigContext,
+							) ([]sourcedriver.ImplicitSource, error) {
+								return nil, ctx.UnmarshalVCSConfig(testVCSDriverName, target)
+							},
 						},
 					},
 				)

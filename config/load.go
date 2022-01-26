@@ -216,10 +216,12 @@ func (l *loader) finalize() (Config, error) {
 		return Config{}, err
 	}
 
-	l.populateImplicitSources()
-
 	cfg := Config{
 		Daemon: l.daemon,
+	}
+
+	if err := l.populateImplicitSources(&cfg); err != nil {
+		return Config{}, err
 	}
 
 	for _, i := range l.sources {

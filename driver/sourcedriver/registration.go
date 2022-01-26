@@ -10,10 +10,6 @@ type Registration struct {
 	// Description is a short human-readable description of the driver.
 	Description string
 
-	// NewConfigSchema returns a zero-value ConfigSchema for this driver.
-	NewConfigSchema func() ConfigSchema
-
-	// ImplicitSources is a set of sources that should be added to the
-	// configuration automatically.
-	ImplicitSources map[string]ConfigSchema
+	// ConfigLoader loads configuration for this driver.
+	ConfigLoader ConfigLoader
 }
