@@ -28,10 +28,8 @@ func newCloneCommand() *cobra.Command {
 		other identifier. For example, the Grit repository itself may be
 		referred to as "gritcli/grit" or simply "grit".
 
-		Each of the repository sources defined in the Grit configuration file is
-		searched for matches to the provided repository name. If there are
-		multiple matches and the shell is interactive the user is prompted to
-		select the desired repository.
+		If there are multiple matching local clones and the shell is interactive
+		the user is prompted to select the desired repository.
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if args[0] == "" {

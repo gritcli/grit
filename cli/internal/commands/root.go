@@ -37,7 +37,9 @@ func NewRoot(v string) *cobra.Command {
 	flags.SetupShellExecutorOutput(root)
 
 	root.AddCommand(
+		newChDirCommand(),
 		newCloneCommand(),
+		newGoCommand(),
 		newShellIntegrationCommand(),
 		newSourceCommand(),
 	)
