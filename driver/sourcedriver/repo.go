@@ -19,4 +19,10 @@ type RemoteRepo struct {
 	// This is a page viewable in a browser by a human, not the URL used to
 	// clone the repository.
 	WebURL string
+
+	// RelativeCloneDir is the directory into which a local clone of this
+	// repository is placed, relative to the source's clone directory.
+	//
+	// It uses the path separator native to the current OS.
+	RelativeCloneDir string
 }

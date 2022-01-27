@@ -3,6 +3,7 @@ package githubsource
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -63,11 +64,17 @@ func toRemoteRepos(repos ...*github.Repository) []sourcedriver.RemoteRepo {
 	remotes := make([]sourcedriver.RemoteRepo, len(repos))
 
 	for i, r := range repos {
+		owner, name, err := parseRepoName(r.GetFullName())
+		if err != nil {
+			panic(err)
+		}
+
 		remotes[i] = sourcedriver.RemoteRepo{
-			ID:          strconv.FormatInt(r.GetID(), 10),
-			Name:        r.GetFullName(),
-			Description: r.GetDescription(),
-			WebURL:      r.GetHTMLURL(),
+			ID:               strconv.FormatInt(r.GetID(), 10),
+			Name:             r.GetFullName(),
+			Description:      r.GetDescription(),
+			WebURL:           r.GetHTMLURL(),
+			RelativeCloneDir: filepath.Join(owner, name),
 		}
 	}
 
