@@ -1,4 +1,4 @@
-package deps
+package daemon
 
 import (
 	"github.com/dogmatiq/dodeca/logging"
@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	Container.Provide(func(
+	container.Provide(func(
 		sources source.List,
 		c *source.Cloner,
 		s *source.Suggester,
@@ -23,7 +23,7 @@ func init() {
 		}
 	})
 
-	Container.Provide(func(
+	container.Provide(func(
 		s api.APIServer,
 	) *grpc.Server {
 		g := grpc.NewServer()

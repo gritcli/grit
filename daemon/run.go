@@ -9,11 +9,14 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
-	"github.com/gritcli/grit/daemon/internal/deps"
 	"github.com/gritcli/grit/daemon/internal/source"
+	"github.com/gritcli/grit/internal/di"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )
+
+// container is the dependency injection container for the Grit daemon.
+var container di.Container
 
 // Run executes the Grit daemon.
 func Run(version string) (err error) {
@@ -24,7 +27,7 @@ func Run(version string) (err error) {
 	)
 	defer cancel()
 
-	return deps.Container.Invoke(func(
+	return container.Invoke(func(
 		cfg config.Config,
 		s *grpc.Server,
 		r *config.DriverRegistry,

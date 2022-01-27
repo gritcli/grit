@@ -1,9 +1,9 @@
-package deps
+package daemon
 
 import "github.com/dogmatiq/dodeca/logging"
 
 func init() {
-	Container.Provide(func() logging.Logger {
+	container.Provide(func() logging.Logger {
 		return logging.DebugLogger
 	})
 }

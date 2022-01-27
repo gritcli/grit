@@ -1,4 +1,4 @@
-package deps
+package daemon
 
 import (
 	"github.com/dogmatiq/dodeca/logging"
@@ -7,13 +7,13 @@ import (
 )
 
 func init() {
-	Container.Provide(func(
+	container.Provide(func(
 		cfg config.Config,
 	) source.List {
 		return source.NewList(cfg.Sources)
 	})
 
-	Container.Provide(func(
+	container.Provide(func(
 		sources source.List,
 		logger logging.Logger,
 	) *source.Cloner {
@@ -23,7 +23,7 @@ func init() {
 		}
 	})
 
-	Container.Provide(func(
+	container.Provide(func(
 		sources source.List,
 		logger logging.Logger,
 	) *source.Suggester {

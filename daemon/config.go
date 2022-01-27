@@ -1,4 +1,4 @@
-package deps
+package daemon
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	Container.Provide(func() *config.DriverRegistry {
+	container.Provide(func() *config.DriverRegistry {
 		r := &config.DriverRegistry{}
 		r.RegisterSourceDriver("github", githubsource.Registration)
 		r.RegisterVCSDriver("git", gitvcs.Registration)
@@ -17,7 +17,7 @@ func init() {
 		return r
 	})
 
-	Container.Provide(func(r *config.DriverRegistry) (config.Config, error) {
+	container.Provide(func(r *config.DriverRegistry) (config.Config, error) {
 		return config.Load(
 			os.Getenv("GRIT_CONFIG_DIR"),
 			r,
