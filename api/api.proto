@@ -77,8 +77,8 @@ message CloneResponse {
 
 message SuggestRepoRequest {
     string word = 1;
-    bool include_cloned = 2;
-    bool include_uncloned = 3;
+    bool include_local = 2;
+    bool include_remote = 3;
 }
 
 message SuggestResponse {

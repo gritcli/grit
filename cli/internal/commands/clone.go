@@ -83,9 +83,9 @@ func newCloneCommand() *cobra.Command {
 			}
 
 			return client.SuggestRepo(ctx, &api.SuggestRepoRequest{
-				Word:            word,
-				IncludeCloned:   false,
-				IncludeUncloned: true,
+				Word:          word,
+				IncludeLocal:  false,
+				IncludeRemote: true,
 			})
 		}),
 	}

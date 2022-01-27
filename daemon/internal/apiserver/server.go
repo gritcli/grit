@@ -135,8 +135,8 @@ func (s *Server) SuggestRepo(
 ) (*api.SuggestResponse, error) {
 	repos := s.Suggester.Suggest(
 		req.Word,
-		req.IncludeCloned,
-		req.IncludeUncloned,
+		req.IncludeLocal,
+		req.IncludeRemote,
 	)
 
 	res := &api.SuggestResponse{}

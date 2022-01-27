@@ -14,8 +14,8 @@ type Suggester struct {
 // Suggest suggests a set of repositories that begin with the given word.
 func (s *Suggester) Suggest(
 	word string,
-	includeCloned bool,
-	includeUncloned bool,
+	includeLocal bool,
+	includeRemote bool,
 ) []sourcedriver.RemoteRepo {
 	// TODO: honour "include" flags
 
