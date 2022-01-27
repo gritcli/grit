@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func impl.NewCloner()", func() {
+var _ = Describe("func source.NewCloner()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc

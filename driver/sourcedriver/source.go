@@ -59,4 +59,8 @@ type Source interface {
 		id string,
 		logger logging.Logger,
 	) (c Cloner, dir string, err error)
+
+	// Suggest returns a set of repositories that have names beginning with the
+	// given word (which may be empty).
+	Suggest(word string) []RemoteRepo
 }

@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func impl.Status()", func() {
+var _ = Describe("func source.Status()", func() {
 	var (
 		ctx    context.Context
 		cancel context.CancelFunc

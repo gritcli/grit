@@ -29,6 +29,9 @@ type APIClient interface {
 	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (API_ResolveClient, error)
 	// Clone makes a local clone of a repository from a source.
 	Clone(ctx context.Context, in *CloneRequest, opts ...grpc.CallOption) (API_CloneClient, error)
+	// SuggestRepo returns a list of repository names to be used as
+	// suggestions for completing a partial repository name.
+	SuggestRepo(ctx context.Context, in *SuggestRepoRequest, opts ...grpc.CallOption) (*SuggestResponse, error)
 }
 
 type aPIClient struct {
@@ -112,6 +115,15 @@ func (x *aPICloneClient) Recv() (*CloneResponse, error) {
 	return m, nil
 }
 
+func (c *aPIClient) SuggestRepo(ctx context.Context, in *SuggestRepoRequest, opts ...grpc.CallOption) (*SuggestResponse, error) {
+	out := new(SuggestResponse)
+	err := c.cc.Invoke(ctx, "/grit.v2.api.API/SuggestRepo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // APIServer is the server API for API service.
 // All implementations should embed UnimplementedAPIServer
 // for forward compatibility
@@ -123,6 +135,9 @@ type APIServer interface {
 	Resolve(*ResolveRequest, API_ResolveServer) error
 	// Clone makes a local clone of a repository from a source.
 	Clone(*CloneRequest, API_CloneServer) error
+	// SuggestRepo returns a list of repository names to be used as
+	// suggestions for completing a partial repository name.
+	SuggestRepo(context.Context, *SuggestRepoRequest) (*SuggestResponse, error)
 }
 
 // UnimplementedAPIServer should be embedded to have forward compatible implementations.
@@ -137,6 +152,9 @@ func (UnimplementedAPIServer) Resolve(*ResolveRequest, API_ResolveServer) error 
 }
 func (UnimplementedAPIServer) Clone(*CloneRequest, API_CloneServer) error {
 	return status.Errorf(codes.Unimplemented, "method Clone not implemented")
+}
+func (UnimplementedAPIServer) SuggestRepo(context.Context, *SuggestRepoRequest) (*SuggestResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SuggestRepo not implemented")
 }
 
 // UnsafeAPIServer may be embedded to opt out of forward compatibility for this service.
@@ -210,6 +228,24 @@ func (x *aPICloneServer) Send(m *CloneResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _API_SuggestRepo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SuggestRepoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(APIServer).SuggestRepo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grit.v2.api.API/SuggestRepo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(APIServer).SuggestRepo(ctx, req.(*SuggestRepoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // API_ServiceDesc is the grpc.ServiceDesc for API service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -220,6 +256,10 @@ var API_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Sources",
 			Handler:    _API_Sources_Handler,
+		},
+		{
+			MethodName: "SuggestRepo",
+			Handler:    _API_SuggestRepo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

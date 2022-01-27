@@ -84,6 +84,7 @@ type Source struct {
 	StatusFunc    func(context.Context) (string, error)
 	ResolveFunc   func(context.Context, string, logging.Logger) ([]sourcedriver.RemoteRepo, error)
 	NewClonerFunc func(context.Context, string, logging.Logger) (sourcedriver.Cloner, string, error)
+	SuggestFunc   func(string) []sourcedriver.RemoteRepo
 }
 
 // Init returns s.InitFunc() if it is non-nil; otherwise, it returns nil.
@@ -140,6 +141,15 @@ func (s *Source) NewCloner(
 	}
 
 	return nil, "", errors.New("<not implemented>")
+}
+
+// Suggest returns s.SuggestFunc() if it is non-nil; otherwise, it returns nil.
+func (s *Source) Suggest(word string) []sourcedriver.RemoteRepo {
+	if s.SuggestFunc != nil {
+		return s.SuggestFunc(word)
+	}
+
+	return nil
 }
 
 // SourceDriverCloner is a test implementation of the sourcedriver.Cloner

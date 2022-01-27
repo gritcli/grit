@@ -13,6 +13,10 @@ service API {
 
     // Clone makes a local clone of a repository from a source.
     rpc Clone(CloneRequest) returns (stream CloneResponse);
+
+    // SuggestRepo returns a list of repository names to be used as
+    // suggestions for completing a partial repository name.
+    rpc SuggestRepo(SuggestRepoRequest) returns (SuggestResponse);
 }
 
 message SourcesRequest {
@@ -69,4 +73,14 @@ message CloneResponse {
         ClientOutput output = 1;
         string directory = 2;
     }
+}
+
+message SuggestRepoRequest {
+    string word = 1;
+    bool include_cloned = 2;
+    bool include_uncloned = 3;
+}
+
+message SuggestResponse {
+    repeated string words = 1;
 }

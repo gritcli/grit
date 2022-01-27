@@ -22,4 +22,14 @@ func init() {
 			Logger:  logger,
 		}
 	})
+
+	Container.Provide(func(
+		sources source.List,
+		logger logging.Logger,
+	) *source.Suggester {
+		return &source.Suggester{
+			Sources: sources,
+			Logger:  logger,
+		}
+	})
 }
