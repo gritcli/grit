@@ -1,4 +1,4 @@
-package registry
+package config
 
 import (
 	"sync"
@@ -7,9 +7,10 @@ import (
 	"github.com/gritcli/grit/driver/vcsdriver"
 )
 
-// Registry is a collection of driver implementations.
-type Registry struct {
-	Parent *Registry
+// DriverRegistry is a collection of driver implementations that are available
+// to the configuration.
+type DriverRegistry struct {
+	Parent *DriverRegistry
 
 	m             sync.RWMutex
 	sourceByAlias map[string]sourcedriver.Registration

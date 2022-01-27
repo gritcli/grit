@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	. "github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
@@ -143,7 +142,7 @@ var _ = Describe("func Load() (VCS configuration)", func() {
 			`error normalizing default driver configuration`,
 			[]string{},
 			`unable to produce default global configuration for the 'test_vcs_driver_with_broken_default' version control system: <error>`,
-			func(reg *registry.Registry) {
+			func(reg *DriverRegistry) {
 				reg.RegisterVCSDriver(
 					"test_vcs_driver_with_broken_default",
 					vcsdriver.Registration{

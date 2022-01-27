@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/onsi/ginkgo/extensions/table"
@@ -28,7 +27,7 @@ func TestSourceDriver(
 			content string,
 			expect func(dir string, cfg config.Config, err error),
 		) {
-			reg := &registry.Registry{}
+			reg := &config.DriverRegistry{}
 			reg.RegisterSourceDriver(r.Name, r)
 
 			for _, d := range deps {

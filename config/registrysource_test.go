@@ -1,17 +1,17 @@
-package registry_test
+package config_test
 
 import (
-	. "github.com/gritcli/grit/driver/registry"
+	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("type Registry", func() {
-	var reg *Registry
+var _ = Describe("type DriverRegistry", func() {
+	var reg *DriverRegistry
 
 	BeforeEach(func() {
-		reg = &Registry{}
+		reg = &DriverRegistry{}
 	})
 
 	Describe("func RegisterSourceDriver()", func() {
@@ -70,12 +70,12 @@ var _ = Describe("type Registry", func() {
 
 	When("the registry has a parent", func() {
 		var (
-			parent     *Registry
+			parent     *DriverRegistry
 			fromParent sourcedriver.Registration
 		)
 
 		BeforeEach(func() {
-			parent = &Registry{}
+			parent = &DriverRegistry{}
 			reg.Parent = parent
 
 			fromParent = sourcedriver.Registration{

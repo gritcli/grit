@@ -1,4 +1,4 @@
-package registry
+package config
 
 import (
 	"sort"
@@ -7,7 +7,7 @@ import (
 )
 
 // RegisterSourceDriver adds a source driver to the registry.
-func (r *Registry) RegisterSourceDriver(alias string, reg sourcedriver.Registration) {
+func (r *DriverRegistry) RegisterSourceDriver(alias string, reg sourcedriver.Registration) {
 	r.m.Lock()
 	defer r.m.Unlock()
 
@@ -23,7 +23,7 @@ func (r *Registry) RegisterSourceDriver(alias string, reg sourcedriver.Registrat
 }
 
 // SourceDriverByAlias returns the source driver with the given alias.
-func (r *Registry) SourceDriverByAlias(alias string) (sourcedriver.Registration, bool) {
+func (r *DriverRegistry) SourceDriverByAlias(alias string) (sourcedriver.Registration, bool) {
 	r.m.RLock()
 	reg, ok := r.sourceByAlias[alias]
 	r.m.RUnlock()
@@ -40,10 +40,10 @@ func (r *Registry) SourceDriverByAlias(alias string) (sourcedriver.Registration,
 }
 
 // SourceDrivers returns all of the registered source drivers.
-func (r *Registry) SourceDrivers() map[string]sourcedriver.Registration {
+func (r *DriverRegistry) SourceDrivers() map[string]sourcedriver.Registration {
 	drivers := map[string]sourcedriver.Registration{}
 
-	populate := func(r *Registry) {
+	populate := func(r *DriverRegistry) {
 		r.m.RLock()
 		defer r.m.RUnlock()
 
@@ -63,7 +63,7 @@ func (r *Registry) SourceDrivers() map[string]sourcedriver.Registration {
 
 // SourceDriverAliases returns a sorted slice containing the aliases of all
 // registered source drivers.
-func (r *Registry) SourceDriverAliases() []string {
+func (r *DriverRegistry) SourceDriverAliases() []string {
 	drivers := r.SourceDrivers()
 	aliases := make([]string, 0, len(drivers))
 

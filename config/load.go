@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsimple"
@@ -22,7 +21,7 @@ import (
 //
 // reg is a registry of drivers that can be used within the configuration. It
 // may be nil.
-func Load(dir string, reg *registry.Registry) (Config, error) {
+func Load(dir string, reg *DriverRegistry) (Config, error) {
 	if dir == "" {
 		dir = DefaultDirectory
 	}
@@ -45,7 +44,7 @@ func Load(dir string, reg *registry.Registry) (Config, error) {
 
 	l := loader{
 		ConfigDir: configDir,
-		Registry: registry.Registry{
+		Registry: DriverRegistry{
 			Parent: reg,
 		},
 	}
@@ -70,7 +69,7 @@ type loader struct {
 	ConfigDir string
 
 	// Registry is used to lookup information about source and VCS drivers.
-	Registry registry.Registry
+	Registry DriverRegistry
 
 	// daemonFile is the name of the file containing the "daemon" block that was
 	// merged into the configuration. It is empty if no "daemon" block has yet

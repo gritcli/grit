@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	. "github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/gritcli/grit/internal/stubs"
@@ -122,7 +121,7 @@ func makeConfigDir(configs ...string) (dir string, cleanup func()) {
 func testLoadSuccess(
 	configs []string,
 	expect Config,
-	hooks ...func(r *registry.Registry),
+	hooks ...func(r *DriverRegistry),
 ) {
 	dir, cleanup := makeConfigDir(configs...)
 	defer cleanup()
@@ -145,7 +144,7 @@ func testLoadSuccess(
 func testLoadFailure(
 	configs []string,
 	expect string,
-	hooks ...func(r *registry.Registry),
+	hooks ...func(r *DriverRegistry),
 ) {
 	orig := format.TruncatedDiff
 	format.TruncatedDiff = false
@@ -174,8 +173,8 @@ const (
 )
 
 // newRegistry returns the registry to use for Load() tests.
-func newRegistry() *registry.Registry {
-	reg := &registry.Registry{}
+func newRegistry() *DriverRegistry {
+	reg := &DriverRegistry{}
 
 	reg.RegisterSourceDriver(
 		testSourceDriverName,

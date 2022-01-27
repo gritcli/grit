@@ -11,7 +11,6 @@ import (
 	"github.com/gritcli/grit/daemon/internal/apiserver"
 	"github.com/gritcli/grit/daemon/internal/deps"
 	"github.com/gritcli/grit/daemon/internal/source"
-	"github.com/gritcli/grit/driver/registry"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )
@@ -28,7 +27,7 @@ func Run(version string) (err error) {
 	return deps.Container.Invoke(func(
 		cfg config.Config,
 		s *grpc.Server,
-		r *registry.Registry,
+		r *config.DriverRegistry,
 		sources source.List,
 		logger logging.Logger,
 	) error {
@@ -56,7 +55,7 @@ func Run(version string) (err error) {
 }
 
 // logDrivers logs information about the drivers in the registry.
-func logDrivers(logger logging.Logger, r *registry.Registry) {
+func logDrivers(logger logging.Logger, r *config.DriverRegistry) {
 	for alias, reg := range r.SourceDrivers() {
 		if alias == reg.Name {
 			logger.Log(

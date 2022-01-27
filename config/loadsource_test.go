@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	. "github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/driver/registry"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/gritcli/grit/internal/stubs"
@@ -109,7 +108,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					},
 				},
 			}),
-			func(reg *registry.Registry) {
+			func(reg *DriverRegistry) {
 				loader := newSourceLoader()
 				loader.ImplicitSourcesFunc = func(
 					ctx sourcedriver.ConfigContext,
@@ -166,7 +165,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					},
 				},
 			}),
-			func(reg *registry.Registry) {
+			func(reg *DriverRegistry) {
 				loader := newSourceLoader()
 				loader.ImplicitSourcesFunc = func(
 					ctx sourcedriver.ConfigContext,
@@ -205,7 +204,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 					},
 				},
 			}),
-			func(reg *registry.Registry) {
+			func(reg *DriverRegistry) {
 				// Register another VCS driver with the same name but a
 				// different alias.
 				reg.RegisterVCSDriver(
@@ -324,7 +323,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 			`error producing implicit sources`,
 			[]string{},
 			`the implicit sources provided by the 'test_source_driver_with_implicit_source' driver cannot be loaded: <error>`,
-			func(reg *registry.Registry) {
+			func(reg *DriverRegistry) {
 				loader := newSourceLoader()
 				loader.ImplicitSourcesFunc = func(
 					ctx sourcedriver.ConfigContext,
@@ -347,7 +346,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 				`source "test_source" "test_source_driver_uses_unrecognized_vcs" {}`,
 			},
 			`the implicit sources provided by the 'test_source_driver_uses_unrecognized_vcs' driver cannot be loaded: dependency on unrecognized version control system ('<unrecognized>')`,
-			func(reg *registry.Registry) {
+			func(reg *DriverRegistry) {
 				loader := newSourceLoader()
 				loader.ImplicitSourcesFunc = func(
 					ctx sourcedriver.ConfigContext,
@@ -371,7 +370,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 				`source "test_source" "test_source_driver_uses_unrecognized_vcs" {}`,
 			},
 			`the implicit sources provided by the 'test_source_driver_uses_unrecognized_vcs' driver cannot be loaded: depends on incompatible version control system ('test_vcs_driver'), none of the matching drivers ('test_vcs_driver') use the same configuration structure`,
-			func(reg *registry.Registry) {
+			func(reg *DriverRegistry) {
 				loader := newSourceLoader()
 				loader.ImplicitSourcesFunc = func(
 					ctx sourcedriver.ConfigContext,
@@ -397,7 +396,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 				}`,
 			},
 			`<dir>/config-0.hcl: the 'test_source' source has configuration for the 'unused_vcs_driver' version control system but the source driver ('test_source_driver') does not support that VCS`,
-			func(reg *registry.Registry) {
+			func(reg *DriverRegistry) {
 				reg.RegisterVCSDriver(
 					"unused_vcs_driver",
 					vcsdriver.Registration{
@@ -413,7 +412,7 @@ var _ = Describe("func Load() (source configuration)", func() {
 		DescribeTable(
 			"it panics",
 			func(target interface{}, expect string) {
-				reg := &registry.Registry{}
+				reg := &DriverRegistry{}
 				reg.RegisterSourceDriver(
 					"test_source_driver",
 					sourcedriver.Registration{
