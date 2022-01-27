@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
+	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/cli/internal/deps"
-	"github.com/gritcli/grit/internal/common/api"
 	"github.com/spf13/cobra"
 )
 

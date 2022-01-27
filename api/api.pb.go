@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.27.1
 // 	protoc        v3.19.2
-// source: github.com/gritcli/grit/internal/common/api/api.proto
+// source: github.com/gritcli/grit/api/api.proto
 
 package api
 
@@ -29,7 +29,7 @@ type SourcesRequest struct {
 func (x *SourcesRequest) Reset() {
 	*x = SourcesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[0]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -42,7 +42,7 @@ func (x *SourcesRequest) String() string {
 func (*SourcesRequest) ProtoMessage() {}
 
 func (x *SourcesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[0]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +55,7 @@ func (x *SourcesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SourcesRequest.ProtoReflect.Descriptor instead.
 func (*SourcesRequest) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{0}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{0}
 }
 
 type SourcesResponse struct {
@@ -69,7 +69,7 @@ type SourcesResponse struct {
 func (x *SourcesResponse) Reset() {
 	*x = SourcesResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[1]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -82,7 +82,7 @@ func (x *SourcesResponse) String() string {
 func (*SourcesResponse) ProtoMessage() {}
 
 func (x *SourcesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[1]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -95,7 +95,7 @@ func (x *SourcesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SourcesResponse.ProtoReflect.Descriptor instead.
 func (*SourcesResponse) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{1}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SourcesResponse) GetSources() []*Source {
@@ -119,7 +119,7 @@ type Source struct {
 func (x *Source) Reset() {
 	*x = Source{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[2]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -132,7 +132,7 @@ func (x *Source) String() string {
 func (*Source) ProtoMessage() {}
 
 func (x *Source) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[2]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -145,7 +145,7 @@ func (x *Source) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Source.ProtoReflect.Descriptor instead.
 func (*Source) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{2}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Source) GetName() string {
@@ -191,7 +191,7 @@ type Repo struct {
 func (x *Repo) Reset() {
 	*x = Repo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[3]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -204,7 +204,7 @@ func (x *Repo) String() string {
 func (*Repo) ProtoMessage() {}
 
 func (x *Repo) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[3]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -217,7 +217,7 @@ func (x *Repo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Repo.ProtoReflect.Descriptor instead.
 func (*Repo) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{3}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Repo) GetId() string {
@@ -266,7 +266,7 @@ type ClientOptions struct {
 func (x *ClientOptions) Reset() {
 	*x = ClientOptions{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[4]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -279,7 +279,7 @@ func (x *ClientOptions) String() string {
 func (*ClientOptions) ProtoMessage() {}
 
 func (x *ClientOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[4]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -292,7 +292,7 @@ func (x *ClientOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClientOptions.ProtoReflect.Descriptor instead.
 func (*ClientOptions) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{4}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ClientOptions) GetCaptureDebugLog() bool {
@@ -314,7 +314,7 @@ type ClientOutput struct {
 func (x *ClientOutput) Reset() {
 	*x = ClientOutput{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[5]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -327,7 +327,7 @@ func (x *ClientOutput) String() string {
 func (*ClientOutput) ProtoMessage() {}
 
 func (x *ClientOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[5]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -340,7 +340,7 @@ func (x *ClientOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClientOutput.ProtoReflect.Descriptor instead.
 func (*ClientOutput) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{5}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ClientOutput) GetMessage() string {
@@ -369,7 +369,7 @@ type ResolveRequest struct {
 func (x *ResolveRequest) Reset() {
 	*x = ResolveRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[6]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -382,7 +382,7 @@ func (x *ResolveRequest) String() string {
 func (*ResolveRequest) ProtoMessage() {}
 
 func (x *ResolveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[6]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -395,7 +395,7 @@ func (x *ResolveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveRequest.ProtoReflect.Descriptor instead.
 func (*ResolveRequest) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{6}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ResolveRequest) GetClientOptions() *ClientOptions {
@@ -426,7 +426,7 @@ type ResolveResponse struct {
 func (x *ResolveResponse) Reset() {
 	*x = ResolveResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[7]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -439,7 +439,7 @@ func (x *ResolveResponse) String() string {
 func (*ResolveResponse) ProtoMessage() {}
 
 func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[7]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -452,7 +452,7 @@ func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveResponse.ProtoReflect.Descriptor instead.
 func (*ResolveResponse) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{7}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{7}
 }
 
 func (m *ResolveResponse) GetResponse() isResolveResponse_Response {
@@ -505,7 +505,7 @@ type CloneRequest struct {
 func (x *CloneRequest) Reset() {
 	*x = CloneRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[8]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -518,7 +518,7 @@ func (x *CloneRequest) String() string {
 func (*CloneRequest) ProtoMessage() {}
 
 func (x *CloneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[8]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +531,7 @@ func (x *CloneRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloneRequest.ProtoReflect.Descriptor instead.
 func (*CloneRequest) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{8}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *CloneRequest) GetClientOptions() *ClientOptions {
@@ -569,7 +569,7 @@ type CloneResponse struct {
 func (x *CloneResponse) Reset() {
 	*x = CloneResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[9]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -582,7 +582,7 @@ func (x *CloneResponse) String() string {
 func (*CloneResponse) ProtoMessage() {}
 
 func (x *CloneResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[9]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -595,7 +595,7 @@ func (x *CloneResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloneResponse.ProtoReflect.Descriptor instead.
 func (*CloneResponse) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{9}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{9}
 }
 
 func (m *CloneResponse) GetResponse() isCloneResponse_Response {
@@ -648,7 +648,7 @@ type SuggestRepoRequest struct {
 func (x *SuggestRepoRequest) Reset() {
 	*x = SuggestRepoRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[10]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -661,7 +661,7 @@ func (x *SuggestRepoRequest) String() string {
 func (*SuggestRepoRequest) ProtoMessage() {}
 
 func (x *SuggestRepoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[10]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -674,7 +674,7 @@ func (x *SuggestRepoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SuggestRepoRequest.ProtoReflect.Descriptor instead.
 func (*SuggestRepoRequest) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{10}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SuggestRepoRequest) GetWord() string {
@@ -709,7 +709,7 @@ type SuggestResponse struct {
 func (x *SuggestResponse) Reset() {
 	*x = SuggestResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[11]
+		mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -722,7 +722,7 @@ func (x *SuggestResponse) String() string {
 func (*SuggestResponse) ProtoMessage() {}
 
 func (x *SuggestResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[11]
+	mi := &file_github_com_gritcli_grit_api_api_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -735,7 +735,7 @@ func (x *SuggestResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SuggestResponse.ProtoReflect.Descriptor instead.
 func (*SuggestResponse) Descriptor() ([]byte, []int) {
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP(), []int{11}
+	return file_github_com_gritcli_grit_api_api_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SuggestResponse) GetWords() []string {
@@ -745,12 +745,11 @@ func (x *SuggestResponse) GetWords() []string {
 	return nil
 }
 
-var File_github_com_gritcli_grit_internal_common_api_api_proto protoreflect.FileDescriptor
+var File_github_com_gritcli_grit_api_api_proto protoreflect.FileDescriptor
 
-var file_github_com_gritcli_grit_internal_common_api_api_proto_rawDesc = []byte{
-	0x0a, 0x35, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x69,
-	0x74, 0x63, 0x6c, 0x69, 0x2f, 0x67, 0x72, 0x69, 0x74, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e,
-	0x61, 0x6c, 0x2f, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x70,
+var file_github_com_gritcli_grit_api_api_proto_rawDesc = []byte{
+	0x0a, 0x25, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x69,
+	0x74, 0x63, 0x6c, 0x69, 0x2f, 0x67, 0x72, 0x69, 0x74, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x70,
 	0x69, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0b, 0x67, 0x72, 0x69, 0x74, 0x2e, 0x76, 0x32,
 	0x2e, 0x61, 0x70, 0x69, 0x22, 0x10, 0x0a, 0x0e, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x40, 0x0a, 0x0f, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65,
@@ -839,26 +838,25 @@ var file_github_com_gritcli_grit_internal_common_api_api_proto_rawDesc = []byte{
 	0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x75, 0x67, 0x67, 0x65, 0x73, 0x74, 0x52,
 	0x65, 0x70, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x67, 0x72, 0x69,
 	0x74, 0x2e, 0x76, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x75, 0x67, 0x67, 0x65, 0x73, 0x74,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x2d, 0x5a, 0x2b, 0x67, 0x69, 0x74, 0x68,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1d, 0x5a, 0x1b, 0x67, 0x69, 0x74, 0x68,
 	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x69, 0x74, 0x63, 0x6c, 0x69, 0x2f, 0x67,
-	0x72, 0x69, 0x74, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x63, 0x6f, 0x6d,
-	0x6d, 0x6f, 0x6e, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x72, 0x69, 0x74, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescOnce sync.Once
-	file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescData = file_github_com_gritcli_grit_internal_common_api_api_proto_rawDesc
+	file_github_com_gritcli_grit_api_api_proto_rawDescOnce sync.Once
+	file_github_com_gritcli_grit_api_api_proto_rawDescData = file_github_com_gritcli_grit_api_api_proto_rawDesc
 )
 
-func file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescGZIP() []byte {
-	file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescOnce.Do(func() {
-		file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescData = protoimpl.X.CompressGZIP(file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescData)
+func file_github_com_gritcli_grit_api_api_proto_rawDescGZIP() []byte {
+	file_github_com_gritcli_grit_api_api_proto_rawDescOnce.Do(func() {
+		file_github_com_gritcli_grit_api_api_proto_rawDescData = protoimpl.X.CompressGZIP(file_github_com_gritcli_grit_api_api_proto_rawDescData)
 	})
-	return file_github_com_gritcli_grit_internal_common_api_api_proto_rawDescData
+	return file_github_com_gritcli_grit_api_api_proto_rawDescData
 }
 
-var file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
-var file_github_com_gritcli_grit_internal_common_api_api_proto_goTypes = []interface{}{
+var file_github_com_gritcli_grit_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_github_com_gritcli_grit_api_api_proto_goTypes = []interface{}{
 	(*SourcesRequest)(nil),     // 0: grit.v2.api.SourcesRequest
 	(*SourcesResponse)(nil),    // 1: grit.v2.api.SourcesResponse
 	(*Source)(nil),             // 2: grit.v2.api.Source
@@ -872,7 +870,7 @@ var file_github_com_gritcli_grit_internal_common_api_api_proto_goTypes = []inter
 	(*SuggestRepoRequest)(nil), // 10: grit.v2.api.SuggestRepoRequest
 	(*SuggestResponse)(nil),    // 11: grit.v2.api.SuggestResponse
 }
-var file_github_com_gritcli_grit_internal_common_api_api_proto_depIdxs = []int32{
+var file_github_com_gritcli_grit_api_api_proto_depIdxs = []int32{
 	2,  // 0: grit.v2.api.SourcesResponse.sources:type_name -> grit.v2.api.Source
 	4,  // 1: grit.v2.api.ResolveRequest.client_options:type_name -> grit.v2.api.ClientOptions
 	5,  // 2: grit.v2.api.ResolveResponse.output:type_name -> grit.v2.api.ClientOutput
@@ -894,13 +892,13 @@ var file_github_com_gritcli_grit_internal_common_api_api_proto_depIdxs = []int32
 	0,  // [0:6] is the sub-list for field type_name
 }
 
-func init() { file_github_com_gritcli_grit_internal_common_api_api_proto_init() }
-func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
-	if File_github_com_gritcli_grit_internal_common_api_api_proto != nil {
+func init() { file_github_com_gritcli_grit_api_api_proto_init() }
+func file_github_com_gritcli_grit_api_api_proto_init() {
+	if File_github_com_gritcli_grit_api_api_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SourcesRequest); i {
 			case 0:
 				return &v.state
@@ -912,7 +910,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SourcesResponse); i {
 			case 0:
 				return &v.state
@@ -924,7 +922,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Source); i {
 			case 0:
 				return &v.state
@@ -936,7 +934,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Repo); i {
 			case 0:
 				return &v.state
@@ -948,7 +946,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ClientOptions); i {
 			case 0:
 				return &v.state
@@ -960,7 +958,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ClientOutput); i {
 			case 0:
 				return &v.state
@@ -972,7 +970,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ResolveRequest); i {
 			case 0:
 				return &v.state
@@ -984,7 +982,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ResolveResponse); i {
 			case 0:
 				return &v.state
@@ -996,7 +994,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CloneRequest); i {
 			case 0:
 				return &v.state
@@ -1008,7 +1006,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CloneResponse); i {
 			case 0:
 				return &v.state
@@ -1020,7 +1018,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SuggestRepoRequest); i {
 			case 0:
 				return &v.state
@@ -1032,7 +1030,7 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 				return nil
 			}
 		}
-		file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_github_com_gritcli_grit_api_api_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SuggestResponse); i {
 			case 0:
 				return &v.state
@@ -1045,11 +1043,11 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 			}
 		}
 	}
-	file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[7].OneofWrappers = []interface{}{
+	file_github_com_gritcli_grit_api_api_proto_msgTypes[7].OneofWrappers = []interface{}{
 		(*ResolveResponse_Output)(nil),
 		(*ResolveResponse_Repo)(nil),
 	}
-	file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes[9].OneofWrappers = []interface{}{
+	file_github_com_gritcli_grit_api_api_proto_msgTypes[9].OneofWrappers = []interface{}{
 		(*CloneResponse_Output)(nil),
 		(*CloneResponse_Directory)(nil),
 	}
@@ -1057,18 +1055,18 @@ func file_github_com_gritcli_grit_internal_common_api_api_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_github_com_gritcli_grit_internal_common_api_api_proto_rawDesc,
+			RawDescriptor: file_github_com_gritcli_grit_api_api_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_github_com_gritcli_grit_internal_common_api_api_proto_goTypes,
-		DependencyIndexes: file_github_com_gritcli_grit_internal_common_api_api_proto_depIdxs,
-		MessageInfos:      file_github_com_gritcli_grit_internal_common_api_api_proto_msgTypes,
+		GoTypes:           file_github_com_gritcli_grit_api_api_proto_goTypes,
+		DependencyIndexes: file_github_com_gritcli_grit_api_api_proto_depIdxs,
+		MessageInfos:      file_github_com_gritcli_grit_api_api_proto_msgTypes,
 	}.Build()
-	File_github_com_gritcli_grit_internal_common_api_api_proto = out.File
-	file_github_com_gritcli_grit_internal_common_api_api_proto_rawDesc = nil
-	file_github_com_gritcli_grit_internal_common_api_api_proto_goTypes = nil
-	file_github_com_gritcli_grit_internal_common_api_api_proto_depIdxs = nil
+	File_github_com_gritcli_grit_api_api_proto = out.File
+	file_github_com_gritcli_grit_api_api_proto_rawDesc = nil
+	file_github_com_gritcli_grit_api_api_proto_goTypes = nil
+	file_github_com_gritcli_grit_api_api_proto_depIdxs = nil
 }
