@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gritcli/grit/internal/cli"
+	"github.com/gritcli/grit/cli"
 )
 
 // version string, automatically set during build process.

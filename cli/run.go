@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gritcli/grit/internal/cli/internal/commands"
-	"github.com/gritcli/grit/internal/cli/internal/deps"
+	"github.com/gritcli/grit/cli/internal/commands"
+	"github.com/gritcli/grit/cli/internal/deps"
 )
 
 // Run starts the Grit CLI.

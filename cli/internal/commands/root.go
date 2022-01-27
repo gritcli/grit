@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"github.com/gritcli/grit/internal/cli/internal/deps"
-	"github.com/gritcli/grit/internal/cli/internal/flags"
+	"github.com/gritcli/grit/cli/internal/deps"
+	"github.com/gritcli/grit/cli/internal/flags"
 	"github.com/spf13/cobra"
 )
 
