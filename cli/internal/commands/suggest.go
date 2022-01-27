@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/gritcli/grit/api"
-	"github.com/gritcli/grit/cli/internal/deps"
+	"github.com/gritcli/grit/cli/internal/cobradi"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +33,7 @@ func suggest(fn suggestFunc) validArgsFunc {
 	) ([]string, cobra.ShellCompDirective) {
 		var res *api.SuggestResponse
 
-		err := deps.Invoke(cmd, func(
+		err := cobradi.Invoke(cmd, func(
 			ctx context.Context,
 			client api.APIClient,
 		) error {

@@ -1,4 +1,4 @@
-package deps
+package cobradi
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func Execute(ctx context.Context, c *di.Container, cmd *cobra.Command) (err erro
 	return cmd.ExecuteContext(ctx)
 }
 
-// Invoke invokes fn  with arguments populated by the container associated with
+// Invoke invokes fn with arguments populated by the container associated with
 // the given command.
 func Invoke(cmd *cobra.Command, fn interface{}) error {
 	ctx := cmd.Context()
@@ -37,4 +37,11 @@ func Invoke(cmd *cobra.Command, fn interface{}) error {
 	})
 
 	return con.Invoke(fn)
+}
+
+// Provide registers fn as a provider function for the container. Its return
+// values are added to the container.
+func Provide(cmd *cobra.Command, fn interface{}) {
+	con := cmd.Context().Value(contextKey{}).(*di.Container)
+	con.Provide(fn)
 }

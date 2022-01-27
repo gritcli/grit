@@ -5,7 +5,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/api"
-	"github.com/gritcli/grit/cli/internal/deps"
+	"github.com/gritcli/grit/cli/internal/cobradi"
 	"github.com/gritcli/grit/cli/internal/render"
 	"github.com/spf13/cobra"
 )
@@ -22,7 +22,7 @@ func newSourceListCommand() *cobra.Command {
 		their current status.
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deps.Invoke(cmd, func(
+			return cobradi.Invoke(cmd, func(
 				ctx context.Context,
 				client api.APIClient,
 			) error {

@@ -1,4 +1,4 @@
-package deps
+package cli
 
 import (
 	"io"
@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	Container.Provide(func(
+	container.Provide(func(
 		cmd *cobra.Command,
 	) (shell.Executor, error) {
 		filename, ok := flags.ShellExecutorOutputFile(cmd)
@@ -37,7 +37,7 @@ func init() {
 			return nil, err
 		}
 
-		Container.Defer(func() error {
+		container.Defer(func() error {
 			defer fp.Close()
 
 			if err := fp.Sync(); err != nil {

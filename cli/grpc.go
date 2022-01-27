@@ -1,4 +1,4 @@
-package deps
+package cli
 
 import (
 	"github.com/gritcli/grit/api"
@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	Container.Provide(func(
+	container.Provide(func(
 		cmd *cobra.Command,
 	) (grpc.ClientConnInterface, error) {
 		socket, err := flags.Socket(cmd)
@@ -26,12 +26,12 @@ func init() {
 		if err != nil {
 			return nil, err
 		}
-		Container.Defer(conn.Close)
+		container.Defer(conn.Close)
 
 		return conn, nil
 	})
 
-	Container.Provide(func(
+	container.Provide(func(
 		cmd *cobra.Command,
 	) *api.ClientOptions {
 		return &api.ClientOptions{
@@ -39,5 +39,5 @@ func init() {
 		}
 	})
 
-	Container.Provide(api.NewAPIClient)
+	container.Provide(api.NewAPIClient)
 }

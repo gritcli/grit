@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/gritcli/grit/cli/internal/deps"
+	"github.com/gritcli/grit/cli/internal/cobradi"
 	"github.com/gritcli/grit/cli/internal/flags"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +25,7 @@ func NewRoot(v string) *cobra.Command {
 			//
 			// This allows other DI provider definitions to make use of the
 			// flags passed to the command.
-			deps.Container.Provide(func() *cobra.Command {
+			cobradi.Provide(cmd, func() *cobra.Command {
 				return cmd
 			})
 		},

@@ -6,9 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/gritcli/grit/cli/internal/cobradi"
 	"github.com/gritcli/grit/cli/internal/commands"
-	"github.com/gritcli/grit/cli/internal/deps"
+	"github.com/gritcli/grit/internal/di"
 )
+
+// container is the dependency injection container for the Grit CLI.
+var container di.Container
 
 // Run starts the Grit CLI.
 func Run(version string) (err error) {
@@ -19,9 +23,9 @@ func Run(version string) (err error) {
 	)
 	defer cancel()
 
-	return deps.Execute(
+	return cobradi.Execute(
 		ctx,
-		&deps.Container,
+		&container,
 		commands.NewRoot(version),
 	)
 }

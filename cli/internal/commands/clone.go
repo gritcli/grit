@@ -7,7 +7,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/api"
-	"github.com/gritcli/grit/cli/internal/deps"
+	"github.com/gritcli/grit/cli/internal/cobradi"
 	"github.com/gritcli/grit/cli/internal/interactive"
 	"github.com/gritcli/grit/cli/internal/render"
 	"github.com/gritcli/grit/cli/internal/shell"
@@ -38,7 +38,7 @@ func newCloneCommand() *cobra.Command {
 				return errors.New("<repo> argument must not be empty")
 			}
 
-			return deps.Invoke(cmd, func(
+			return cobradi.Invoke(cmd, func(
 				ctx context.Context,
 				client api.APIClient,
 				clientOptions *api.ClientOptions,
