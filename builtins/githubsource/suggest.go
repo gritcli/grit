@@ -7,8 +7,11 @@ import (
 	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
-// Suggest returns a set of repositories with names that begin with the
-// given word.
+// Suggest returns a set of repositories that have names beginning with the
+// given word (which may be empty).
+//
+// This implementation considers the name to start with the word if any of the
+// owner name, unqualified name, or fully qualified name begin with the word.
 func (s *source) Suggest(word string) []sourcedriver.RemoteRepo {
 	var matches []*github.Repository
 
