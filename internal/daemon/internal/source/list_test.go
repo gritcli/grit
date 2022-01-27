@@ -1,6 +1,9 @@
 package source_test
 
 import (
+	"context"
+
+	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	. "github.com/gritcli/grit/internal/daemon/internal/source"
@@ -14,57 +17,63 @@ var _ = Describe("type List", func() {
 
 	Describe("func NewList()", func() {
 		It("constructs the source from the configuration", func() {
-			src := &stubs.Source{}
+			// These sources have an InitFunc set so that they can be
+			// differentiated from each other. The panic message is different so
+			// these functions can't get combined by the compiler.
+			srcA := &stubs.Source{
+				InitFunc: func(context.Context, logging.Logger) error {
+					panic("not implemented (a)")
+				},
+			}
+
+			srcB := &stubs.Source{
+				InitFunc: func(context.Context, logging.Logger) error {
+					panic("not implemented (b)")
+				},
+			}
 
 			list = NewList([]config.Source{
 				{
-					Name:    "<source>",
+					Name:    "<source-a>",
 					Enabled: true,
 					Clones: config.Clones{
-						Dir: "/path/to/clones",
+						Dir: "/path/to/clones-a",
 					},
 					Driver: &stubs.SourceConfig{
 						NewSourceFunc: func() sourcedriver.Source {
-							return src
+							return srcA
+						},
+					},
+				},
+				{
+					Name:    "<source-b>",
+					Enabled: true,
+					Clones: config.Clones{
+						Dir: "/path/to/clones-b",
+					},
+					Driver: &stubs.SourceConfig{
+						NewSourceFunc: func() sourcedriver.Source {
+							return srcB
 						},
 					},
 				},
 			})
 
-			Expect(list).To(Equal(List{
-				{
-					Name:        "<source>",
+			Expect(list).To(ConsistOf(
+				Source{
+					Name:        "<source-a>",
 					Description: "<description>",
-					CloneDir:    "/path/to/clones",
-					Driver:      src,
+					CloneDir:    "/path/to/clones-a",
+					Driver:      srcA,
 				},
-			}))
+				Source{
+					Name:        "<source-b>",
+					Description: "<description>",
+					CloneDir:    "/path/to/clones-b",
+					Driver:      srcB,
+				},
+			))
 
-		})
-
-		It("sorts sources by name", func() {
-			list = NewList([]config.Source{
-				{
-					Name:    "<b>",
-					Enabled: true,
-					Driver:  &stubs.SourceConfig{},
-				},
-				{
-					Name:    "<c>",
-					Enabled: true,
-					Driver:  &stubs.SourceConfig{},
-				},
-				{
-					Name:    "<a>",
-					Enabled: true,
-					Driver:  &stubs.SourceConfig{},
-				},
-			})
-
-			Expect(list).To(HaveLen(3))
-			Expect(list[0].Name).To(Equal("<a>"))
-			Expect(list[1].Name).To(Equal("<b>"))
-			Expect(list[2].Name).To(Equal("<c>"))
 		})
 
 		It("excludes disabled sources", func() {
@@ -84,6 +93,9 @@ var _ = Describe("type List", func() {
 			list = List{
 				{
 					Name: "<source>",
+				},
+				{
+					Name: "<other>",
 				},
 			}
 		})

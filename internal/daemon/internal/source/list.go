@@ -1,7 +1,6 @@
 package source
 
 import (
-	"sort"
 	"strings"
 
 	"github.com/gritcli/grit/config"
@@ -29,13 +28,6 @@ func NewList(sources []config.Source) List {
 			},
 		)
 	}
-
-	sort.Slice(
-		list,
-		func(i, j int) bool {
-			return list[i].Name < list[j].Name
-		},
-	)
 
 	return list
 }
