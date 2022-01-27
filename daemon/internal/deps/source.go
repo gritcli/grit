@@ -3,7 +3,7 @@ package deps
 import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/internal/daemon/internal/source"
+	"github.com/gritcli/grit/daemon/internal/source"
 )
 
 func init() {

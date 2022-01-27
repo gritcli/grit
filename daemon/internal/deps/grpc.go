@@ -2,9 +2,9 @@ package deps
 
 import (
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/gritcli/grit/daemon/internal/apiserver"
+	"github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/internal/common/api"
-	"github.com/gritcli/grit/internal/daemon/internal/apiserver"
-	"github.com/gritcli/grit/internal/daemon/internal/source"
 	"google.golang.org/grpc"
 )
 

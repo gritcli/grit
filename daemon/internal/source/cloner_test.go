@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/dogmatiq/dodeca/logging"
+	. "github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/gritcli/grit/internal/daemon/internal/source"
 	"github.com/gritcli/grit/internal/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

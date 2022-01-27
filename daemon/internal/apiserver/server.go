@@ -5,8 +5,8 @@ import (
 	"sort"
 
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/internal/common/api"
-	"github.com/gritcli/grit/internal/daemon/internal/source"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"
 )
