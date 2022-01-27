@@ -47,18 +47,15 @@ type Source interface {
 		logger logging.Logger,
 	) ([]RemoteRepo, error)
 
-	// NewCloner returns a cloner that clones the repository with the given ID.
+	// NewCloner returns a cloner that clones the repository with the given ID,
+	// and information about the repository being cloned.
 	//
 	// id is the repository ID, as discovered by a prior call to Resolve().
-	//
-	// dir is the sub-directory that the clone should be placed into, relative
-	// to the source's configured clone directory. Typically this should be some
-	// form of the repository's name, sanitized for use as a directory name.
 	NewCloner(
 		ctx context.Context,
 		id string,
 		logger logging.Logger,
-	) (c Cloner, dir string, err error)
+	) (Cloner, RemoteRepo, error)
 
 	// Suggest returns a set of repositories that have names beginning with the
 	// given word (which may be empty).

@@ -53,16 +53,18 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (sourcedriver.Cloner, string, error) {
+			) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
 				return &stubs.SourceDriverCloner{
-					CloneFunc: func(
-						context.Context,
-						string,
-						logging.Logger,
-					) error {
-						return nil
-					},
-				}, "clone-dir", nil
+						CloneFunc: func(
+							context.Context,
+							string,
+							logging.Logger,
+						) error {
+							return nil
+						},
+					}, sourcedriver.RemoteRepo{
+						RelativeCloneDir: "clone-dir",
+					}, nil
 			}
 
 			dir, err := cloner.Clone(
@@ -84,8 +86,10 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (sourcedriver.Cloner, string, error) {
-				return &stubs.SourceDriverCloner{}, "existing-dir", nil
+			) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
+				return &stubs.SourceDriverCloner{}, sourcedriver.RemoteRepo{
+					RelativeCloneDir: "existing-dir",
+				}, nil
 			}
 
 			_, err = cloner.Clone(
@@ -107,8 +111,10 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (sourcedriver.Cloner, string, error) {
-				return &stubs.SourceDriverCloner{}, "\x00", nil
+			) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
+				return &stubs.SourceDriverCloner{}, sourcedriver.RemoteRepo{
+					RelativeCloneDir: "\x00",
+				}, nil
 			}
 
 			_, err := cloner.Clone(
@@ -140,8 +146,8 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (sourcedriver.Cloner, string, error) {
-				return nil, "", errors.New("<error>")
+			) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
+				return nil, sourcedriver.RemoteRepo{}, errors.New("<error>")
 			}
 
 			_, err := cloner.Clone(
@@ -158,16 +164,18 @@ var _ = Describe("type Cloner", func() {
 				context.Context,
 				string,
 				logging.Logger,
-			) (sourcedriver.Cloner, string, error) {
+			) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
 				return &stubs.SourceDriverCloner{
-					CloneFunc: func(
-						context.Context,
-						string,
-						logging.Logger,
-					) error {
-						return errors.New("<error>")
-					},
-				}, "clone-dir", nil
+						CloneFunc: func(
+							context.Context,
+							string,
+							logging.Logger,
+						) error {
+							return errors.New("<error>")
+						},
+					}, sourcedriver.RemoteRepo{
+						RelativeCloneDir: "clone-dir",
+					}, nil
 			}
 
 			_, err := cloner.Clone(

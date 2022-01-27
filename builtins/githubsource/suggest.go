@@ -3,7 +3,6 @@ package githubsource
 import (
 	"strings"
 
-	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
@@ -13,22 +12,22 @@ import (
 // This implementation considers the name to start with the word if any of the
 // owner name, unqualified name, or fully qualified name begin with the word.
 func (s *source) Suggest(word string) []sourcedriver.RemoteRepo {
-	var matches []*github.Repository
+	var matches []sourcedriver.RemoteRepo
 
 	for owner, repos := range s.reposByOwner {
 		if strings.HasPrefix(owner, word) {
 			for _, r := range repos {
-				matches = append(matches, r)
+				matches = append(matches, toRemoteRepo(r))
 			}
 		} else {
 			for name, r := range repos {
 				if strings.HasPrefix(r.GetFullName(), word) ||
 					strings.HasPrefix(name, word) {
-					matches = append(matches, r)
+					matches = append(matches, toRemoteRepo(r))
 				}
 			}
 		}
 	}
 
-	return toRemoteRepos(matches...)
+	return matches
 }

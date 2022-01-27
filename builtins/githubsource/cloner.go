@@ -8,15 +8,16 @@ import (
 	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
-// NewCloner returns a cloner that clones the repository with the given ID.
+// NewCloner returns a cloner that clones the repository with the given ID, and
+// information about the repository being cloned.
 func (s *source) NewCloner(
 	ctx context.Context,
 	id string,
 	logger logging.Logger,
-) (sourcedriver.Cloner, string, error) {
+) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
 	intID, err := parseRepoID(id)
 	if err != nil {
-		return nil, "", err
+		return nil, sourcedriver.RemoteRepo{}, err
 	}
 
 	r, ok := s.reposByID[intID]
@@ -24,7 +25,7 @@ func (s *source) NewCloner(
 		var err error
 		r, _, err = s.client.Repositories.GetByID(ctx, intID)
 		if err != nil {
-			return nil, "", err
+			return nil, sourcedriver.RemoteRepo{}, err
 		}
 	}
 
@@ -47,5 +48,5 @@ func (s *source) NewCloner(
 		c.HTTPPassword = s.config.Token
 	}
 
-	return c, r.GetFullName(), nil
+	return c, toRemoteRepo(r), nil
 }

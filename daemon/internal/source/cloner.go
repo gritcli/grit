@@ -43,12 +43,12 @@ func (c *Cloner) Clone(
 		return "", fmt.Errorf("unable to clone: unrecognized source (%s)", source)
 	}
 
-	bc, dir, err := src.Driver.NewCloner(ctx, repoID, logger)
+	cloner, repo, err := src.Driver.NewCloner(ctx, repoID, logger)
 	if err != nil {
 		return "", fmt.Errorf("unable to prepare for cloning: %w", err)
 	}
 
-	dir = filepath.Join(src.CloneDir, dir)
+	dir := filepath.Join(src.CloneDir, repo.RelativeCloneDir)
 
 	if err := makeCloneDir(dir); err != nil {
 		return "", fmt.Errorf("unable to create clone directory: %w", err)
@@ -59,7 +59,7 @@ func (c *Cloner) Clone(
 		}
 	}()
 
-	if err := bc.Clone(ctx, dir, logger); err != nil {
+	if err := cloner.Clone(ctx, dir, logger); err != nil {
 		return "", fmt.Errorf("unable to clone: %w", err)
 	}
 

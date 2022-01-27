@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/google/go-github/github"
 	"github.com/gritcli/grit/driver/sourcedriver"
 )
 
@@ -21,24 +20,24 @@ func (s *source) Resolve(
 		return nil, nil
 	}
 
-	var repos []*github.Repository
-
 	if ownerName == "" {
+		var matches []sourcedriver.RemoteRepo
+
 		for _, reposByName := range s.reposByOwner {
 			if r, ok := reposByName[repoName]; ok {
-				repos = append(repos, r)
+				matches = append(matches, toRemoteRepo(r))
 			}
 		}
 
 		logging.Debug(
 			logger,
 			"found %d match(es) for '%s' in the repository list for @%s",
-			len(repos),
+			len(matches),
 			query,
 			s.user.GetLogin(),
 		)
 
-		if len(repos) == 0 {
+		if len(matches) == 0 {
 			logging.Debug(
 				logger,
 				"skipping GitHub API query for '%s' because it is not a fully-qualified repository name",
@@ -46,7 +45,7 @@ func (s *source) Resolve(
 			)
 		}
 
-		return toRemoteRepos(repos...), nil
+		return matches, nil
 	}
 
 	if r, ok := s.reposByOwner[ownerName][repoName]; ok {

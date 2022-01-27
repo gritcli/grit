@@ -27,7 +27,7 @@ var _ = Describe("func source.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner", func() {
-			cloner, dir, err := src.NewCloner(ctx, publicUserRepo.ID, logging.SilentLogger)
+			cloner, repo, err := src.NewCloner(ctx, publicUserRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
@@ -35,7 +35,7 @@ var _ = Describe("func source.NewCloner()", func() {
 				HTTPEndpoint: "https://github.com/grit-integration-tests/test-public.git",
 			}))
 
-			Expect(dir).To(Equal("grit-integration-tests/test-public"))
+			Expect(repo).To(Equal(publicUserRepo))
 		})
 	})
 
@@ -51,7 +51,7 @@ var _ = Describe("func source.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {
-			cloner, dir, err := src.NewCloner(ctx, privateUserRepo.ID, logging.SilentLogger)
+			cloner, repo, err := src.NewCloner(ctx, privateUserRepo.ID, logging.SilentLogger)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
@@ -60,7 +60,7 @@ var _ = Describe("func source.NewCloner()", func() {
 				HTTPPassword: token,
 			}))
 
-			Expect(dir).To(Equal("grit-integration-tests/test-private"))
+			Expect(repo).To(Equal(privateUserRepo))
 		})
 	})
 })

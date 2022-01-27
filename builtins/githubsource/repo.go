@@ -58,24 +58,28 @@ func parseRepoName(name string) (ownerName, repoName string, err error) {
 	return ownerName, repoName, nil
 }
 
+// toRemoteRepo converts a github.Repository to a sourcedriver.RemoteRepo.
+func toRemoteRepo(r *github.Repository) sourcedriver.RemoteRepo {
+	owner, name, err := parseRepoName(r.GetFullName())
+	if err != nil {
+		panic(err)
+	}
+
+	return sourcedriver.RemoteRepo{
+		ID:               strconv.FormatInt(r.GetID(), 10),
+		Name:             r.GetFullName(),
+		Description:      r.GetDescription(),
+		WebURL:           r.GetHTMLURL(),
+		RelativeCloneDir: filepath.Join(owner, name),
+	}
+}
+
 // toRemoteRepos converts multiple github.Repository to a slice of
 // sourcedriver.RemoteRepo.
 func toRemoteRepos(repos ...*github.Repository) []sourcedriver.RemoteRepo {
 	remotes := make([]sourcedriver.RemoteRepo, len(repos))
-
 	for i, r := range repos {
-		owner, name, err := parseRepoName(r.GetFullName())
-		if err != nil {
-			panic(err)
-		}
-
-		remotes[i] = sourcedriver.RemoteRepo{
-			ID:               strconv.FormatInt(r.GetID(), 10),
-			Name:             r.GetFullName(),
-			Description:      r.GetDescription(),
-			WebURL:           r.GetHTMLURL(),
-			RelativeCloneDir: filepath.Join(owner, name),
-		}
+		remotes[i] = toRemoteRepo(r)
 	}
 
 	return remotes
