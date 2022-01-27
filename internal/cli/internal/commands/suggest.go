@@ -8,19 +8,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// suggestFunc is a function that returns a suggestion response from the API.
+type suggestFunc func(
+	ctx context.Context,
+	client api.APIClient,
+	cmd *cobra.Command,
+	args []string,
+	word string,
+) (*api.SuggestResponse, error)
+
+// validArgsFunc is a function for use with cobra.Command.ValidArgsFunction.
+type validArgsFunc func(
+	*cobra.Command,
+	[]string,
+	string,
+) ([]string, cobra.ShellCompDirective)
+
 // suggest is a helper function for using the suggestion API for autocompletion.
-//
-// It returns a function with a signature that matches
-// cobra.Command.ValidArgsFunction.
-func suggest(
-	fn func(
-		ctx context.Context,
-		client api.APIClient,
-		cmd *cobra.Command,
-		args []string,
-		word string,
-	) (*api.SuggestResponse, error),
-) func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
+func suggest(fn suggestFunc) validArgsFunc {
 	return func(
 		cmd *cobra.Command,
 		args []string,
