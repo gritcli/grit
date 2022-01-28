@@ -17,7 +17,6 @@ func resolveRepo(
 	ctx context.Context,
 	cmd *cobra.Command,
 	client api.APIClient,
-	prompt string,
 	req *api.ResolveRequest,
 ) (*api.Repo, error) {
 	stream, err := client.Resolve(ctx, req)
@@ -48,11 +47,7 @@ func resolveRepo(
 		return nil, errors.New("no matching repositories found")
 	}
 
-	return interactive.SelectRepos(
-		cmd,
-		prompt,
-		repos,
-	)
+	return interactive.SelectRepos(cmd, repos)
 }
 
 // suggestFunc is a function that returns a suggestion response from the API.

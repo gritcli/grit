@@ -45,7 +45,6 @@ func newCloneCommand() *cobra.Command {
 					ctx,
 					cmd,
 					client,
-					"Which repository would you like to clone?",
 					&api.ResolveRequest{
 						ClientOptions: clientOptions,
 						Query:         args[0],

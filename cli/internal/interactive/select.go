@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"reflect"
+	"strings"
 
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/cli/internal/flags"
@@ -17,6 +18,7 @@ func selectPrompt(
 	label string,
 	items interface{},
 	templates *promptui.SelectTemplates,
+	searchPredicate func(string, int) bool,
 ) (int, error) {
 	n := reflect.ValueOf(items).Len()
 
@@ -33,11 +35,13 @@ func selectPrompt(
 	}
 
 	p := promptui.Select{
-		Label:     label,
-		Items:     items,
-		Templates: templates,
-		Stdin:     cmd.InOrStdin().(io.ReadCloser),
-		Stdout:    cmd.OutOrStdout().(io.WriteCloser),
+		Label:        label,
+		Items:        items,
+		Templates:    templates,
+		HideSelected: true,
+		Searcher:     searchPredicate,
+		Stdin:        cmd.InOrStdin().(io.ReadCloser),
+		Stdout:       cmd.OutOrStdout().(io.WriteCloser),
 	}
 
 	n, _, err := p.Run()
@@ -47,18 +51,33 @@ func selectPrompt(
 // SelectRepos prompts the user to select from a list of repositories.
 func SelectRepos(
 	cmd *cobra.Command,
-	label string,
 	repos []*api.Repo,
 ) (*api.Repo, error) {
 	n, err := selectPrompt(
 		cmd,
-		label,
+		"Chhose a repository:",
 		repos,
 		&promptui.SelectTemplates{
 			Label:    "{{ . }}",
-			Active:   `> {{ .Source         }}: {{ .Name | cyan  }}  {{ .Description         }}  {{ .WebUrl }}`,
-			Inactive: `  {{ .Source | faint }}: {{ .Name | faint }}  {{ .Description | faint }}  {{ .WebUrl | faint }}`,
-			Selected: `  {{ .Source | faint }}: {{ .Name | green }}  {{ .Description | faint }}  {{ .WebUrl | faint }}`,
+			Active:   `> {{ .Name | cyan }} {{ print "[" .Source "]" | yellow }} {{ .Description         }}  {{ .WebUrl }}`,
+			Inactive: `  {{ .Name | faint }} {{ print "[" .Source "]" | faint }} {{ .Description | faint }}  {{ .WebUrl | faint }}`,
+		},
+		func(s string, i int) bool {
+			s = strings.ToLower(s)
+
+			if strings.Contains(strings.ToLower(repos[i].Name), s) {
+				return true
+			}
+
+			if strings.Contains(strings.ToLower(repos[i].Source), s) {
+				return true
+			}
+
+			if strings.Contains(strings.ToLower(repos[i].Description), s) {
+				return true
+			}
+
+			return false
 		},
 	)
 
