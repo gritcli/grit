@@ -20,9 +20,9 @@ type Server struct {
 	Logger     logging.Logger
 }
 
-// Sources lists the configured repository sources.
-func (s *Server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.SourcesResponse, error) {
-	res := &api.SourcesResponse{}
+// ListSources lists the configured repository sources.
+func (s *Server) ListSources(ctx context.Context, _ *api.ListSourcesRequest) (*api.ListSourcesResponse, error) {
+	res := &api.ListSourcesResponse{}
 
 	for _, s := range s.SourceList {
 		status, err := s.Driver.Status(ctx)

@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type APIClient interface {
-	// Sources lists the configured repository sources.
-	Sources(ctx context.Context, in *SourcesRequest, opts ...grpc.CallOption) (*SourcesResponse, error)
+	// ListSources lists the configured repository sources.
+	ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error)
 	// ResolveLocalRepo resolves repository name, URL or other identifier to a
 	// list if local repository clones.
 	ResolveLocalRepo(ctx context.Context, in *ResolveLocalRepoRequest, opts ...grpc.CallOption) (API_ResolveLocalRepoClient, error)
@@ -45,9 +45,9 @@ func NewAPIClient(cc grpc.ClientConnInterface) APIClient {
 	return &aPIClient{cc}
 }
 
-func (c *aPIClient) Sources(ctx context.Context, in *SourcesRequest, opts ...grpc.CallOption) (*SourcesResponse, error) {
-	out := new(SourcesResponse)
-	err := c.cc.Invoke(ctx, "/grit.v2.api.API/Sources", in, out, opts...)
+func (c *aPIClient) ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error) {
+	out := new(ListSourcesResponse)
+	err := c.cc.Invoke(ctx, "/grit.v2.api.API/ListSources", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -163,8 +163,8 @@ func (c *aPIClient) SuggestRepo(ctx context.Context, in *SuggestRepoRequest, opt
 // All implementations should embed UnimplementedAPIServer
 // for forward compatibility
 type APIServer interface {
-	// Sources lists the configured repository sources.
-	Sources(context.Context, *SourcesRequest) (*SourcesResponse, error)
+	// ListSources lists the configured repository sources.
+	ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error)
 	// ResolveLocalRepo resolves repository name, URL or other identifier to a
 	// list if local repository clones.
 	ResolveLocalRepo(*ResolveLocalRepoRequest, API_ResolveLocalRepoServer) error
@@ -182,8 +182,8 @@ type APIServer interface {
 type UnimplementedAPIServer struct {
 }
 
-func (UnimplementedAPIServer) Sources(context.Context, *SourcesRequest) (*SourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Sources not implemented")
+func (UnimplementedAPIServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSources not implemented")
 }
 func (UnimplementedAPIServer) ResolveLocalRepo(*ResolveLocalRepoRequest, API_ResolveLocalRepoServer) error {
 	return status.Errorf(codes.Unimplemented, "method ResolveLocalRepo not implemented")
@@ -209,20 +209,20 @@ func RegisterAPIServer(s grpc.ServiceRegistrar, srv APIServer) {
 	s.RegisterService(&API_ServiceDesc, srv)
 }
 
-func _API_Sources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SourcesRequest)
+func _API_ListSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSourcesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(APIServer).Sources(ctx, in)
+		return srv.(APIServer).ListSources(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grit.v2.api.API/Sources",
+		FullMethod: "/grit.v2.api.API/ListSources",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIServer).Sources(ctx, req.(*SourcesRequest))
+		return srv.(APIServer).ListSources(ctx, req.(*ListSourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -316,8 +316,8 @@ var API_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*APIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Sources",
-			Handler:    _API_Sources_Handler,
+			MethodName: "ListSources",
+			Handler:    _API_ListSources_Handler,
 		},
 		{
 			MethodName: "SuggestRepo",
