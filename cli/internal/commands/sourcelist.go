@@ -37,7 +37,7 @@ func newSourceListCommand() *cobra.Command {
 						src.Name,
 						src.Description,
 						src.Status,
-						render.AbsPath(src.CloneDir),
+						render.AbsPath(src.BaseCloneDir),
 					)
 				}
 

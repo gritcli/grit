@@ -11,20 +11,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// resolveRepo is a helper function for choosing a single repository from the
-// result of a call to the resolve API.
-func resolveRepo(
+// resolveRemoteRepo is a helper function for choosing a single repository from
+// the result of a call to the resolve API operation.
+func resolveRemoteRepo(
 	ctx context.Context,
 	cmd *cobra.Command,
 	client api.APIClient,
-	req *api.ResolveRequest,
-) (*api.Repo, error) {
+	options *api.ClientOptions,
+	query string,
+) (*api.RemoteRepo, error) {
+	req := &api.ResolveRequest{
+		ClientOptions: options,
+		Query:         query,
+		Filter:        api.ResolveFilter_RESOLVE_REMOTE_ONLY,
+	}
+
 	stream, err := client.Resolve(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	var repos []*api.Repo
+	var repos []*api.RemoteRepo
 
 	for {
 		res, err := stream.Recv()
@@ -38,7 +45,7 @@ func resolveRepo(
 
 		if out := res.GetOutput(); out != nil {
 			cmd.Println(out.Message)
-		} else if r := res.GetRepo(); r != nil {
+		} else if r := res.GetRemoteRepo(); r != nil {
 			repos = append(repos, r)
 		}
 	}
@@ -47,7 +54,52 @@ func resolveRepo(
 		return nil, errors.New("no matching repositories found")
 	}
 
-	return interactive.SelectRepos(cmd, repos)
+	return interactive.SelectRemoteRepos(cmd, repos)
+}
+
+// cloneRepo clones a remote repository using the clone API operation.
+func cloneRepo(
+	ctx context.Context,
+	cmd *cobra.Command,
+	client api.APIClient,
+	clientOptions *api.ClientOptions,
+	repo *api.RemoteRepo,
+) (*api.LocalRepo, error) {
+	req := &api.CloneRequest{
+		ClientOptions: clientOptions,
+		Source:        repo.Source,
+		RepoId:        repo.Id,
+	}
+
+	stream, err := client.Clone(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var local *api.LocalRepo
+
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if out := res.GetOutput(); out != nil {
+			cmd.Println(out.Message)
+		} else if r := res.GetLocalRepo(); r != nil {
+			local = r
+		}
+	}
+
+	if local == nil {
+		return nil, errors.New("server did not provide information about the local clone")
+	}
+
+	return local, nil
 }
 
 // suggestFunc is a function that returns a suggestion response from the API.

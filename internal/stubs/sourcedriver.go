@@ -152,14 +152,14 @@ func (s *Source) Suggest(word string) []sourcedriver.RemoteRepo {
 	return nil
 }
 
-// SourceDriverCloner is a test implementation of the sourcedriver.Cloner
+// SourceCloner is a test implementation of the sourcedriver.SourceCloner
 // interface.
-type SourceDriverCloner struct {
+type SourceCloner struct {
 	CloneFunc func(context.Context, string, logging.Logger) error
 }
 
-// Clone returns s.CloneFunc() if it is non-nil; otherwise, it returns an error.
-func (s *SourceDriverCloner) Clone(
+// Clone returns s.CloneFunc() if it is non-nil; otherwise, it returns nil.
+func (s *SourceCloner) Clone(
 	ctx context.Context,
 	dir string,
 	logger logging.Logger,
@@ -168,5 +168,5 @@ func (s *SourceDriverCloner) Clone(
 		return s.CloneFunc(ctx, dir, logger)
 	}
 
-	return errors.New("<not implemented>")
+	return nil
 }

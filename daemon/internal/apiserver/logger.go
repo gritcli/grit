@@ -23,7 +23,7 @@ func (s *Server) newStreamLogger(
 		})
 
 		if err := stream.SendMsg(m); err != nil {
-			logging.Log(s.Logger, "unable to write log to stream: %w", err)
+			logging.Log(s.Logger, "unable to write log to stream: %s", err)
 		}
 	}
 

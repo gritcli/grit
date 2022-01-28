@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"errors"
-	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/api"
@@ -41,34 +40,31 @@ func newCloneCommand() *cobra.Command {
 				clientOptions *api.ClientOptions,
 				executor shell.Executor,
 			) error {
-				repo, err := resolveRepo(
-					ctx,
-					cmd,
-					client,
-					&api.ResolveRequest{
-						ClientOptions: clientOptions,
-						Query:         args[0],
-						Filter:        api.ResolveFilter_RESOLVE_REMOTE_ONLY,
-					},
-				)
-				if err != nil {
-					return err
-				}
-
-				dir, err := cloneRepo(
+				remote, err := resolveRemoteRepo(
 					ctx,
 					cmd,
 					client,
 					clientOptions,
-					repo,
+					args[0],
 				)
 				if err != nil {
 					return err
 				}
 
-				cmd.Println(render.RelPath(dir))
+				local, err := cloneRepo(
+					ctx,
+					cmd,
+					client,
+					clientOptions,
+					remote,
+				)
+				if err != nil {
+					return err
+				}
 
-				return executor("cd", dir)
+				cmd.Println(render.RelPath(local.AbsoluteCloneDir))
+
+				return executor("cd", local.AbsoluteCloneDir)
 			})
 		},
 		ValidArgsFunction: suggest(func(
@@ -88,49 +84,4 @@ func newCloneCommand() *cobra.Command {
 			})
 		}),
 	}
-}
-
-// cloneRepo clones a repository.
-func cloneRepo(
-	ctx context.Context,
-	cmd *cobra.Command,
-	client api.APIClient,
-	clientOptions *api.ClientOptions,
-	repo *api.Repo,
-) (string, error) {
-	req := &api.CloneRequest{
-		ClientOptions: clientOptions,
-		Source:        repo.Source,
-		RepoId:        repo.Id,
-	}
-
-	stream, err := client.Clone(ctx, req)
-	if err != nil {
-		return "", err
-	}
-
-	dir := ""
-
-	for {
-		res, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return "", err
-		}
-
-		if out := res.GetOutput(); out != nil {
-			cmd.Println(out.Message)
-		} else if d := res.GetDirectory(); d != "" {
-			dir = d
-		}
-	}
-
-	if dir == "" {
-		return "", errors.New("server did not provide the directory of the clone")
-	}
-
-	return dir, nil
 }

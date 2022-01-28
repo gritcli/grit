@@ -7,6 +7,7 @@ import (
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/daemon/internal/source"
+	"github.com/gritcli/grit/driver/sourcedriver"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"
 )
@@ -30,10 +31,10 @@ func (s *Server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.Sourc
 		}
 
 		res.Sources = append(res.Sources, &api.Source{
-			Name:        s.Name,
-			Description: s.Description,
-			Status:      status,
-			CloneDir:    s.CloneDir,
+			Name:         s.Name,
+			Description:  s.Description,
+			Status:       status,
+			BaseCloneDir: s.CloneDir,
 		})
 	}
 
@@ -77,14 +78,8 @@ func (s *Server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 
 			for _, r := range repos {
 				if err := stream.Send(&api.ResolveResponse{
-					Response: &api.ResolveResponse_Repo{
-						Repo: &api.Repo{
-							Id:          r.ID,
-							Source:      src.Name,
-							Name:        r.Name,
-							Description: r.Description,
-							WebUrl:      r.WebURL,
-						},
+					Response: &api.ResolveResponse_RemoteRepo{
+						RemoteRepo: marshalRemoteRepo(src.Name, r),
 					},
 				}); err != nil {
 					return err
@@ -100,7 +95,7 @@ func (s *Server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 
 // Clone makes a local clone of a repository from a source.
 func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error {
-	dir, err := s.Cloner.Clone(
+	repo, err := s.Cloner.Clone(
 		stream.Context(),
 		req.Source,
 		req.RepoId,
@@ -121,8 +116,8 @@ func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 	}
 
 	return stream.Send(&api.CloneResponse{
-		Response: &api.CloneResponse_Directory{
-			Directory: dir,
+		Response: &api.CloneResponse_LocalRepo{
+			LocalRepo: marshalLocalRepo(repo),
 		},
 	})
 }
@@ -148,4 +143,25 @@ func (s *Server) SuggestRepo(
 	}
 
 	return res, nil
+}
+
+// marshalRemoteRepo marshals a sourcedriver.RemoteRepo into its API
+// representation.
+func marshalRemoteRepo(source string, r sourcedriver.RemoteRepo) *api.RemoteRepo {
+	return &api.RemoteRepo{
+		Id:          r.ID,
+		Source:      source,
+		Name:        r.Name,
+		Description: r.Description,
+		WebUrl:      r.WebURL,
+	}
+}
+
+// marshalRemoteRepo marshals a source.LocalRepo into its API
+// representation.
+func marshalLocalRepo(r source.LocalRepo) *api.LocalRepo {
+	return &api.LocalRepo{
+		RemoteRepo:       marshalRemoteRepo(r.Source.Name, r.RemoteRepo),
+		AbsoluteCloneDir: r.AbsoluteCloneDir,
+	}
 }

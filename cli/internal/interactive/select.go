@@ -12,6 +12,46 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SelectRemoteRepos prompts the user to select from a list of repositories.
+func SelectRemoteRepos(
+	cmd *cobra.Command,
+	repos []*api.RemoteRepo,
+) (*api.RemoteRepo, error) {
+	n, err := selectPrompt(
+		cmd,
+		"Chhose a repository:",
+		repos,
+		&promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   `> {{ .Name | cyan }} {{ print "[" .Source "]" | yellow }} {{ .Description         }}  {{ .WebUrl }}`,
+			Inactive: `  {{ .Name | faint }} {{ print "[" .Source "]" | faint }} {{ .Description | faint }}  {{ .WebUrl | faint }}`,
+		},
+		func(s string, i int) bool {
+			s = strings.ToLower(s)
+
+			if strings.Contains(strings.ToLower(repos[i].Name), s) {
+				return true
+			}
+
+			if strings.Contains(strings.ToLower(repos[i].Source), s) {
+				return true
+			}
+
+			if strings.Contains(strings.ToLower(repos[i].Description), s) {
+				return true
+			}
+
+			return false
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return repos[n], nil
+}
+
 // selectPrompt prompts the user to choose from a set of options.
 func selectPrompt(
 	cmd *cobra.Command,
@@ -46,44 +86,4 @@ func selectPrompt(
 
 	n, _, err := p.Run()
 	return n, err
-}
-
-// SelectRepos prompts the user to select from a list of repositories.
-func SelectRepos(
-	cmd *cobra.Command,
-	repos []*api.Repo,
-) (*api.Repo, error) {
-	n, err := selectPrompt(
-		cmd,
-		"Chhose a repository:",
-		repos,
-		&promptui.SelectTemplates{
-			Label:    "{{ . }}",
-			Active:   `> {{ .Name | cyan }} {{ print "[" .Source "]" | yellow }} {{ .Description         }}  {{ .WebUrl }}`,
-			Inactive: `  {{ .Name | faint }} {{ print "[" .Source "]" | faint }} {{ .Description | faint }}  {{ .WebUrl | faint }}`,
-		},
-		func(s string, i int) bool {
-			s = strings.ToLower(s)
-
-			if strings.Contains(strings.ToLower(repos[i].Name), s) {
-				return true
-			}
-
-			if strings.Contains(strings.ToLower(repos[i].Source), s) {
-				return true
-			}
-
-			if strings.Contains(strings.ToLower(repos[i].Description), s) {
-				return true
-			}
-
-			return false
-		},
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return repos[n], nil
 }

@@ -40,20 +40,6 @@ func newChDirCommand() *cobra.Command {
 				clientOptions *api.ClientOptions,
 				executor shell.Executor,
 			) error {
-				_, err := resolveRepo(
-					ctx,
-					cmd,
-					client,
-					&api.ResolveRequest{
-						ClientOptions: clientOptions,
-						Query:         args[0],
-						Filter:        api.ResolveFilter_RESOLVE_LOCAL_ONLY,
-					},
-				)
-				if err != nil {
-					return err
-				}
-
 				return nil
 			})
 		},

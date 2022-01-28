@@ -7,7 +7,18 @@ import (
 	"path/filepath"
 
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/gritcli/grit/driver/sourcedriver"
 )
+
+// LocalRepo represents a local clone of a remote repository.
+type LocalRepo struct {
+	sourcedriver.RemoteRepo
+	Source Source
+
+	// AbsoluteCloneDir is the absolute path to the directory containing the
+	// local clone.
+	AbsoluteCloneDir string
+}
 
 // A Cloner clones repositories.
 type Cloner struct {
@@ -21,7 +32,7 @@ func (c *Cloner) Clone(
 	ctx context.Context,
 	source, repoID string,
 	clientLogger logging.Logger,
-) (_ string, err error) {
+) (_ LocalRepo, err error) {
 	logger := logging.Tee(
 		clientLogger,
 		logging.Prefix(
@@ -40,18 +51,18 @@ func (c *Cloner) Clone(
 
 	src, ok := c.Sources.ByName(source)
 	if !ok {
-		return "", fmt.Errorf("unable to clone: unrecognized source (%s)", source)
+		return LocalRepo{}, fmt.Errorf("unable to clone: unrecognized source (%s)", source)
 	}
 
 	cloner, repo, err := src.Driver.NewCloner(ctx, repoID, logger)
 	if err != nil {
-		return "", fmt.Errorf("unable to prepare for cloning: %w", err)
+		return LocalRepo{}, fmt.Errorf("unable to prepare for cloning: %w", err)
 	}
 
 	dir := filepath.Join(src.CloneDir, repo.RelativeCloneDir)
 
 	if err := makeCloneDir(dir); err != nil {
-		return "", fmt.Errorf("unable to create clone directory: %w", err)
+		return LocalRepo{}, fmt.Errorf("unable to create clone directory: %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -60,10 +71,17 @@ func (c *Cloner) Clone(
 	}()
 
 	if err := cloner.Clone(ctx, dir, logger); err != nil {
-		return "", fmt.Errorf("unable to clone: %w", err)
+		return LocalRepo{}, fmt.Errorf("unable to clone: %w", err)
 	}
 
-	return dir, nil
+	return LocalRepo{
+		repo,
+		src,
+		filepath.Join(
+			src.CloneDir,
+			repo.RelativeCloneDir,
+		),
+	}, nil
 }
 
 // makeCloneDir makes the given directory (and all of its parents) only if it

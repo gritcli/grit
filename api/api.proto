@@ -36,15 +36,21 @@ message Source {
     string name = 1;
     string description = 2;
     string status = 3;
-    string clone_dir = 4;
+    string base_clone_dir = 4;
 }
 
-message Repo {
+message RemoteRepo {
     string id = 1;
     string source = 2;
     string name = 3;
     string description = 4;
     string web_url = 5;
+}
+
+message LocalRepo
+{
+    RemoteRepo remote_repo = 1;
+    string absolute_clone_dir = 2;
 }
 
 message ClientOptions {
@@ -65,7 +71,7 @@ message ResolveRequest {
 message ResolveResponse {
     oneof response {
         ClientOutput output = 1;
-        Repo repo = 2;
+        RemoteRepo remote_repo = 2;
     }
 }
 
@@ -78,7 +84,7 @@ message CloneRequest {
 message CloneResponse {
     oneof response {
         ClientOutput output = 1;
-        string directory = 2;
+        LocalRepo local_repo = 2;
     }
 }
 
