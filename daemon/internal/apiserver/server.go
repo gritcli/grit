@@ -45,9 +45,12 @@ func (s *Server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.Sourc
 	return res, nil
 }
 
-// Resolve resolves repository name, URL or other identifier to a list of
-// candidate repositories.
-func (s *Server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) error {
+// ResolveRemoteRepo resolves repository name, URL or other identifier to a list
+// of candidate repositories.
+func (s *Server) ResolveRemoteRepo(
+	req *api.ResolveRemoteRepoRequest,
+	stream api.API_ResolveRemoteRepoServer,
+) error {
 	ctx := stream.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -55,8 +58,8 @@ func (s *Server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 		stream,
 		req.ClientOptions,
 		func(out *api.ClientOutput) proto.Message {
-			return &api.ResolveResponse{
-				Response: &api.ResolveResponse_Output{
+			return &api.ResolveRemoteRepoResponse{
+				Response: &api.ResolveRemoteRepoResponse_Output{
 					Output: out,
 				},
 			}
@@ -77,8 +80,8 @@ func (s *Server) Resolve(req *api.ResolveRequest, stream api.API_ResolveServer) 
 			}
 
 			for _, r := range repos {
-				if err := stream.Send(&api.ResolveResponse{
-					Response: &api.ResolveResponse_RemoteRepo{
+				if err := stream.Send(&api.ResolveRemoteRepoResponse{
+					Response: &api.ResolveRemoteRepoResponse_RemoteRepo{
 						RemoteRepo: marshalRemoteRepo(src.Name, r),
 					},
 				}); err != nil {
@@ -128,13 +131,10 @@ func (s *Server) SuggestRepo(
 	ctx context.Context,
 	req *api.SuggestRepoRequest,
 ) (*api.SuggestResponse, error) {
-	includeLocal := req.Filter != api.ResolveFilter_RESOLVE_REMOTE_ONLY
-	includeRemote := req.Filter != api.ResolveFilter_RESOLVE_LOCAL_ONLY
-
 	repos := s.Suggester.Suggest(
 		req.Word,
-		includeLocal,
-		includeRemote,
+		req.Filter != api.SuggestRepoFilter_SUGGEST_REMOTE_ONLY,
+		req.Filter != api.SuggestRepoFilter_SUGGEST_LOCAL_ONLY,
 	)
 
 	res := &api.SuggestResponse{}

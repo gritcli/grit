@@ -20,13 +20,12 @@ func resolveRemoteRepo(
 	options *api.ClientOptions,
 	query string,
 ) (*api.RemoteRepo, error) {
-	req := &api.ResolveRequest{
+	req := &api.ResolveRemoteRepoRequest{
 		ClientOptions: options,
 		Query:         query,
-		Filter:        api.ResolveFilter_RESOLVE_REMOTE_ONLY,
 	}
 
-	stream, err := client.Resolve(ctx, req)
+	stream, err := client.ResolveRemoteRepo(ctx, req)
 	if err != nil {
 		return nil, err
 	}
