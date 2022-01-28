@@ -32,9 +32,9 @@ type APIClient interface {
 	ResolveRemoteRepo(ctx context.Context, in *ResolveRemoteRepoRequest, opts ...grpc.CallOption) (API_ResolveRemoteRepoClient, error)
 	// CloneRemoteRepo makes a local clone of a repository from a source.
 	CloneRemoteRepo(ctx context.Context, in *CloneRemoteRepoRequest, opts ...grpc.CallOption) (API_CloneRemoteRepoClient, error)
-	// SuggestRepo returns a list of repository names to be used as
-	// suggestions for completing a partial repository name.
-	SuggestRepo(ctx context.Context, in *SuggestRepoRequest, opts ...grpc.CallOption) (*SuggestResponse, error)
+	// SuggestRepos returns a list of repository names to be used as suggestions
+	// for completing a partial repository name.
+	SuggestRepos(ctx context.Context, in *SuggestReposRequest, opts ...grpc.CallOption) (*SuggestResponse, error)
 }
 
 type aPIClient struct {
@@ -150,9 +150,9 @@ func (x *aPICloneRemoteRepoClient) Recv() (*CloneRemoteRepoResponse, error) {
 	return m, nil
 }
 
-func (c *aPIClient) SuggestRepo(ctx context.Context, in *SuggestRepoRequest, opts ...grpc.CallOption) (*SuggestResponse, error) {
+func (c *aPIClient) SuggestRepos(ctx context.Context, in *SuggestReposRequest, opts ...grpc.CallOption) (*SuggestResponse, error) {
 	out := new(SuggestResponse)
-	err := c.cc.Invoke(ctx, "/grit.v2.api.API/SuggestRepo", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grit.v2.api.API/SuggestRepos", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -173,9 +173,9 @@ type APIServer interface {
 	ResolveRemoteRepo(*ResolveRemoteRepoRequest, API_ResolveRemoteRepoServer) error
 	// CloneRemoteRepo makes a local clone of a repository from a source.
 	CloneRemoteRepo(*CloneRemoteRepoRequest, API_CloneRemoteRepoServer) error
-	// SuggestRepo returns a list of repository names to be used as
-	// suggestions for completing a partial repository name.
-	SuggestRepo(context.Context, *SuggestRepoRequest) (*SuggestResponse, error)
+	// SuggestRepos returns a list of repository names to be used as suggestions
+	// for completing a partial repository name.
+	SuggestRepos(context.Context, *SuggestReposRequest) (*SuggestResponse, error)
 }
 
 // UnimplementedAPIServer should be embedded to have forward compatible implementations.
@@ -194,8 +194,8 @@ func (UnimplementedAPIServer) ResolveRemoteRepo(*ResolveRemoteRepoRequest, API_R
 func (UnimplementedAPIServer) CloneRemoteRepo(*CloneRemoteRepoRequest, API_CloneRemoteRepoServer) error {
 	return status.Errorf(codes.Unimplemented, "method CloneRemoteRepo not implemented")
 }
-func (UnimplementedAPIServer) SuggestRepo(context.Context, *SuggestRepoRequest) (*SuggestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SuggestRepo not implemented")
+func (UnimplementedAPIServer) SuggestRepos(context.Context, *SuggestReposRequest) (*SuggestResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SuggestRepos not implemented")
 }
 
 // UnsafeAPIServer may be embedded to opt out of forward compatibility for this service.
@@ -290,20 +290,20 @@ func (x *aPICloneRemoteRepoServer) Send(m *CloneRemoteRepoResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _API_SuggestRepo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SuggestRepoRequest)
+func _API_SuggestRepos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SuggestReposRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(APIServer).SuggestRepo(ctx, in)
+		return srv.(APIServer).SuggestRepos(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grit.v2.api.API/SuggestRepo",
+		FullMethod: "/grit.v2.api.API/SuggestRepos",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIServer).SuggestRepo(ctx, req.(*SuggestRepoRequest))
+		return srv.(APIServer).SuggestRepos(ctx, req.(*SuggestReposRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -320,8 +320,8 @@ var API_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _API_ListSources_Handler,
 		},
 		{
-			MethodName: "SuggestRepo",
-			Handler:    _API_SuggestRepo_Handler,
+			MethodName: "SuggestRepos",
+			Handler:    _API_SuggestRepos_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

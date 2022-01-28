@@ -149,16 +149,16 @@ func (s *Server) CloneRemoteRepo(req *api.CloneRemoteRepoRequest, stream api.API
 	})
 }
 
-// SuggestRepo returns a list of repository names to be used as suggestions for
+// SuggestRepos returns a list of repository names to be used as suggestions for
 // completing a partial repository name.
-func (s *Server) SuggestRepo(
+func (s *Server) SuggestRepos(
 	ctx context.Context,
-	req *api.SuggestRepoRequest,
+	req *api.SuggestReposRequest,
 ) (*api.SuggestResponse, error) {
 	repos := s.Suggester.Suggest(
 		req.Word,
-		req.Filter != api.SuggestRepoFilter_SUGGEST_REMOTE_ONLY,
-		req.Filter != api.SuggestRepoFilter_SUGGEST_LOCAL_ONLY,
+		req.Filter != api.SuggestReposFilter_SUGGEST_REMOTE_ONLY,
+		req.Filter != api.SuggestReposFilter_SUGGEST_LOCAL_ONLY,
 	)
 
 	res := &api.SuggestResponse{}

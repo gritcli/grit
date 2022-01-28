@@ -18,9 +18,9 @@ service API {
     // CloneRemoteRepo makes a local clone of a repository from a source.
     rpc CloneRemoteRepo(CloneRemoteRepoRequest) returns (stream CloneRemoteRepoResponse);
 
-    // SuggestRepo returns a list of repository names to be used as
-    // suggestions for completing a partial repository name.
-    rpc SuggestRepo(SuggestRepoRequest) returns (SuggestResponse);
+    // SuggestRepos returns a list of repository names to be used as suggestions
+    // for completing a partial repository name.
+    rpc SuggestRepos(SuggestReposRequest) returns (SuggestResponse);
 }
 
 message ListSourcesRequest {
@@ -97,15 +97,15 @@ message CloneRemoteRepoResponse {
     }
 }
 
-enum SuggestRepoFilter {
+enum SuggestReposFilter {
     SUGGEST_ANY = 0;
     SUGGEST_LOCAL_ONLY = 1;
     SUGGEST_REMOTE_ONLY = 2;
 }
 
-message SuggestRepoRequest {
+message SuggestReposRequest {
     string word = 1;
-    SuggestRepoFilter filter = 2;
+    SuggestReposFilter filter = 2;
 }
 
 message SuggestResponse {

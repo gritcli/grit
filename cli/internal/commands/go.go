@@ -56,9 +56,9 @@ func newGoCommand() *cobra.Command {
 				return nil, nil
 			}
 
-			return client.SuggestRepo(ctx, &api.SuggestRepoRequest{
+			return client.SuggestRepos(ctx, &api.SuggestReposRequest{
 				Word:   word,
-				Filter: api.SuggestRepoFilter_SUGGEST_ANY,
+				Filter: api.SuggestReposFilter_SUGGEST_ANY,
 			})
 		}),
 	}

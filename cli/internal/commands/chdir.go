@@ -54,9 +54,9 @@ func newChDirCommand() *cobra.Command {
 				return nil, nil
 			}
 
-			return client.SuggestRepo(ctx, &api.SuggestRepoRequest{
+			return client.SuggestRepos(ctx, &api.SuggestReposRequest{
 				Word:   word,
-				Filter: api.SuggestRepoFilter_SUGGEST_LOCAL_ONLY,
+				Filter: api.SuggestReposFilter_SUGGEST_LOCAL_ONLY,
 			})
 		}),
 	}
