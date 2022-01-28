@@ -64,13 +64,13 @@ func cloneRepo(
 	clientOptions *api.ClientOptions,
 	repo *api.RemoteRepo,
 ) (*api.LocalRepo, error) {
-	req := &api.CloneRequest{
+	req := &api.CloneRemoteRepoRequest{
 		ClientOptions: clientOptions,
 		Source:        repo.Source,
 		RepoId:        repo.Id,
 	}
 
-	stream, err := client.Clone(ctx, req)
+	stream, err := client.CloneRemoteRepo(ctx, req)
 	if err != nil {
 		return nil, err
 	}

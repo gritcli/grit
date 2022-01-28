@@ -120,8 +120,8 @@ func (s *Server) ResolveRemoteRepo(
 	return g.Wait()
 }
 
-// Clone makes a local clone of a repository from a source.
-func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error {
+// CloneRemoteRepo makes a local clone of a repository from a source.
+func (s *Server) CloneRemoteRepo(req *api.CloneRemoteRepoRequest, stream api.API_CloneRemoteRepoServer) error {
 	repo, err := s.Cloner.Clone(
 		stream.Context(),
 		req.Source,
@@ -130,8 +130,8 @@ func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 			stream,
 			req.ClientOptions,
 			func(out *api.ClientOutput) proto.Message {
-				return &api.CloneResponse{
-					Response: &api.CloneResponse_Output{
+				return &api.CloneRemoteRepoResponse{
+					Response: &api.CloneRemoteRepoResponse_Output{
 						Output: out,
 					},
 				}
@@ -142,8 +142,8 @@ func (s *Server) Clone(req *api.CloneRequest, stream api.API_CloneServer) error 
 		return err
 	}
 
-	return stream.Send(&api.CloneResponse{
-		Response: &api.CloneResponse_LocalRepo{
+	return stream.Send(&api.CloneRemoteRepoResponse{
+		Response: &api.CloneRemoteRepoResponse_LocalRepo{
 			LocalRepo: marshalLocalRepo(repo),
 		},
 	})

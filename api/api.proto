@@ -15,8 +15,8 @@ service API {
     // list of remote repositories.
     rpc ResolveRemoteRepo(ResolveRemoteRepoRequest) returns (stream ResolveRemoteRepoResponse);
 
-    // Clone makes a local clone of a repository from a source.
-    rpc Clone(CloneRequest) returns (stream CloneResponse);
+    // CloneRemoteRepo makes a local clone of a repository from a source.
+    rpc CloneRemoteRepo(CloneRemoteRepoRequest) returns (stream CloneRemoteRepoResponse);
 
     // SuggestRepo returns a list of repository names to be used as
     // suggestions for completing a partial repository name.
@@ -84,13 +84,13 @@ message ResolveRemoteRepoResponse {
     }
 }
 
-message CloneRequest {
+message CloneRemoteRepoRequest {
     ClientOptions client_options = 1;
     string source = 2;
     string repo_id = 3;
 }
 
-message CloneResponse {
+message CloneRemoteRepoResponse {
     oneof response {
         ClientOutput output = 1;
         LocalRepo local_repo = 2;
