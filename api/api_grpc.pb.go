@@ -24,8 +24,11 @@ const _ = grpc.SupportPackageIsVersion7
 type APIClient interface {
 	// Sources lists the configured repository sources.
 	Sources(ctx context.Context, in *SourcesRequest, opts ...grpc.CallOption) (*SourcesResponse, error)
+	// ResolveLocalRepo resolves repository name, URL or other identifier to a
+	// list if local repository clones.
+	ResolveLocalRepo(ctx context.Context, in *ResolveLocalRepoRequest, opts ...grpc.CallOption) (API_ResolveLocalRepoClient, error)
 	// ResolveRemoteRepo resolves repository name, URL or other identifier to a
-	// list of candidate repositories.
+	// list of remote repositories.
 	ResolveRemoteRepo(ctx context.Context, in *ResolveRemoteRepoRequest, opts ...grpc.CallOption) (API_ResolveRemoteRepoClient, error)
 	// Clone makes a local clone of a repository from a source.
 	Clone(ctx context.Context, in *CloneRequest, opts ...grpc.CallOption) (API_CloneClient, error)
@@ -51,8 +54,40 @@ func (c *aPIClient) Sources(ctx context.Context, in *SourcesRequest, opts ...grp
 	return out, nil
 }
 
+func (c *aPIClient) ResolveLocalRepo(ctx context.Context, in *ResolveLocalRepoRequest, opts ...grpc.CallOption) (API_ResolveLocalRepoClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], "/grit.v2.api.API/ResolveLocalRepo", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &aPIResolveLocalRepoClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type API_ResolveLocalRepoClient interface {
+	Recv() (*ResolveLocalRepoResponse, error)
+	grpc.ClientStream
+}
+
+type aPIResolveLocalRepoClient struct {
+	grpc.ClientStream
+}
+
+func (x *aPIResolveLocalRepoClient) Recv() (*ResolveLocalRepoResponse, error) {
+	m := new(ResolveLocalRepoResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *aPIClient) ResolveRemoteRepo(ctx context.Context, in *ResolveRemoteRepoRequest, opts ...grpc.CallOption) (API_ResolveRemoteRepoClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], "/grit.v2.api.API/ResolveRemoteRepo", opts...)
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[1], "/grit.v2.api.API/ResolveRemoteRepo", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +119,7 @@ func (x *aPIResolveRemoteRepoClient) Recv() (*ResolveRemoteRepoResponse, error) 
 }
 
 func (c *aPIClient) Clone(ctx context.Context, in *CloneRequest, opts ...grpc.CallOption) (API_CloneClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[1], "/grit.v2.api.API/Clone", opts...)
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[2], "/grit.v2.api.API/Clone", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -130,8 +165,11 @@ func (c *aPIClient) SuggestRepo(ctx context.Context, in *SuggestRepoRequest, opt
 type APIServer interface {
 	// Sources lists the configured repository sources.
 	Sources(context.Context, *SourcesRequest) (*SourcesResponse, error)
+	// ResolveLocalRepo resolves repository name, URL or other identifier to a
+	// list if local repository clones.
+	ResolveLocalRepo(*ResolveLocalRepoRequest, API_ResolveLocalRepoServer) error
 	// ResolveRemoteRepo resolves repository name, URL or other identifier to a
-	// list of candidate repositories.
+	// list of remote repositories.
 	ResolveRemoteRepo(*ResolveRemoteRepoRequest, API_ResolveRemoteRepoServer) error
 	// Clone makes a local clone of a repository from a source.
 	Clone(*CloneRequest, API_CloneServer) error
@@ -146,6 +184,9 @@ type UnimplementedAPIServer struct {
 
 func (UnimplementedAPIServer) Sources(context.Context, *SourcesRequest) (*SourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sources not implemented")
+}
+func (UnimplementedAPIServer) ResolveLocalRepo(*ResolveLocalRepoRequest, API_ResolveLocalRepoServer) error {
+	return status.Errorf(codes.Unimplemented, "method ResolveLocalRepo not implemented")
 }
 func (UnimplementedAPIServer) ResolveRemoteRepo(*ResolveRemoteRepoRequest, API_ResolveRemoteRepoServer) error {
 	return status.Errorf(codes.Unimplemented, "method ResolveRemoteRepo not implemented")
@@ -184,6 +225,27 @@ func _API_Sources_Handler(srv interface{}, ctx context.Context, dec func(interfa
 		return srv.(APIServer).Sources(ctx, req.(*SourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _API_ResolveLocalRepo_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ResolveLocalRepoRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(APIServer).ResolveLocalRepo(m, &aPIResolveLocalRepoServer{stream})
+}
+
+type API_ResolveLocalRepoServer interface {
+	Send(*ResolveLocalRepoResponse) error
+	grpc.ServerStream
+}
+
+type aPIResolveLocalRepoServer struct {
+	grpc.ServerStream
+}
+
+func (x *aPIResolveLocalRepoServer) Send(m *ResolveLocalRepoResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _API_ResolveRemoteRepo_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -263,6 +325,11 @@ var API_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ResolveLocalRepo",
+			Handler:       _API_ResolveLocalRepo_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "ResolveRemoteRepo",
 			Handler:       _API_ResolveRemoteRepo_Handler,

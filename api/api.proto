@@ -7,8 +7,12 @@ service API {
     // Sources lists the configured repository sources.
     rpc Sources(SourcesRequest) returns (SourcesResponse);
 
+    // ResolveLocalRepo resolves repository name, URL or other identifier to a
+    // list if local repository clones.
+    rpc ResolveLocalRepo(ResolveLocalRepoRequest) returns (stream ResolveLocalRepoResponse);
+
     // ResolveRemoteRepo resolves repository name, URL or other identifier to a
-    // list of candidate repositories.
+    // list of remote repositories.
     rpc ResolveRemoteRepo(ResolveRemoteRepoRequest) returns (stream ResolveRemoteRepoResponse);
 
     // Clone makes a local clone of a repository from a source.
@@ -54,6 +58,18 @@ message ClientOptions {
 message ClientOutput {
     string message = 1;
     bool is_debug = 2;
+}
+
+message ResolveLocalRepoRequest {
+    ClientOptions client_options = 1;
+    string query = 2;
+}
+
+message ResolveLocalRepoResponse {
+    oneof response {
+        ClientOutput output = 1;
+        LocalRepo local_repo = 2;
+    }
 }
 
 message ResolveRemoteRepoRequest {

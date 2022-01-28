@@ -45,8 +45,32 @@ func (s *Server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.Sourc
 	return res, nil
 }
 
+// ResolveLocalRepo resolves repository name, URL or other identifier to a
+// list if local repository clones.
+func (s *Server) ResolveLocalRepo(
+	req *api.ResolveLocalRepoRequest,
+	stream api.API_ResolveLocalRepoServer,
+) error {
+	// ctx := stream.Context()
+	// g, ctx := errgroup.WithContext(ctx)
+
+	// log := s.newStreamLogger(
+	// 	stream,
+	// 	req.ClientOptions,
+	// 	func(out *api.ClientOutput) proto.Message {
+	// 		return &api.ResolveLocalRepoResponse{
+	// 			Response: &api.ResolveLocalRepoResponse_Output{
+	// 				Output: out,
+	// 			},
+	// 		}
+	// 	},
+	// )
+
+	return nil
+}
+
 // ResolveRemoteRepo resolves repository name, URL or other identifier to a list
-// of candidate repositories.
+// of remote repositories.
 func (s *Server) ResolveRemoteRepo(
 	req *api.ResolveRemoteRepoRequest,
 	stream api.API_ResolveRemoteRepoServer,
