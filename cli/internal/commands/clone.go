@@ -8,7 +8,6 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/cli/internal/cobradi"
-	"github.com/gritcli/grit/cli/internal/interactive"
 	"github.com/gritcli/grit/cli/internal/render"
 	"github.com/gritcli/grit/cli/internal/shell"
 	"github.com/spf13/cobra"
@@ -46,8 +45,12 @@ func newCloneCommand() *cobra.Command {
 					ctx,
 					cmd,
 					client,
-					clientOptions,
-					args[0],
+					"Which repository would you like to clone?",
+					&api.ResolveRequest{
+						ClientOptions: clientOptions,
+						Query:         args[0],
+						Filter:        api.ResolveFilter_RESOLVE_REMOTE_ONLY,
+					},
 				)
 				if err != nil {
 					return err
@@ -81,60 +84,11 @@ func newCloneCommand() *cobra.Command {
 			}
 
 			return client.SuggestRepo(ctx, &api.SuggestRepoRequest{
-				Word:          word,
-				IncludeLocal:  false,
-				IncludeRemote: true,
+				Word:   word,
+				Filter: api.ResolveFilter_RESOLVE_REMOTE_ONLY,
 			})
 		}),
 	}
-}
-
-// resolveRepo resolves a repo query string to a specific repo.
-func resolveRepo(
-	ctx context.Context,
-	cmd *cobra.Command,
-	client api.APIClient,
-	clientOptions *api.ClientOptions,
-	query string,
-) (*api.Repo, error) {
-	req := &api.ResolveRequest{
-		ClientOptions: clientOptions,
-		Query:         query,
-	}
-
-	stream, err := client.Resolve(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	var repos []*api.Repo
-
-	for {
-		res, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		if out := res.GetOutput(); out != nil {
-			cmd.Println(out.Message)
-		} else if r := res.GetRepo(); r != nil {
-			repos = append(repos, r)
-		}
-	}
-
-	if len(repos) == 0 {
-		return nil, errors.New("no matching repositories found")
-	}
-
-	return interactive.SelectRepos(
-		cmd,
-		"Which repository would you like to clone?",
-		repos,
-	)
 }
 
 // cloneRepo clones a repository.

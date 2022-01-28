@@ -50,7 +50,7 @@ func (s *source) Init(
 		return nil
 	}
 
-	logging.Log(logger, "authenticated as %s", user.GetLogin())
+	logging.Log(logger, "authenticated as @%s", user.GetLogin())
 	s.user = user
 
 	if err := s.populateRepoCache(ctx, logger); err != nil {

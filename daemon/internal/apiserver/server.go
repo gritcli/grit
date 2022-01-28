@@ -133,10 +133,13 @@ func (s *Server) SuggestRepo(
 	ctx context.Context,
 	req *api.SuggestRepoRequest,
 ) (*api.SuggestResponse, error) {
+	includeLocal := req.Filter != api.ResolveFilter_RESOLVE_REMOTE_ONLY
+	includeRemote := req.Filter != api.ResolveFilter_RESOLVE_LOCAL_ONLY
+
 	repos := s.Suggester.Suggest(
 		req.Word,
-		req.IncludeLocal,
-		req.IncludeRemote,
+		includeLocal,
+		includeRemote,
 	)
 
 	res := &api.SuggestResponse{}

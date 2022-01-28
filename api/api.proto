@@ -19,6 +19,12 @@ service API {
     rpc SuggestRepo(SuggestRepoRequest) returns (SuggestResponse);
 }
 
+enum ResolveFilter {
+    RESOLVE_ANY = 0;
+    RESOLVE_LOCAL_ONLY = 1;
+    RESOLVE_REMOTE_ONLY = 2;
+}
+
 message SourcesRequest {
 }
 
@@ -53,6 +59,7 @@ message ClientOutput {
 message ResolveRequest {
     ClientOptions client_options = 1;
     string query = 2;
+    ResolveFilter filter = 3;
 }
 
 message ResolveResponse {
@@ -77,8 +84,7 @@ message CloneResponse {
 
 message SuggestRepoRequest {
     string word = 1;
-    bool include_local = 2;
-    bool include_remote = 3;
+    ResolveFilter filter = 2;
 }
 
 message SuggestResponse {

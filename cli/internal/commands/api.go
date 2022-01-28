@@ -2,11 +2,58 @@ package commands
 
 import (
 	"context"
+	"errors"
+	"io"
 
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/cli/internal/cobradi"
+	"github.com/gritcli/grit/cli/internal/interactive"
 	"github.com/spf13/cobra"
 )
+
+// resolveRepo is a helper function for choosing a single repository from the
+// result of a call to the resolve API.
+func resolveRepo(
+	ctx context.Context,
+	cmd *cobra.Command,
+	client api.APIClient,
+	prompt string,
+	req *api.ResolveRequest,
+) (*api.Repo, error) {
+	stream, err := client.Resolve(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var repos []*api.Repo
+
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if out := res.GetOutput(); out != nil {
+			cmd.Println(out.Message)
+		} else if r := res.GetRepo(); r != nil {
+			repos = append(repos, r)
+		}
+	}
+
+	if len(repos) == 0 {
+		return nil, errors.New("no matching repositories found")
+	}
+
+	return interactive.SelectRepos(
+		cmd,
+		prompt,
+		repos,
+	)
+}
 
 // suggestFunc is a function that returns a suggestion response from the API.
 type suggestFunc func(

@@ -55,9 +55,8 @@ func newChDirCommand() *cobra.Command {
 			}
 
 			return client.SuggestRepo(ctx, &api.SuggestRepoRequest{
-				Word:          word,
-				IncludeLocal:  true,
-				IncludeRemote: false,
+				Word:   word,
+				Filter: api.ResolveFilter_RESOLVE_LOCAL_ONLY,
 			})
 		}),
 	}
