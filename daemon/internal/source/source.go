@@ -10,9 +10,9 @@ type Source struct {
 	// Description is a human-readable description of the source.
 	Description string
 
-	// CloneDir is the directory containing repositories cloned from this
+	// BaseCloneDir is the directory containing repositories cloned from this
 	// source.
-	CloneDir string // TODO: rename to BaseCloneDir
+	BaseCloneDir string
 
 	// Driver is the source implementation provided by the driver, used to
 	// perform repository operations for this source.

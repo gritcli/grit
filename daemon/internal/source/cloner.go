@@ -59,7 +59,7 @@ func (c *Cloner) Clone(
 		return LocalRepo{}, fmt.Errorf("unable to prepare for cloning: %w", err)
 	}
 
-	dir := filepath.Join(src.CloneDir, repo.RelativeCloneDir)
+	dir := filepath.Join(src.BaseCloneDir, repo.RelativeCloneDir)
 
 	if err := makeCloneDir(dir); err != nil {
 		return LocalRepo{}, fmt.Errorf("unable to create clone directory: %w", err)
@@ -78,7 +78,7 @@ func (c *Cloner) Clone(
 		repo,
 		src,
 		filepath.Join(
-			src.CloneDir,
+			src.BaseCloneDir,
 			repo.RelativeCloneDir,
 		),
 	}, nil

@@ -49,9 +49,9 @@ var _ = Describe("type Cloner", func() {
 		}
 
 		src = Source{
-			Name:     "<source>",
-			CloneDir: tempDir,
-			Driver:   driver,
+			Name:         "<source>",
+			BaseCloneDir: tempDir,
+			Driver:       driver,
 		}
 
 		cloner = &Cloner{

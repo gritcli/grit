@@ -61,16 +61,16 @@ var _ = Describe("type List", func() {
 
 			Expect(list).To(ConsistOf(
 				Source{
-					Name:        "<source-a>",
-					Description: "<description>",
-					CloneDir:    "/path/to/clones-a",
-					Driver:      srcA,
+					Name:         "<source-a>",
+					Description:  "<description>",
+					BaseCloneDir: "/path/to/clones-a",
+					Driver:       srcA,
 				},
 				Source{
-					Name:        "<source-b>",
-					Description: "<description>",
-					CloneDir:    "/path/to/clones-b",
-					Driver:      srcB,
+					Name:         "<source-b>",
+					Description:  "<description>",
+					BaseCloneDir: "/path/to/clones-b",
+					Driver:       srcB,
 				},
 			))
 

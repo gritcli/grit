@@ -21,10 +21,10 @@ func NewList(sources []config.Source) List {
 		list = append(
 			list,
 			Source{
-				Name:        cfg.Name,
-				Description: cfg.Driver.DescribeSourceConfig(),
-				CloneDir:    cfg.Clones.Dir,
-				Driver:      cfg.Driver.NewSource(),
+				Name:         cfg.Name,
+				Description:  cfg.Driver.DescribeSourceConfig(),
+				BaseCloneDir: cfg.Clones.Dir,
+				Driver:       cfg.Driver.NewSource(),
 			},
 		)
 	}

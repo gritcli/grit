@@ -34,7 +34,7 @@ func (s *Server) Sources(ctx context.Context, _ *api.SourcesRequest) (*api.Sourc
 			Name:         s.Name,
 			Description:  s.Description,
 			Status:       status,
-			BaseCloneDir: s.CloneDir,
+			BaseCloneDir: s.BaseCloneDir,
 		})
 	}
 
