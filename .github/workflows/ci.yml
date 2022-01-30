@@ -15,3 +15,6 @@ jobs:
   ci:
     name: Shared
     uses: gritcli/repos/.github/workflows/shared-go+github.yml@main
+
+    secrets:
+      GRIT_INTEGRATION_TEST_GITHUB_TOKEN: ${{ secrets.GRIT_INTEGRATION_TEST_GITHUB_TOKEN }}
