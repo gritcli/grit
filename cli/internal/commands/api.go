@@ -20,12 +20,13 @@ func resolveRemoteRepo(
 	options *api.ClientOptions,
 	query string,
 ) (*api.RemoteRepo, error) {
-	req := &api.ResolveRemoteRepoRequest{
+	req := &api.ResolveRepoRequest{
 		ClientOptions: options,
 		Query:         query,
+		Locality:      api.Locality_REMOTE_ONLY,
 	}
 
-	stream, err := client.ResolveRemoteRepo(ctx, req)
+	stream, err := client.ResolveRepo(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +65,13 @@ func cloneRepo(
 	clientOptions *api.ClientOptions,
 	repo *api.RemoteRepo,
 ) (*api.LocalRepo, error) {
-	req := &api.CloneRemoteRepoRequest{
+	req := &api.CloneRepoRequest{
 		ClientOptions: clientOptions,
 		Source:        repo.Source,
 		RepoId:        repo.Id,
 	}
 
-	stream, err := client.CloneRemoteRepo(ctx, req)
+	stream, err := client.CloneRepo(ctx, req)
 	if err != nil {
 		return nil, err
 	}

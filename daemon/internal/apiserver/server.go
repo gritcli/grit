@@ -45,35 +45,11 @@ func (s *Server) ListSources(ctx context.Context, _ *api.ListSourcesRequest) (*a
 	return res, nil
 }
 
-// ResolveLocalRepo resolves repository name, URL or other identifier to a
-// list if local repository clones.
-func (s *Server) ResolveLocalRepo(
-	req *api.ResolveLocalRepoRequest,
-	stream api.API_ResolveLocalRepoServer,
-) error {
-	// ctx := stream.Context()
-	// g, ctx := errgroup.WithContext(ctx)
-
-	// log := s.newStreamLogger(
-	// 	stream,
-	// 	req.ClientOptions,
-	// 	func(out *api.ClientOutput) proto.Message {
-	// 		return &api.ResolveLocalRepoResponse{
-	// 			Response: &api.ResolveLocalRepoResponse_Output{
-	// 				Output: out,
-	// 			},
-	// 		}
-	// 	},
-	// )
-
-	return nil
-}
-
-// ResolveRemoteRepo resolves repository name, URL or other identifier to a list
-// of remote repositories.
-func (s *Server) ResolveRemoteRepo(
-	req *api.ResolveRemoteRepoRequest,
-	stream api.API_ResolveRemoteRepoServer,
+// ResolveRepo resolves a repository name, URL or other identifier to a list of
+// repositories.
+func (s *Server) ResolveRepo(
+	req *api.ResolveRepoRequest,
+	stream api.API_ResolveRepoServer,
 ) error {
 	ctx := stream.Context()
 	g, ctx := errgroup.WithContext(ctx)
@@ -82,46 +58,48 @@ func (s *Server) ResolveRemoteRepo(
 		stream,
 		req.ClientOptions,
 		func(out *api.ClientOutput) proto.Message {
-			return &api.ResolveRemoteRepoResponse{
-				Response: &api.ResolveRemoteRepoResponse_Output{
+			return &api.ResolveRepoResponse{
+				Response: &api.ResolveRepoResponse_Output{
 					Output: out,
 				},
 			}
 		},
 	)
 
-	for _, src := range s.SourceList {
-		src := src // capture loop variable
+	if req.Locality != api.Locality_LOCAL_ONLY {
+		for _, src := range s.SourceList {
+			src := src // capture loop variable
 
-		g.Go(func() error {
-			repos, err := src.Driver.Resolve(
-				ctx,
-				req.Query,
-				logging.Prefix(log, "%s: ", src.Name),
-			)
-			if err != nil {
-				return err
-			}
-
-			for _, r := range repos {
-				if err := stream.Send(&api.ResolveRemoteRepoResponse{
-					Response: &api.ResolveRemoteRepoResponse_RemoteRepo{
-						RemoteRepo: marshalRemoteRepo(src.Name, r),
-					},
-				}); err != nil {
+			g.Go(func() error {
+				repos, err := src.Driver.Resolve(
+					ctx,
+					req.Query,
+					logging.Prefix(log, "%s: ", src.Name),
+				)
+				if err != nil {
 					return err
 				}
-			}
 
-			return nil
-		})
+				for _, r := range repos {
+					if err := stream.Send(&api.ResolveRepoResponse{
+						Response: &api.ResolveRepoResponse_RemoteRepo{
+							RemoteRepo: marshalRemoteRepo(src.Name, r),
+						},
+					}); err != nil {
+						return err
+					}
+				}
+
+				return nil
+			})
+		}
 	}
 
 	return g.Wait()
 }
 
-// CloneRemoteRepo makes a local clone of a repository from a source.
-func (s *Server) CloneRemoteRepo(req *api.CloneRemoteRepoRequest, stream api.API_CloneRemoteRepoServer) error {
+// CloneRepo makes a local clone of a repository from a source.
+func (s *Server) CloneRepo(req *api.CloneRepoRequest, stream api.API_CloneRepoServer) error {
 	repo, err := s.Cloner.Clone(
 		stream.Context(),
 		req.Source,
@@ -130,8 +108,8 @@ func (s *Server) CloneRemoteRepo(req *api.CloneRemoteRepoRequest, stream api.API
 			stream,
 			req.ClientOptions,
 			func(out *api.ClientOutput) proto.Message {
-				return &api.CloneRemoteRepoResponse{
-					Response: &api.CloneRemoteRepoResponse_Output{
+				return &api.CloneRepoResponse{
+					Response: &api.CloneRepoResponse_Output{
 						Output: out,
 					},
 				}
@@ -142,8 +120,8 @@ func (s *Server) CloneRemoteRepo(req *api.CloneRemoteRepoRequest, stream api.API
 		return err
 	}
 
-	return stream.Send(&api.CloneRemoteRepoResponse{
-		Response: &api.CloneRemoteRepoResponse_LocalRepo{
+	return stream.Send(&api.CloneRepoResponse{
+		Response: &api.CloneRepoResponse_LocalRepo{
 			LocalRepo: marshalLocalRepo(repo),
 		},
 	})
@@ -157,8 +135,8 @@ func (s *Server) SuggestRepos(
 ) (*api.SuggestResponse, error) {
 	repos := s.Suggester.Suggest(
 		req.Word,
-		req.Filter != api.SuggestReposFilter_SUGGEST_REMOTE_ONLY,
-		req.Filter != api.SuggestReposFilter_SUGGEST_LOCAL_ONLY,
+		req.Locality != api.Locality_REMOTE_ONLY,
+		req.Locality != api.Locality_LOCAL_ONLY,
 	)
 
 	res := &api.SuggestResponse{}

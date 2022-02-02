@@ -3,33 +3,6 @@ package grit.v2.api;
 
 option go_package = "github.com/gritcli/grit/api";
 
-service API {
-    // ListSources lists the configured repository sources.
-    rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse);
-
-    // ResolveLocalRepo resolves repository name, URL or other identifier to a
-    // list if local repository clones.
-    rpc ResolveLocalRepo(ResolveLocalRepoRequest) returns (stream ResolveLocalRepoResponse);
-
-    // ResolveRemoteRepo resolves repository name, URL or other identifier to a
-    // list of remote repositories.
-    rpc ResolveRemoteRepo(ResolveRemoteRepoRequest) returns (stream ResolveRemoteRepoResponse);
-
-    // CloneRemoteRepo makes a local clone of a repository from a source.
-    rpc CloneRemoteRepo(CloneRemoteRepoRequest) returns (stream CloneRemoteRepoResponse);
-
-    // SuggestRepos returns a list of repository names to be used as suggestions
-    // for completing a partial repository name.
-    rpc SuggestRepos(SuggestReposRequest) returns (SuggestResponse);
-}
-
-message ListSourcesRequest {
-}
-
-message ListSourcesResponse {
-    repeated Source sources = 1;
-}
-
 message Source {
     string name = 1;
     string description = 2;
@@ -51,6 +24,12 @@ message LocalRepo
     string absolute_clone_dir = 2;
 }
 
+enum Locality {
+    ANY = 0;
+    LOCAL_ONLY = 1;
+    REMOTE_ONLY = 2;
+}
+
 message ClientOptions {
     bool capture_debug_log = 1;
 }
@@ -60,52 +39,58 @@ message ClientOutput {
     bool is_debug = 2;
 }
 
-message ResolveLocalRepoRequest {
-    ClientOptions client_options = 1;
-    string query = 2;
+service API {
+    // ListSources lists the configured repository sources.
+    rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse);
+
+    // ResolveRepo resolves a repository name, URL or other identifier to a list
+    // of repositories.
+    rpc ResolveRepo(ResolveRepoRequest) returns (stream ResolveRepoResponse);
+
+    // CloneRepo makes a local clone of a repository from a source.
+    rpc CloneRepo(CloneRepoRequest) returns (stream CloneRepoResponse);
+
+    // SuggestRepos returns a list of repository names to be used as suggestions
+    // for completing a partial repository name.
+    rpc SuggestRepos(SuggestReposRequest) returns (SuggestResponse);
 }
 
-message ResolveLocalRepoResponse {
+message ListSourcesRequest {}
+
+message ListSourcesResponse {
+    repeated Source sources = 1;
+}
+
+message ResolveRepoRequest {
+    ClientOptions client_options = 1;
+    string query = 2;
+    Locality locality = 3;
+}
+
+message ResolveRepoResponse {
     oneof response {
         ClientOutput output = 1;
         LocalRepo local_repo = 2;
+        RemoteRepo remote_repo = 3;
     }
 }
 
-message ResolveRemoteRepoRequest {
-    ClientOptions client_options = 1;
-    string query = 2;
-}
-
-message ResolveRemoteRepoResponse {
-    oneof response {
-        ClientOutput output = 1;
-        RemoteRepo remote_repo = 2;
-    }
-}
-
-message CloneRemoteRepoRequest {
+message CloneRepoRequest {
     ClientOptions client_options = 1;
     string source = 2;
     string repo_id = 3;
 }
 
-message CloneRemoteRepoResponse {
+message CloneRepoResponse {
     oneof response {
         ClientOutput output = 1;
         LocalRepo local_repo = 2;
     }
 }
 
-enum SuggestReposFilter {
-    SUGGEST_ANY = 0;
-    SUGGEST_LOCAL_ONLY = 1;
-    SUGGEST_REMOTE_ONLY = 2;
-}
-
 message SuggestReposRequest {
     string word = 1;
-    SuggestReposFilter filter = 2;
+    Locality locality = 2;
 }
 
 message SuggestResponse {

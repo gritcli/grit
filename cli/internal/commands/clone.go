@@ -79,8 +79,8 @@ func newCloneCommand() *cobra.Command {
 			}
 
 			return client.SuggestRepos(ctx, &api.SuggestReposRequest{
-				Word:   word,
-				Filter: api.SuggestReposFilter_SUGGEST_REMOTE_ONLY,
+				Word:     word,
+				Locality: api.Locality_REMOTE_ONLY,
 			})
 		}),
 	}
