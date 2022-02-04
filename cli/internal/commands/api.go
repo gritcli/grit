@@ -57,51 +57,6 @@ func resolveRemoteRepo(
 	return interactive.SelectRemoteRepos(cmd, repos)
 }
 
-// cloneRepo clones a remote repository using the clone API operation.
-func cloneRepo(
-	ctx context.Context,
-	cmd *cobra.Command,
-	client api.APIClient,
-	clientOptions *api.ClientOptions,
-	repo *api.RemoteRepo,
-) (*api.LocalRepo, error) {
-	req := &api.CloneRepoRequest{
-		ClientOptions: clientOptions,
-		Source:        repo.Source,
-		RepoId:        repo.Id,
-	}
-
-	stream, err := client.CloneRepo(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	var local *api.LocalRepo
-
-	for {
-		res, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		if out := res.GetOutput(); out != nil {
-			cmd.Println(out.Message)
-		} else if r := res.GetLocalRepo(); r != nil {
-			local = r
-		}
-	}
-
-	if local == nil {
-		return nil, errors.New("server did not provide information about the local clone")
-	}
-
-	return local, nil
-}
-
 // suggestFunc is a function that returns a suggestion response from the API.
 type suggestFunc func(
 	ctx context.Context,

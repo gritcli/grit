@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/gritcli/grit/cli/internal/cobradi"
+	"github.com/gritcli/grit/cli/internal/commands/clone"
 	"github.com/gritcli/grit/cli/internal/flags"
 	"github.com/spf13/cobra"
 )
@@ -38,7 +39,7 @@ func NewRoot(v string) *cobra.Command {
 
 	root.AddCommand(
 		newChDirCommand(),
-		newCloneCommand(),
+		clone.NewCommand(),
 		newGoCommand(),
 		newShellIntegrationCommand(),
 		newSourceCommand(),

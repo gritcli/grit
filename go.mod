@@ -22,11 +22,28 @@ require (
 )
 
 require (
+	github.com/atotto/clipboard v0.1.4 // indirect
+	github.com/charmbracelet/lipgloss v0.4.0 // indirect
+	github.com/containerd/console v1.0.2 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/muesli/ansi v0.0.0-20211018074035-2e021307bc4b // indirect
+	github.com/muesli/reflow v0.3.0 // indirect
+	github.com/muesli/termenv v0.9.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/sahilm/fuzzy v0.1.0 // indirect
+	golang.org/x/term v0.0.0-20210422114643-f5beecf764ed // indirect
+)
+
+require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+	github.com/charmbracelet/bubbles v0.10.2
+	github.com/charmbracelet/bubbletea v0.19.3
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
