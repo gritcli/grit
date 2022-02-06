@@ -25,9 +25,9 @@ message LocalRepo
 }
 
 enum Locality {
-    ANY = 0;
-    LOCAL_ONLY = 1;
-    REMOTE_ONLY = 2;
+    UNKNOWN_LOCALITY = 0;
+    LOCAL = 1;
+    REMOTE = 2;
 }
 
 message ClientOptions {
@@ -64,7 +64,8 @@ message ListSourcesResponse {
 message ResolveRepoRequest {
     ClientOptions client_options = 1;
     string query = 2;
-    Locality locality = 3;
+    repeated string source_filter = 3;
+    repeated Locality locality_filter = 4;
 }
 
 message ResolveRepoResponse {
@@ -90,7 +91,7 @@ message CloneRepoResponse {
 
 message SuggestReposRequest {
     string word = 1;
-    Locality locality = 2;
+    repeated Locality locality_filter = 2;
 }
 
 message SuggestResponse {
