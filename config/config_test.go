@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"sort"
 	"strings"
 
 	. "github.com/gritcli/grit/config"
@@ -56,13 +55,6 @@ func withSource(cfg Config, src Source) Config {
 	}
 
 	cfg.Sources = append(cfg.Sources, src)
-
-	sort.Slice(
-		cfg.Sources,
-		func(i, j int) bool {
-			return cfg.Sources[i].Name < cfg.Sources[j].Name
-		},
-	)
 
 	return cfg
 }
