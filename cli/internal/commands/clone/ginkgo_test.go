@@ -1,4 +1,4 @@
-package interactive_test
+package clone_test
 
 import (
 	"reflect"

@@ -1,0 +1,2 @@
+The "source list" command lists the configured repository sources and their
+current status.

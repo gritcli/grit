@@ -23,9 +23,11 @@ func Run(version string) (err error) {
 	)
 	defer cancel()
 
+	commands.Root.Version = version
+
 	return cobradi.Execute(
 		ctx,
 		&container,
-		commands.NewRoot(version),
+		commands.Root,
 	)
 }
