@@ -12,13 +12,13 @@ func SetupFromSource(cmd *cobra.Command) {
 	cmd.Flags().StringP(
 		"from-source", "f",
 		"",
-		"use a specific source",
+		"limit resolution of <repo> to a single `source`",
 	)
 
 	cmd.Flags().Bool(
 		"no-resolve",
 		false,
-		"interpret <repo> as a unique ID, requires --from-source",
+		"force <repo> to be interpreted as a unique ID, requires --from-source",
 	)
 }
 
