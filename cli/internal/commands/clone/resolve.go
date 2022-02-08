@@ -65,10 +65,14 @@ func resolveInteractive(
 	query string,
 	responses api.API_ResolveRepoClient,
 ) (*api.RemoteRepo, error) {
-	p := tea.NewProgram(newResolveModel(
-		query,
-		responses,
-	))
+	p := tea.NewProgram(
+		newResolveModel(
+			query,
+			responses,
+		),
+		tea.WithInput(cmd.InOrStdin()),
+		tea.WithOutput(cmd.OutOrStdout()),
+	)
 
 	x, err := p.StartReturningModel()
 	if err != nil {
