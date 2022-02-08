@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"os"
+
 	"github.com/gritcli/grit/cli/internal/cobradi"
 	"github.com/gritcli/grit/cli/internal/commands/clone"
 	"github.com/gritcli/grit/cli/internal/commands/source"
@@ -28,6 +30,12 @@ var Root = &cobra.Command{
 }
 
 func init() {
+	// Explicitly set the streams for Cobra to use; otherwise, cmd.Print() uses
+	// stderr.
+	Root.SetIn(os.Stdin)
+	Root.SetOut(os.Stdout)
+	Root.SetErr(os.Stderr)
+
 	flags.SetupVerbose(Root)
 	flags.SetupNoInteractive(Root)
 	flags.SetupSocket(Root)

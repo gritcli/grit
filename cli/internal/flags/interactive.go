@@ -1,7 +1,6 @@
 package flags
 
 import (
-	"io"
 	"os"
 
 	"github.com/mattn/go-isatty"
@@ -29,18 +28,13 @@ func IsInteractive(cmd *cobra.Command) bool {
 
 // supportsInteractivity returns true if cmd can support interactive prompts.
 func supportsInteractivity(cmd *cobra.Command) bool {
-	// The promptui library requires close capabilities on the IO reader for
-	// some reason, so we can't perform any interactivity unless this operation
-	// is available.
-	in := cmd.InOrStdin()
-	if _, ok := in.(io.ReadCloser); !ok {
-		return false
-	}
+	return isTerminal(cmd.InOrStdin()) &&
+		isTerminal(cmd.OutOrStdout())
+}
 
-	// Lastly, we want to check if the file we're writing to is actually a
-	// terminal.
-	out := cmd.OutOrStdout()
-	if f, ok := out.(*os.File); ok {
+// isTerminal returns true if x is an *os.File that is a TTY.
+func isTerminal(x interface{}) bool {
+	if f, ok := x.(*os.File); ok {
 		return isatty.IsTerminal(f.Fd())
 	}
 
