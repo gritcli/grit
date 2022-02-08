@@ -19,13 +19,12 @@ var helpText string
 
 // Command is the "clone" command.
 var Command = &cobra.Command{
-	Use:                   "clone [--from-source <source> [--no-resolve]] <repo>",
-	DisableFlagsInUseLine: true,
-	Args:                  cobra.ExactArgs(1),
-	Short:                 "Clone a remote repository",
-	Long:                  helpText,
-	ValidArgsFunction:     completion.RepoName(0, api.Locality_REMOTE),
-	RunE:                  run,
+	Use:               "clone [--from-source <source> [--no-resolve]] <repo>",
+	Args:              cobra.ExactArgs(1),
+	Short:             "Clone a remote repository",
+	Long:              helpText,
+	ValidArgsFunction: completion.RepoName(0, api.Locality_REMOTE),
+	RunE:              run,
 }
 
 func init() {

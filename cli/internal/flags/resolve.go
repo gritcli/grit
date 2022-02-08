@@ -11,14 +11,25 @@ import (
 func SetupFromSource(cmd *cobra.Command) {
 	cmd.Flags().StringP(
 		"from-source", "f",
-		"",
-		"use a specific source",
+		"asdfas",
+		"Limit resolution of `<repo>` to a single source. By default all sources are searched.",
 	)
+	Annotate(cmd, "from-source", Annotation{
+		ArgName: "source",
+	})
+
+	// 	`--from-source|-f <source>`
+	//   Limit resolution of <repo> to the given source. By default all
+	//   sources are searched.
+
+	// `--no-resolve`
+	//   Force `<repo>` to be interpreted as a unique identifier.
+	//   Requires `--source`.
 
 	cmd.Flags().Bool(
 		"no-resolve",
 		false,
-		"interpret <repo> as a unique ID, requires --from-source",
+		"Force `<repo>` to be interpreted as a (source-specific) unique identifier, `requires --from-source`",
 	)
 }
 

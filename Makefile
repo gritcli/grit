@@ -1,5 +1,6 @@
 TEST_CONFIG_DIR := ./internal/testdata/etc
 GO_EMBEDDED_FILES += $(shell PATH="$(PATH)" git-find cli/internal/commands -name 'help.txt')
+GO_EMBEDDED_FILES += $(shell PATH="$(PATH)" git-find cli/internal/commands -name '*.gtpl')
 
 -include .makefiles/Makefile
 -include .makefiles/pkg/protobuf/v2/Makefile
