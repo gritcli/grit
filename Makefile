@@ -5,7 +5,7 @@ GO_EMBEDDED_FILES += $(shell PATH="$(PATH)" git-find cli/internal/commands -name
 -include .makefiles/pkg/protobuf/v2/Makefile
 -include .makefiles/pkg/go/v1/Makefile
 
-run: $(GO_DEBUG_DIR)/grit artifacts/grit
+run: $(GO_DEBUG_DIR)/grit2 artifacts/grit
 	$< --socket artifacts/grit/daemon.sock $(RUN_ARGS)
 
 serve: $(GO_DEBUG_DIR)/gritd artifacts/grit

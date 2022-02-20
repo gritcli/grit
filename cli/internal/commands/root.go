@@ -12,7 +12,7 @@ import (
 
 // Root is the root "grit" command.
 var Root = &cobra.Command{
-	Use:   "grit",
+	Use:   "grit2",
 	Short: "Manage your local VCS clones",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Add the currently-executing Cobra CLI command the the DI
