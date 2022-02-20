@@ -135,15 +135,22 @@ func printUnambiguousCommands(
 		query,
 	)
 
-	for _, r := range repos {
-		cmd.PrintErrf(
-			"  %s clone --from-source %s --no-resolve %s # %s \n",
-			os.Args[0],
-			shell.Escape(r.GetSource()),
-			shell.Escape(r.GetId()),
-			r.GetName(),
-		)
-	}
+	socket, _ := flags.Socket(cmd)
 
-	cmd.Println("")
+	for n, r := range repos {
+		cmd.PrintErrf("%d) %s\n", n+1, r.GetName())
+		cmd.Println("")
+		cmd.PrintErrf(
+			"  %s clone \\\n",
+			os.Args[0],
+		)
+
+		if socket != api.DefaultSocket {
+			cmd.PrintErrf("    --socket %s \\\n", shell.Escape(socket))
+		}
+
+		cmd.PrintErrf("    --from-source %s \\\n", shell.Escape(r.GetSource()))
+		cmd.PrintErrf("    --no-resolve %s\n", shell.Escape(r.GetId()))
+		cmd.Println("")
+	}
 }
