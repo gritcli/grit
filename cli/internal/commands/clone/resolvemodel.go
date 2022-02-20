@@ -6,9 +6,9 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/cli/internal/apitea"
+	"github.com/gritcli/grit/cli/internal/style"
 )
 
 // resolutionComplete is a tea.Msg that indicates resolution has completed.
@@ -31,7 +31,7 @@ type resolveModel struct {
 	output    []string
 	matches   []*api.RemoteRepo
 	cursor    int
-	done      bool
+	loaded    bool
 }
 
 // newResolveModel returns a new model for interactive repository resolution.
@@ -46,6 +46,7 @@ func newResolveModel(
 	}
 
 	m.spinner.Spinner = spinner.Points
+	m.spinner.Style = style.Spinner
 
 	return m
 }
@@ -92,7 +93,7 @@ func (m resolveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if !m.done {
+	if !m.loaded {
 		s, cmd := m.spinner.Update(msg)
 		m.spinner = s
 		batch = append(batch, cmd)
@@ -134,7 +135,7 @@ func (m *resolveModel) handleKeyPress(msg tea.KeyMsg) tea.Cmd {
 
 // handleComplete handles completion of the API resolution operation.
 func (m *resolveModel) handleComplete() tea.Cmd {
-	m.done = true
+	m.loaded = true
 
 	switch len(m.matches) {
 	case 0:
@@ -157,84 +158,95 @@ func (m *resolveModel) handleComplete() tea.Cmd {
 
 func (m resolveModel) View() string {
 	count := len(m.matches)
-	view := ""
-
-	if len(m.output) > 0 {
-		for _, o := range m.output {
-			view += o + "\n"
-		}
-
-		view += "\n"
-	}
-
-	view += fmt.Sprintf("resolving '%s', ", m.query)
-
-	switch count {
-	case 0:
-		view += "no matching repositories found"
-	case 1:
-		view += "one matching repository found"
-	default:
-		view += fmt.Sprintf("%d matching repositories found", len(m.matches))
-	}
-
-	if !m.done {
-		view += " " + m.spinner.View()
-	}
-
-	view += "\n"
-
-	selected := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("4"))
-	faint := lipgloss.NewStyle().Faint(true)
-
-	switch count {
-	case 0:
-		if m.done {
-			view += faint.Render("nothing to clone")
-		} else {
-			view += faint.Render("press [esc] to cancel")
-		}
-
-	case 1:
-		if m.done {
-			view += faint.Render(
-				fmt.Sprintf("chose '%s' automatically",
-					m.matches[0].GetName(),
-				),
-			)
-		} else {
-			view += faint.Render("press [enter] to clone ") +
-				selected.Render(m.matches[0].GetName()) +
-				faint.Render(" immediately, or [esc] to cancel")
-		}
-	default:
-		view += faint.Render(
-			"use [↑/↓] to select a repository, [enter] to clone, or [esc] to cancel",
-		)
-	}
-
-	if !m.done {
-		view += faint.Render(" (or wait for more matches)")
-	}
-
-	view += "\n\n"
+	view := m.renderOutput()
+	view += m.renderStatus() + "\n"
+	view += m.renderInstructions() + "\n\n"
 
 	if count > 1 {
 		for i, r := range m.matches {
+			st := style.Unselected
 			if i == m.cursor {
-				view += " ∙ "
-				view += selected.Render(r.GetName())
-			} else {
-				view += "   "
-				view += r.GetName()
+				st = style.Selected
 			}
 
-			view += " (" + r.GetSource() + ")" + "\n"
-			view += "   "
-			view += faint.Render(r.GetDescription()) + "\n"
+			view += "  "
+			view += st.Render(fmt.Sprintf(
+				"%s (%s)",
+				r.GetName(),
+				r.GetSource(),
+			))
+			view += "\n"
+			view += "  "
+			view += style.Description.Render(r.GetDescription()) + "\n"
 			view += "\n"
 		}
 	}
 
 	return view
+}
+
+// renderOutput renders the server log output.
+func (m *resolveModel) renderOutput() string {
+	output := ""
+
+	if len(m.output) > 0 {
+		for _, o := range m.output {
+			output += o + "\n"
+		}
+
+		output += "\n"
+	}
+
+	return output
+}
+
+// renderStatus renders the current status of the resolution process.
+func (m *resolveModel) renderStatus() string {
+	status := fmt.Sprintf("resolving '%s', ", m.query)
+
+	switch len(m.matches) {
+	case 0:
+		status += "no matching repositories found"
+	case 1:
+		status += "one matching repository found"
+	default:
+		status += fmt.Sprintf("%d matching repositories found", len(m.matches))
+	}
+
+	if !m.loaded {
+		status += " " + m.spinner.View()
+	}
+
+	return status
+}
+
+// renderInstructions renders the instructions for choosing a repo.
+func (m *resolveModel) renderInstructions() string {
+	const chooseInstructions = "use [↑/↓] to select a repository, [enter] to clone, or [esc] to cancel"
+
+	if m.loaded {
+		switch len(m.matches) {
+		case 0:
+			return style.Instructions.Render("nothing to clone")
+		case 1:
+			return style.Instructions.Render(
+				fmt.Sprintf("chose '%s' automatically", m.matches[0].GetName()),
+			)
+		default:
+			return style.Instructions.Render(chooseInstructions)
+		}
+	}
+
+	const orWaitForMore = " (or wait for more matches)"
+
+	switch len(m.matches) {
+	case 0:
+		return style.Instructions.Render("press [esc] to cancel" + orWaitForMore)
+	case 1:
+		return style.Instructions.Render("press [enter] to clone ") +
+			style.Selected.Render(m.matches[0].GetName()) +
+			style.Instructions.Render(" immediately, or [esc] to cancel"+orWaitForMore)
+	default:
+		return style.Instructions.Render(chooseInstructions + orWaitForMore)
+	}
 }
