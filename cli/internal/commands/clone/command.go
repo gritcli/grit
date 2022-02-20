@@ -54,8 +54,7 @@ func run(cmd *cobra.Command, args []string) error {
 		exec shell.Executor,
 	) error {
 		if !noResolve {
-			var err error
-			queryOrID, source, err = resolve(
+			repo, ok, err := resolve(
 				ctx,
 				cmd,
 				client,
@@ -66,6 +65,12 @@ func run(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
+			if !ok {
+				return nil
+			}
+
+			queryOrID = repo.GetId()
+			source = repo.GetSource()
 		}
 
 		dir, err := clone(

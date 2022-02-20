@@ -21,7 +21,7 @@ func resolve(
 	clientOptions *api.ClientOptions,
 	query string,
 	source string,
-) (string, string, error) {
+) (*api.RemoteRepo, bool, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -39,7 +39,7 @@ func resolve(
 
 	responses, err := client.ResolveRepo(ctx, req)
 	if err != nil {
-		return "", "", err
+		return nil, false, err
 	}
 
 	resolver := resolveNonInteractive
@@ -47,12 +47,12 @@ func resolve(
 		resolver = resolveInteractive
 	}
 
-	repo, err := resolver(ctx, cmd, query, responses)
+	repo, ok, err := resolver(ctx, cmd, query, responses)
 	if err != nil {
-		return "", "", err
+		return nil, false, err
 	}
 
-	return repo.GetId(), repo.GetSource(), nil
+	return repo, ok, nil
 }
 
 // resolveInteractive resolves the repository query to a single repository.
@@ -64,7 +64,7 @@ func resolveInteractive(
 	cmd *cobra.Command,
 	query string,
 	responses api.API_ResolveRepoClient,
-) (*api.RemoteRepo, error) {
+) (*api.RemoteRepo, bool, error) {
 	p := tea.NewProgram(
 		newResolveModel(
 			query,
@@ -76,11 +76,11 @@ func resolveInteractive(
 
 	x, err := p.StartReturningModel()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	m := x.(resolveModel)
-	return m.Repo, m.Error
+	return m.Repo, m.Repo != nil, m.Error
 }
 
 // resolveNonInteractive resolves the repository query to a single repository ID
@@ -93,7 +93,7 @@ func resolveNonInteractive(
 	cmd *cobra.Command,
 	query string,
 	responses api.API_ResolveRepoClient,
-) (*api.RemoteRepo, error) {
+) (*api.RemoteRepo, bool, error) {
 	var repos []*api.RemoteRepo
 
 	for {
@@ -102,7 +102,7 @@ func resolveNonInteractive(
 			break
 		}
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		if out := res.GetOutput(); out != nil {
@@ -114,12 +114,12 @@ func resolveNonInteractive(
 
 	switch len(repos) {
 	case 1:
-		return repos[0], nil
+		return repos[0], true, nil
 	case 0:
-		return nil, errors.New("no matching repositories")
+		return nil, false, errors.New("no matching repositories")
 	default:
 		printUnambiguousCommands(cmd, query, repos)
-		return nil, errors.New("multiple matching repositories")
+		return nil, false, errors.New("multiple matching repositories")
 	}
 }
 
