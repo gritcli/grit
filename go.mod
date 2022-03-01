@@ -17,7 +17,7 @@ require (
 	github.com/onsi/gomega v1.18.1
 	github.com/spf13/cobra v1.3.0
 	go.uber.org/dig v1.14.0
-	go.uber.org/multierr v1.7.0
+	go.uber.org/multierr v1.8.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.44.0
