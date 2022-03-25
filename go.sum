@@ -305,8 +305,8 @@ go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqe
 go.uber.org/atomic v1.7.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
 go.uber.org/atomic v1.9.0 h1:ECmE8Bn/WFTYwEW/bpKD3M8VtR/zQVbavAoalC1PYyE=
 go.uber.org/atomic v1.9.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
-go.uber.org/dig v1.14.0 h1:VmGvIH45/aapXPQkaOrK5u4B5B7jxZB98HM/utx0eME=
-go.uber.org/dig v1.14.0/go.mod h1:jHAn/z1Ld1luVVyGKOAIFYz/uBFqKjjEEdIqVAqfQ2o=
+go.uber.org/dig v1.14.1 h1:fyakRgZDdi2F8FgwJJoRGangMSPTIxPSLGzR3Oh0/54=
+go.uber.org/dig v1.14.1/go.mod h1:52EKx/Vjdpz9EzeNcweC4YMsTrDdFn9mS/+Uw5ZnVTI=
 go.uber.org/multierr v1.8.0 h1:dg6GjLku4EH+249NNmoIciG9N/jURbDG+pFlTkhzIC8=
 go.uber.org/multierr v1.8.0/go.mod h1:7EAYxJLBy9rStEaz58O2t4Uvip6FSURkq8/ppBp95ak=
 golang.org/x/crypto v0.0.0-20190219172222-a4c6cb3142f2/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
