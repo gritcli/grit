@@ -3,7 +3,7 @@ module github.com/gritcli/grit
 go 1.17
 
 require (
-	github.com/charmbracelet/bubbles v0.11.0
+	github.com/charmbracelet/bubbles v0.12.0
 	github.com/charmbracelet/bubbletea v0.21.0
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/dogmatiq/dodeca v1.3.1
