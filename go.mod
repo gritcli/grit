@@ -1,6 +1,6 @@
 module github.com/gritcli/grit
 
-go 1.17
+go 1.19
 
 require (
 	github.com/charmbracelet/bubbles v0.14.0
