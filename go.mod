@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.23.1
 	github.com/charmbracelet/lipgloss v0.6.0
 	github.com/dogmatiq/dodeca v1.4.2
-	github.com/dustin/go-humanize v1.0.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/go-git/go-git/v5 v5.5.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/hashicorp/hcl/v2 v2.15.0
