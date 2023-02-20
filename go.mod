@@ -18,7 +18,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	go.uber.org/dig v1.16.1
 	go.uber.org/multierr v1.9.0
-	golang.org/x/oauth2 v0.4.0
+	golang.org/x/oauth2 v0.5.0
 	golang.org/x/sync v0.1.0
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
