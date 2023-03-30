@@ -14,7 +14,7 @@ require (
 	github.com/mattn/go-isatty v0.0.18
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.27.5
+	github.com/onsi/gomega v1.27.6
 	github.com/spf13/cobra v1.6.1
 	go.uber.org/dig v1.16.1
 	go.uber.org/multierr v1.10.0
