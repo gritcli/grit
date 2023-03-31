@@ -1,9 +1,10 @@
-TEST_CONFIG_DIR := ./internal/testdata/etc
 GO_EMBEDDED_FILES += $(shell PATH="$(PATH)" git-find cli/internal/commands -name 'help.txt')
+GO_FERRITE_BINARY = gritd
 
 -include .makefiles/Makefile
 -include .makefiles/pkg/protobuf/v2/Makefile
 -include .makefiles/pkg/go/v1/Makefile
+-include .makefiles/pkg/go/v1/with-ferrite.mk
 
 run: $(GO_DEBUG_DIR)/grit2 artifacts/grit
 	$< --socket artifacts/grit/daemon.sock $(args)

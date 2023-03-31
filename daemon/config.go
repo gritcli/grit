@@ -1,13 +1,17 @@
 package daemon
 
 import (
-	"os"
-
+	"github.com/dogmatiq/ferrite"
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/builtins/githubsource"
 	"github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/config"
 )
+
+var configDir = ferrite.
+	String("GRIT_CONFIG_DIR", "the directory containing Grit's configuration files").
+	WithDefault(config.DefaultDirectory).
+	Required()
 
 func init() {
 	imbue.With0(
@@ -29,7 +33,7 @@ func init() {
 			r *config.DriverRegistry,
 		) (config.Config, error) {
 			return config.Load(
-				os.Getenv("GRIT_CONFIG_DIR"),
+				configDir.Value(),
 				r,
 			)
 		},

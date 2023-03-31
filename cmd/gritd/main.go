@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/dogmatiq/ferrite"
 	"github.com/gritcli/grit/daemon"
 )
 
@@ -13,6 +14,7 @@ import (
 var version = "0.0.0"
 
 func main() {
+	ferrite.Init()
 	rand.Seed(time.Now().UnixNano())
 
 	if err := daemon.Run(version); err != nil {
