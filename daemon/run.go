@@ -7,16 +7,16 @@ import (
 	"syscall"
 
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
 	"github.com/gritcli/grit/daemon/internal/source"
-	"github.com/gritcli/grit/internal/di"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )
 
 // container is the dependency injection container for the Grit daemon.
-var container di.Container
+var container = imbue.New()
 
 // Run executes the Grit daemon.
 func Run(version string) (err error) {
@@ -27,34 +27,31 @@ func Run(version string) (err error) {
 	)
 	defer cancel()
 
-	return container.Invoke(func(
-		cfg config.Config,
-		s *grpc.Server,
-		r *config.DriverRegistry,
-		sources source.List,
-		logger logging.Logger,
-	) error {
-		logging.Log(logger, "grit daemon v%s", version)
+	if err := imbue.Invoke3(
+		ctx,
+		container,
+		func(
+			ctx context.Context,
+			r *config.DriverRegistry,
+			s source.List,
+			l logging.Logger,
+		) error {
+			logging.Log(l, "grit daemon v%s", version)
 
-		logDrivers(logger, r)
-		logSources(logger, sources)
+			logDrivers(l, r)
+			logSources(l, s)
 
-		if err := initSourceDrivers(ctx, logger, sources); err != nil {
-			return err
-		}
+			return initSourceDrivers(ctx, l, s)
+		},
+	); err != nil {
+		return err
+	}
 
-		g, ctx := errgroup.WithContext(ctx)
+	g := container.WaitGroup(ctx)
+	imbue.Go2(g, runSourceDrivers)
+	imbue.Go3(g, runGRPCServer)
 
-		g.Go(func() error {
-			return runSourceDrivers(ctx, logger, sources)
-		})
-
-		g.Go(func() error {
-			return runGRPCServer(ctx, logger, cfg.Daemon.Socket, s)
-		})
-
-		return g.Wait()
-	})
+	return g.Wait()
 }
 
 // logDrivers logs information about the drivers in the registry.
@@ -127,7 +124,11 @@ func initSourceDrivers(ctx context.Context, logger logging.Logger, sources sourc
 }
 
 // runSourceDrivers runs each source's driver in parallel.
-func runSourceDrivers(ctx context.Context, logger logging.Logger, sources source.List) error {
+func runSourceDrivers(
+	ctx context.Context,
+	logger logging.Logger,
+	sources source.List,
+) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, src := range sources {
@@ -150,11 +151,11 @@ func runSourceDrivers(ctx context.Context, logger logging.Logger, sources source
 // runGRPCServer runs the gRPC server.
 func runGRPCServer(
 	ctx context.Context,
-	logger logging.Logger,
-	socket string,
+	cfg config.Config,
 	s *grpc.Server,
+	l logging.Logger,
 ) error {
-	lis, err := apiserver.Listen(socket)
+	lis, err := apiserver.Listen(cfg.Daemon.Socket)
 	if err != nil {
 		return err
 	}
@@ -165,8 +166,8 @@ func runGRPCServer(
 		s.GracefulStop()
 	}()
 
-	logging.Log(logger, "api: accepting requests on unix socket: %s", socket)
-	defer logging.Log(logger, "api: server stopped")
+	logging.Log(l, "api: accepting requests on unix socket: %s", cfg.Daemon.Socket)
+	defer logging.Log(l, "api: server stopped")
 
 	return s.Serve(lis)
 }

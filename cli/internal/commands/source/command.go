@@ -1,18 +1,21 @@
 package source
 
 import (
+	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/cli/internal/commands/source/list"
 	"github.com/spf13/cobra"
 )
 
-// Command is the "source" command.
-var Command = &cobra.Command{
-	Use:   "source",
-	Short: "Manage repository sources",
-}
+// Command returns the "source" command.
+func Command(c *imbue.Container) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "source",
+		Short: "Manage repository sources",
+	}
 
-func init() {
-	Command.AddCommand(
-		list.Command,
+	cmd.AddCommand(
+		list.Command(c),
 	)
+
+	return cmd
 }

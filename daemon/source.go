@@ -2,34 +2,47 @@ package daemon
 
 import (
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/daemon/internal/source"
 )
 
 func init() {
-	container.Provide(func(
-		cfg config.Config,
-	) source.List {
-		return source.NewList(cfg.Sources)
-	})
+	imbue.With1(
+		container,
+		func(
+			ctx imbue.Context,
+			cfg config.Config,
+		) (source.List, error) {
+			return source.NewList(cfg.Sources), nil
+		},
+	)
 
-	container.Provide(func(
-		sources source.List,
-		logger logging.Logger,
-	) *source.Cloner {
-		return &source.Cloner{
-			Sources: sources,
-			Logger:  logger,
-		}
-	})
+	imbue.With2(
+		container,
+		func(
+			ctx imbue.Context,
+			s source.List,
+			l logging.Logger,
+		) (*source.Cloner, error) {
+			return &source.Cloner{
+				Sources: s,
+				Logger:  l,
+			}, nil
+		},
+	)
 
-	container.Provide(func(
-		sources source.List,
-		logger logging.Logger,
-	) *source.Suggester {
-		return &source.Suggester{
-			Sources: sources,
-			Logger:  logger,
-		}
-	})
+	imbue.With2(
+		container,
+		func(
+			ctx imbue.Context,
+			s source.List,
+			l logging.Logger,
+		) (*source.Suggester, error) {
+			return &source.Suggester{
+				Sources: s,
+				Logger:  l,
+			}, nil
+		},
+	)
 }

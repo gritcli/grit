@@ -5,8 +5,8 @@ import (
 	_ "embed"
 	"errors"
 
+	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/api"
-	"github.com/gritcli/grit/cli/internal/cobradi"
 	"github.com/gritcli/grit/cli/internal/completion"
 	"github.com/gritcli/grit/cli/internal/flags"
 	"github.com/gritcli/grit/cli/internal/render"
@@ -17,76 +17,79 @@ import (
 //go:embed help.txt
 var helpText string
 
-// Command is the "clone" command.
-var Command = &cobra.Command{
-	Use:                   "clone [--from-source <source> [--no-resolve]] <repo>",
-	DisableFlagsInUseLine: true,
-	Args:                  cobra.ExactArgs(1),
-	Short:                 "Clone a remote repository",
-	Long:                  helpText,
-	ValidArgsFunction:     completion.RepoName(0, api.Locality_REMOTE),
-	RunE:                  run,
-}
+// Command returns the "clone" command.
+func Command(container *imbue.Container) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:                   "clone [--from-source <source> [--no-resolve]] <repo>",
+		DisableFlagsInUseLine: true,
+		Args:                  cobra.ExactArgs(1),
+		Short:                 "Clone a remote repository",
+		Long:                  helpText,
+		ValidArgsFunction:     completion.RepoName(container, 0, api.Locality_REMOTE),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			queryOrID := args[0]
 
-func init() {
-	flags.SetupFromSource(Command)
-}
+			if queryOrID == "" {
+				return errors.New("<repo> argument must not be empty")
+			}
 
-// run executes the command.
-func run(cmd *cobra.Command, args []string) error {
-	queryOrID := args[0]
-
-	if queryOrID == "" {
-		return errors.New("<repo> argument must not be empty")
-	}
-
-	source, noResolve, err := flags.FromSource(cmd)
-	if err != nil {
-		return err
-	}
-
-	cmd.SilenceUsage = true
-
-	return cobradi.Invoke(cmd, func(
-		ctx context.Context,
-		client api.APIClient,
-		options *api.ClientOptions,
-		exec shell.Executor,
-	) error {
-		if !noResolve {
-			repo, ok, err := resolve(
-				ctx,
-				cmd,
-				client,
-				options,
-				queryOrID,
-				source,
-			)
+			source, noResolve, err := flags.FromSource(cmd)
 			if err != nil {
 				return err
 			}
-			if !ok {
-				return nil
-			}
 
-			queryOrID = repo.GetId()
-			source = repo.GetSource()
-		}
+			cmd.SilenceUsage = true
 
-		dir, err := clone(
-			ctx,
-			cmd,
-			client,
-			options,
-			queryOrID,
-			source,
-		)
-		if err != nil {
-			return err
-		}
+			return imbue.Invoke3(
+				cmd.Context(),
+				container,
+				func(
+					ctx context.Context,
+					client api.APIClient,
+					options *api.ClientOptions,
+					exec shell.Executor,
+				) error {
+					if !noResolve {
+						repo, ok, err := resolve(
+							ctx,
+							cmd,
+							client,
+							options,
+							queryOrID,
+							source,
+						)
+						if err != nil {
+							return err
+						}
+						if !ok {
+							return nil
+						}
 
-		cmd.Println(render.RelPath(dir))
+						queryOrID = repo.GetId()
+						source = repo.GetSource()
+					}
 
-		return exec("cd", dir)
-	})
+					dir, err := clone(
+						ctx,
+						cmd,
+						client,
+						options,
+						queryOrID,
+						source,
+					)
+					if err != nil {
+						return err
+					}
+
+					cmd.Println(render.RelPath(dir))
+
+					return exec("cd", dir)
+				},
+			)
+		},
+	}
+
+	flags.SetupFromSource(cmd)
+
+	return cmd
 }

@@ -3,8 +3,8 @@ package completion
 import (
 	"context"
 
+	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/api"
-	"github.com/gritcli/grit/cli/internal/cobradi"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +17,13 @@ type ValidArgsFunc func(
 
 // RepoName returns a ValidArgsFunc that completes the argument at the given
 // position using the known repository names.
-func RepoName(pos int, loc ...api.Locality) ValidArgsFunc {
+func RepoName(
+	container *imbue.Container,
+	pos int,
+	loc ...api.Locality,
+) ValidArgsFunc {
 	return callSuggestAPI(
+		container,
 		pos,
 		func(
 			ctx context.Context,
@@ -45,7 +50,11 @@ type suggestFunc func(
 
 // callSuggestAPI returns a ValidArgsFunc that completes the argument at the
 // given position by calling fn().
-func callSuggestAPI(pos int, fn suggestFunc) ValidArgsFunc {
+func callSuggestAPI(
+	container *imbue.Container,
+	pos int,
+	fn suggestFunc,
+) ValidArgsFunc {
 	return func(
 		cmd *cobra.Command,
 		args []string,
@@ -55,16 +64,18 @@ func callSuggestAPI(pos int, fn suggestFunc) ValidArgsFunc {
 			return nil, cobra.ShellCompDirectiveDefault
 		}
 
-		err := cobradi.Invoke(cmd, func(
-			ctx context.Context,
-			client api.APIClient,
-		) error {
-			res, err := fn(ctx, client, word)
-			words = res.GetWords()
-			return err
-		})
-
-		if err != nil {
+		if err := imbue.Invoke1(
+			cmd.Context(),
+			container,
+			func(
+				ctx context.Context,
+				client api.APIClient,
+			) error {
+				res, err := fn(ctx, client, word)
+				words = res.GetWords()
+				return err
+			},
+		); err != nil {
 			cobra.CompErrorln(err.Error())
 		}
 

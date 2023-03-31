@@ -6,13 +6,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gritcli/grit/cli/internal/cobradi"
+	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/cli/internal/commands"
-	"github.com/gritcli/grit/internal/di"
 )
 
 // container is the dependency injection container for the Grit CLI.
-var container di.Container
+var container = imbue.New()
 
 // Run starts the Grit CLI.
 func Run(version string) (err error) {
@@ -23,11 +22,7 @@ func Run(version string) (err error) {
 	)
 	defer cancel()
 
-	commands.Root.Version = version
-
-	return cobradi.Execute(
-		ctx,
-		&container,
-		commands.Root,
-	)
+	return commands.
+		Root(container, version).
+		ExecuteContext(ctx)
 }
