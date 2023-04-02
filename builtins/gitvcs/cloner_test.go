@@ -7,22 +7,22 @@ import (
 
 	git "github.com/go-git/go-git/v5"
 	"github.com/gritcli/grit/logs"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("type Cloner", func() {
 	var (
 		ctx     context.Context
-		cancel  context.CancelFunc
 		buffer  logs.Buffer
 		cloner  *Cloner
 		tempDir string
 	)
 
 	BeforeEach(func() {
+		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		DeferCleanup(cancel)
 
 		buffer = logs.Buffer{}
 		cloner = &Cloner{}
@@ -30,14 +30,9 @@ var _ = Describe("type Cloner", func() {
 		var err error
 		tempDir, err = os.MkdirTemp("", "")
 		Expect(err).ShouldNot(HaveOccurred())
-	})
-
-	AfterEach(func() {
-		cancel()
-
-		if tempDir != "" {
+		DeferCleanup(func() {
 			os.RemoveAll(tempDir)
-		}
+		})
 	})
 
 	Describe("func Clone()", func() {

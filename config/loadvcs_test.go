@@ -6,8 +6,7 @@ import (
 	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/gritcli/grit/internal/stubs"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 )
 
 var _ = Describe("func Load() (VCS configuration)", func() {

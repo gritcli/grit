@@ -6,13 +6,13 @@ import (
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
-	"github.com/onsi/ginkgo/extensions/table"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 )
 
 // SourceDriverTest is a test that tests source driver configuration.
-type SourceDriverTest = table.TableEntry
+type SourceDriverTest = ginkgo.TableEntry
 
 // TestSourceDriver runs a series of tests
 func TestSourceDriver(
@@ -21,8 +21,7 @@ func TestSourceDriver(
 	deps []vcsdriver.Registration,
 	tests ...SourceDriverTest,
 ) {
-	table.DescribeTable(
-		"it loads the configuration",
+	args := []any{
 		func(
 			content string,
 			expect func(dir string, cfg config.Config, err error),
@@ -40,8 +39,12 @@ func TestSourceDriver(
 			cfg, err := config.Load(dir, reg)
 			expect(dir, cfg, err)
 		},
-		tests...,
-	)
+	}
+	for _, test := range tests {
+		args = append(args, test)
+	}
+
+	ginkgo.DescribeTable("it loads the configuration", args...)
 }
 
 // SourceSuccess returns a test that tests a source driver configuration that is
@@ -51,7 +54,7 @@ func SourceSuccess(
 	content string,
 	expect sourcedriver.Config,
 ) SourceDriverTest {
-	return table.Entry(
+	return ginkgo.Entry(
 		description,
 		content,
 		func(dir string, cfg config.Config, err error) {
@@ -69,7 +72,7 @@ func SourceFailure(
 	content string,
 	expect string,
 ) SourceDriverTest {
-	return table.Entry(
+	return ginkgo.Entry(
 		description,
 		content,
 		func(dir string, cfg config.Config, err error) {

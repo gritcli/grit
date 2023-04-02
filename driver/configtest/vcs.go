@@ -9,14 +9,13 @@ import (
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/hashicorp/hcl/v2"
-	"github.com/onsi/ginkgo"
-	"github.com/onsi/ginkgo/extensions/table"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 )
 
 // VCSDriverTest is a test that tests VCS driver configuration.
-type VCSDriverTest = table.TableEntry
+type VCSDriverTest = ginkgo.TableEntry
 
 // TestVCSDriver runs a series of tests
 func TestVCSDriver(
@@ -24,8 +23,7 @@ func TestVCSDriver(
 	zero vcsdriver.Config,
 	tests ...VCSDriverTest,
 ) {
-	table.DescribeTable(
-		"it loads the configuration",
+	args := []any{
 		func(
 			content []string,
 			expect func(dir string, cfg config.Config, err error),
@@ -54,8 +52,12 @@ func TestVCSDriver(
 			cfg, err := config.Load(dir, reg)
 			expect(dir, cfg, err)
 		},
-		tests...,
-	)
+	}
+	for _, test := range tests {
+		args = append(args, test)
+	}
+
+	ginkgo.DescribeTable("it loads the configuration", args...)
 }
 
 // VCSSuccess returns a test that tests a default VCS driver configuration that
@@ -65,7 +67,7 @@ func VCSSuccess(
 	defaultContent string,
 	expect vcsdriver.Config,
 ) VCSDriverTest {
-	return table.Entry(
+	return ginkgo.Entry(
 		description,
 		[]string{
 			defaultContent,
@@ -95,7 +97,7 @@ func VCSSourceSpecificSuccess(
 	sourceSpecificContent string,
 	expect vcsdriver.Config,
 ) VCSDriverTest {
-	return table.Entry(
+	return ginkgo.Entry(
 		description,
 		[]string{
 			defaultContent,
@@ -129,7 +131,7 @@ func VCSFailure(
 	content string,
 	expect string,
 ) VCSDriverTest {
-	return table.Entry(
+	return ginkgo.Entry(
 		description,
 		[]string{content},
 		func(dir string, cfg config.Config, err error) {

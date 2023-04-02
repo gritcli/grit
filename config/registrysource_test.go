@@ -3,7 +3,7 @@ package config_test
 import (
 	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

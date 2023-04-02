@@ -11,7 +11,7 @@ import (
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/internal/stubs"
 	"github.com/gritcli/grit/logs"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -29,6 +29,9 @@ var _ = Describe("type Cloner", func() {
 		var err error
 		tempDir, err = os.MkdirTemp("", "")
 		Expect(err).ShouldNot(HaveOccurred())
+		DeferCleanup(func() {
+			os.RemoveAll(tempDir)
+		})
 
 		repo = sourcedriver.RemoteRepo{
 			ID:               "<id>",
@@ -56,12 +59,6 @@ var _ = Describe("type Cloner", func() {
 
 		cloner = &Cloner{
 			Sources: List{src},
-		}
-	})
-
-	AfterEach(func() {
-		if tempDir != "" {
-			os.RemoveAll(tempDir)
 		}
 	})
 

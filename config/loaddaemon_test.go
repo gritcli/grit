@@ -4,8 +4,7 @@ import (
 	"path/filepath"
 
 	. "github.com/gritcli/grit/config"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -57,10 +56,9 @@ var _ = Describe("func Load() (daemon configuration)", func() {
 			// force the home directory resolution to fail.
 			original = DefaultDaemonSocket
 			DefaultDaemonSocket = "~someuser/path/to/socket"
-		})
-
-		AfterEach(func() {
-			DefaultDaemonSocket = original
+			DeferCleanup(func() {
+				DefaultDaemonSocket = original
+			})
 		})
 
 		DescribeTable(

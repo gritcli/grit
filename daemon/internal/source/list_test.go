@@ -8,7 +8,7 @@ import (
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/internal/stubs"
 	"github.com/gritcli/grit/logs"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

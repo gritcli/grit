@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	. "github.com/gritcli/grit/cli/internal/shell"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	. "github.com/gritcli/grit/daemon/internal/apiserver"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

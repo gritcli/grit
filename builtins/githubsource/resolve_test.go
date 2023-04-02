@@ -5,24 +5,21 @@ import (
 
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/logs"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("func source.Resolve()", func() {
 	var (
-		ctx    context.Context
-		cancel context.CancelFunc
-		src    sourcedriver.Source
+		ctx context.Context
+		src sourcedriver.Source
 	)
 
 	When("unauthenticated", func() {
 		BeforeEach(func() {
+			var cancel context.CancelFunc
 			ctx, cancel, src = beforeEachUnauthenticated()
-		})
-
-		AfterEach(func() {
-			cancel()
+			DeferCleanup(cancel)
 		})
 
 		It("does not resolve unqualified names", func() {
@@ -60,11 +57,9 @@ var _ = Describe("func source.Resolve()", func() {
 
 	When("authenticated", func() {
 		BeforeEach(func() {
+			var cancel context.CancelFunc
 			ctx, cancel, src, _ = beforeEachAuthenticated()
-		})
-
-		AfterEach(func() {
-			cancel()
+			DeferCleanup(cancel)
 		})
 
 		It("ignores invalid names", func() {

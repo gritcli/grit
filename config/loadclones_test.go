@@ -4,8 +4,7 @@ import (
 	. "github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	"github.com/gritcli/grit/internal/stubs"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 )
 
 var _ = Describe("func Load() (clones configuration)", func() {
@@ -135,10 +134,9 @@ var _ = Describe("func Load() (clones configuration)", func() {
 			// force the home directory resolution to fail.
 			original = DefaultClonesDirectory
 			DefaultClonesDirectory = "~someuser/path/to/socket"
-		})
-
-		AfterEach(func() {
-			DefaultClonesDirectory = original
+			DeferCleanup(func() {
+				DefaultClonesDirectory = original
+			})
 		})
 
 		DescribeTable(

@@ -5,15 +5,14 @@ import (
 
 	. "github.com/gritcli/grit/builtins/githubsource"
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("func source.Status()", func() {
 	var (
-		ctx    context.Context
-		cancel context.CancelFunc
-		src    sourcedriver.Source
+		ctx context.Context
+		src sourcedriver.Source
 	)
 
 	When("unauthenticated", func() {
@@ -24,11 +23,9 @@ var _ = Describe("func source.Status()", func() {
 		})
 
 		JustBeforeEach(func() {
+			var cancel context.CancelFunc
 			ctx, cancel, src = beforeEachUnauthenticated(configure)
-		})
-
-		AfterEach(func() {
-			cancel()
+			DeferCleanup(cancel)
 		})
 
 		It("indicates that the user is unauthenticated", func() {
@@ -54,11 +51,9 @@ var _ = Describe("func source.Status()", func() {
 
 	When("authenticated", func() {
 		BeforeEach(func() {
+			var cancel context.CancelFunc
 			ctx, cancel, src, _ = beforeEachAuthenticated()
-		})
-
-		AfterEach(func() {
-			cancel()
+			DeferCleanup(cancel)
 		})
 
 		It("indicates that the user is authenticated", func() {

@@ -6,24 +6,21 @@ import (
 	"github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/logs"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("func source.NewCloner()", func() {
 	var (
-		ctx    context.Context
-		cancel context.CancelFunc
-		src    sourcedriver.Source
+		ctx context.Context
+		src sourcedriver.Source
 	)
 
 	When("unauthenticated", func() {
 		BeforeEach(func() {
+			var cancel context.CancelFunc
 			ctx, cancel, src = beforeEachUnauthenticated()
-		})
-
-		AfterEach(func() {
-			cancel()
+			DeferCleanup(cancel)
 		})
 
 		It("returns a gitvcs.Cloner", func() {
@@ -43,11 +40,9 @@ var _ = Describe("func source.NewCloner()", func() {
 		var token string
 
 		BeforeEach(func() {
+			var cancel context.CancelFunc
 			ctx, cancel, src, token = beforeEachAuthenticated()
-		})
-
-		AfterEach(func() {
-			cancel()
+			DeferCleanup(cancel)
 		})
 
 		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {

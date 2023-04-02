@@ -4,23 +4,20 @@ import (
 	"context"
 
 	"github.com/gritcli/grit/driver/sourcedriver"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("func source.Suggest()", func() {
 	var (
-		cancel context.CancelFunc
-		src    sourcedriver.Source
+		src sourcedriver.Source
 	)
 
 	When("unauthenticated", func() {
 		BeforeEach(func() {
+			var cancel context.CancelFunc
 			_, cancel, src = beforeEachUnauthenticated()
-		})
-
-		AfterEach(func() {
-			cancel()
+			DeferCleanup(cancel)
 		})
 
 		It("returns an empty slice", func() {
@@ -31,11 +28,9 @@ var _ = Describe("func source.Suggest()", func() {
 
 	When("authenticated", func() {
 		BeforeEach(func() {
+			var cancel context.CancelFunc
 			_, cancel, src, _ = beforeEachAuthenticated()
-		})
-
-		AfterEach(func() {
-			cancel()
+			DeferCleanup(cancel)
 		})
 
 		It("returns repositories with names that begin with the given word", func() {
