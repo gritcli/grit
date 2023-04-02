@@ -1,10 +1,10 @@
 package daemon
 
 import (
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/daemon/internal/source"
+	"github.com/gritcli/grit/logs"
 )
 
 func init() {
@@ -22,12 +22,12 @@ func init() {
 		container,
 		func(
 			ctx imbue.Context,
-			s source.List,
-			l logging.Logger,
+			sources source.List,
+			log logs.Log,
 		) (*source.Cloner, error) {
 			return &source.Cloner{
-				Sources: s,
-				Logger:  l,
+				Sources: sources,
+				Log:     log,
 			}, nil
 		},
 	)
@@ -36,12 +36,12 @@ func init() {
 		container,
 		func(
 			ctx imbue.Context,
-			s source.List,
-			l logging.Logger,
+			sources source.List,
+			log logs.Log,
 		) (*source.Suggester, error) {
 			return &source.Suggester{
-				Sources: s,
-				Logger:  l,
+				Sources: sources,
+				Log:     log,
 			}, nil
 		},
 	)

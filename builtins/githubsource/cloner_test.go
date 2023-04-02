@@ -3,9 +3,9 @@ package githubsource_test
 import (
 	"context"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/logs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -27,7 +27,7 @@ var _ = Describe("func source.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner", func() {
-			cloner, repo, err := src.NewCloner(ctx, publicUserRepo.ID, logging.SilentLogger)
+			cloner, repo, err := src.NewCloner(ctx, publicUserRepo.ID, logs.Discard)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
@@ -51,7 +51,7 @@ var _ = Describe("func source.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {
-			cloner, repo, err := src.NewCloner(ctx, privateUserRepo.ID, logging.SilentLogger)
+			cloner, repo, err := src.NewCloner(ctx, privateUserRepo.ID, logs.Discard)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{

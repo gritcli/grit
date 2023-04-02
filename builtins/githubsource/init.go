@@ -4,15 +4,15 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
+	"github.com/gritcli/grit/logs"
 	"golang.org/x/oauth2"
 )
 
 // Init initializes the source.
 func (s *source) Init(
 	ctx context.Context,
-	logger logging.Logger,
+	log logs.Log,
 ) error {
 	httpClient := http.DefaultClient
 	if s.config.Token != "" {
@@ -35,7 +35,7 @@ func (s *source) Init(
 	}
 
 	if s.config.Token == "" {
-		logging.Log(logger, "not authenticated (no token specified)")
+		log.Write("not authenticated (no token specified)")
 		return nil
 	}
 
@@ -46,14 +46,14 @@ func (s *source) Init(
 		}
 
 		// TODO: rebuild client without token provider
-		logging.Log(logger, "not authenticated (token is invalid)")
+		log.Write("not authenticated (token is invalid)")
 		return nil
 	}
 
-	logging.Log(logger, "authenticated as @%s", user.GetLogin())
+	log.Write("authenticated as @%s", user.GetLogin())
 	s.user = user
 
-	if err := s.populateRepoCache(ctx, logger); err != nil {
+	if err := s.populateRepoCache(ctx, log); err != nil {
 		return err
 	}
 
@@ -64,7 +64,7 @@ func (s *source) Init(
 // which the authenticated user has explicit read, write or admin access.
 func (s *source) populateRepoCache(
 	ctx context.Context,
-	logger logging.Logger,
+	log logs.Log,
 ) error {
 	opts := &github.RepositoryListOptions{
 		ListOptions: github.ListOptions{
@@ -83,7 +83,7 @@ func (s *source) populateRepoCache(
 		}
 
 		for _, r := range repoPage {
-			logging.Debug(logger, "discovered %s", r.GetFullName())
+			log.WriteVerbose("discovered %s", r.GetFullName())
 
 			owner := r.GetOwner().GetLogin()
 			reposByName := s.reposByOwner[owner]
@@ -99,8 +99,7 @@ func (s *source) populateRepoCache(
 		opts.Page = res.NextPage
 	}
 
-	logging.Log(
-		logger,
+	log.Write(
 		"added %d repositories to the repository list for @%s",
 		len(s.reposByID),
 		s.user.GetLogin(),

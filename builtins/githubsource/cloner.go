@@ -3,9 +3,9 @@ package githubsource
 import (
 	"context"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/logs"
 )
 
 // NewCloner returns a cloner that clones the repository with the given ID, and
@@ -13,7 +13,7 @@ import (
 func (s *source) NewCloner(
 	ctx context.Context,
 	id string,
-	logger logging.Logger,
+	log logs.Log,
 ) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
 	intID, err := parseRepoID(id)
 	if err != nil {
@@ -29,8 +29,7 @@ func (s *source) NewCloner(
 		}
 	}
 
-	logging.Debug(
-		logger,
+	log.WriteVerbose(
 		"resolved %s to %s",
 		id,
 		r.GetFullName(),

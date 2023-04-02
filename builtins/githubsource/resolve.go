@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/logs"
 )
 
 // Resolve resolves a repository name, URL, or other identifier to a set of
@@ -13,7 +13,7 @@ import (
 func (s *source) Resolve(
 	ctx context.Context,
 	query string,
-	logger logging.Logger,
+	log logs.Log,
 ) ([]sourcedriver.RemoteRepo, error) {
 	ownerName, repoName, err := parseRepoName(query)
 	if err != nil {
@@ -29,8 +29,7 @@ func (s *source) Resolve(
 			}
 		}
 
-		logging.Debug(
-			logger,
+		log.WriteVerbose(
 			"found %d match(es) for '%s' in the repository list for @%s",
 			len(matches),
 			query,
@@ -38,8 +37,7 @@ func (s *source) Resolve(
 		)
 
 		if len(matches) == 0 {
-			logging.Debug(
-				logger,
+			log.WriteVerbose(
 				"skipping GitHub API query for '%s' because it is not a fully-qualified repository name",
 				query,
 			)
@@ -49,8 +47,7 @@ func (s *source) Resolve(
 	}
 
 	if r, ok := s.reposByOwner[ownerName][repoName]; ok {
-		logging.Debug(
-			logger,
+		log.WriteVerbose(
 			"found an exact match for '%s' in the repository list for @%s",
 			query,
 			s.user.GetLogin(),
@@ -62,8 +59,7 @@ func (s *source) Resolve(
 	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
 		if res.StatusCode == http.StatusNotFound {
-			logging.Debug(
-				logger,
+			log.WriteVerbose(
 				"no repository named '%s' found by querying the GitHub API",
 				query,
 			)
@@ -74,8 +70,7 @@ func (s *source) Resolve(
 		return nil, err
 	}
 
-	logging.Debug(
-		logger,
+	log.WriteVerbose(
 		"found a repository named '%s' by querying the GitHub API",
 		query,
 	)

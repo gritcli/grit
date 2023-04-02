@@ -43,7 +43,7 @@ func init() {
 			cmd *cobra.Command,
 		) (*api.ClientOptions, error) {
 			return &api.ClientOptions{
-				CaptureDebugLog: flags.IsVerbose(cmd),
+				Verbose: flags.IsVerbose(cmd),
 			}, nil
 		},
 	)

@@ -1,11 +1,11 @@
 package daemon
 
 import (
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
 	"github.com/gritcli/grit/daemon/internal/source"
+	"github.com/gritcli/grit/logs"
 	"google.golang.org/grpc"
 )
 
@@ -17,13 +17,13 @@ func init() {
 			sources source.List,
 			c *source.Cloner,
 			s *source.Suggester,
-			logger logging.Logger,
+			log logs.Log,
 		) (api.APIServer, error) {
 			return &apiserver.Server{
 				SourceList: sources,
 				Cloner:     c,
 				Suggester:  s,
-				Logger:     logging.Prefix(logger, "api: "),
+				Log:        log.WithPrefix("api: "),
 			}, nil
 		},
 	)

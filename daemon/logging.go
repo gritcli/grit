@@ -1,8 +1,11 @@
 package daemon
 
 import (
-	"github.com/dogmatiq/dodeca/logging"
+	"fmt"
+	"os"
+
 	"github.com/dogmatiq/imbue"
+	"github.com/gritcli/grit/logs"
 )
 
 func init() {
@@ -10,8 +13,10 @@ func init() {
 		container,
 		func(
 			ctx imbue.Context,
-		) (logging.Logger, error) {
-			return logging.DebugLogger, nil
+		) (logs.Log, error) {
+			return func(m logs.Message) {
+				fmt.Fprintln(os.Stdout, m.Text)
+			}, nil
 		},
 	)
 }

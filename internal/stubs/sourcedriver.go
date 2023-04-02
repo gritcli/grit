@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/logs"
 	"github.com/hashicorp/hcl/v2"
 )
 
@@ -79,27 +79,27 @@ func (s *SourceConfig) DescribeSourceConfig() string {
 
 // Source is a test implementation of the sourcedriver.Source interface.
 type Source struct {
-	InitFunc      func(context.Context, logging.Logger) error
-	RunFunc       func(context.Context, logging.Logger) error
+	InitFunc      func(context.Context, logs.Log) error
+	RunFunc       func(context.Context, logs.Log) error
 	StatusFunc    func(context.Context) (string, error)
-	ResolveFunc   func(context.Context, string, logging.Logger) ([]sourcedriver.RemoteRepo, error)
-	NewClonerFunc func(context.Context, string, logging.Logger) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error)
+	ResolveFunc   func(context.Context, string, logs.Log) ([]sourcedriver.RemoteRepo, error)
+	NewClonerFunc func(context.Context, string, logs.Log) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error)
 	SuggestFunc   func(string) []sourcedriver.RemoteRepo
 }
 
 // Init returns s.InitFunc() if it is non-nil; otherwise, it returns nil.
-func (s *Source) Init(ctx context.Context, logger logging.Logger) error {
+func (s *Source) Init(ctx context.Context, log logs.Log) error {
 	if s.InitFunc != nil {
-		return s.InitFunc(ctx, logger)
+		return s.InitFunc(ctx, log)
 	}
 
 	return nil
 }
 
 // Run returns s.RunFunc() if it is non-nil; otherwise, it returns nil.
-func (s *Source) Run(ctx context.Context, logger logging.Logger) error {
+func (s *Source) Run(ctx context.Context, log logs.Log) error {
 	if s.RunFunc != nil {
-		return s.RunFunc(ctx, logger)
+		return s.RunFunc(ctx, log)
 	}
 
 	return nil
@@ -120,10 +120,10 @@ func (s *Source) Status(ctx context.Context) (string, error) {
 func (s *Source) Resolve(
 	ctx context.Context,
 	query string,
-	logger logging.Logger,
+	log logs.Log,
 ) ([]sourcedriver.RemoteRepo, error) {
 	if s.ResolveFunc != nil {
-		return s.ResolveFunc(ctx, query, logger)
+		return s.ResolveFunc(ctx, query, log)
 	}
 
 	return nil, nil
@@ -134,10 +134,10 @@ func (s *Source) Resolve(
 func (s *Source) NewCloner(
 	ctx context.Context,
 	id string,
-	logger logging.Logger,
+	log logs.Log,
 ) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
 	if s.NewClonerFunc != nil {
-		return s.NewClonerFunc(ctx, id, logger)
+		return s.NewClonerFunc(ctx, id, log)
 	}
 
 	return nil, sourcedriver.RemoteRepo{}, errors.New("<not implemented>")
@@ -155,17 +155,17 @@ func (s *Source) Suggest(word string) []sourcedriver.RemoteRepo {
 // SourceCloner is a test implementation of the sourcedriver.SourceCloner
 // interface.
 type SourceCloner struct {
-	CloneFunc func(context.Context, string, logging.Logger) error
+	CloneFunc func(context.Context, string, logs.Log) error
 }
 
 // Clone returns s.CloneFunc() if it is non-nil; otherwise, it returns nil.
 func (s *SourceCloner) Clone(
 	ctx context.Context,
 	dir string,
-	logger logging.Logger,
+	log logs.Log,
 ) error {
 	if s.CloneFunc != nil {
-		return s.CloneFunc(ctx, dir, logger)
+		return s.CloneFunc(ctx, dir, log)
 	}
 
 	return nil

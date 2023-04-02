@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/github"
 	. "github.com/gritcli/grit/builtins/githubsource"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/logs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -84,7 +84,7 @@ func initSource(
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	if err := s.Init(ctx, logging.SilentLogger); err != nil {
+	if err := s.Init(ctx, logs.Discard); err != nil {
 		cancel()
 		skipIfRateLimited(err)
 	}
@@ -95,7 +95,7 @@ func initSource(
 		defer GinkgoRecover()
 		defer close(done)
 
-		err := s.Run(ctx, logging.SilentLogger)
+		err := s.Run(ctx, logs.Discard)
 		if err != context.Canceled {
 			Expect(err).ShouldNot(HaveOccurred())
 		}

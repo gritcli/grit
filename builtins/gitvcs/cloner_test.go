@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/dogmatiq/dodeca/logging"
 	git "github.com/go-git/go-git/v5"
+	"github.com/gritcli/grit/logs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -16,7 +16,7 @@ var _ = Describe("type Cloner", func() {
 	var (
 		ctx     context.Context
 		cancel  context.CancelFunc
-		logger  logging.BufferedLogger
+		buffer  logs.Buffer
 		cloner  *Cloner
 		tempDir string
 	)
@@ -24,8 +24,7 @@ var _ = Describe("type Cloner", func() {
 	BeforeEach(func() {
 		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 
-		logger.Reset()
-
+		buffer = logs.Buffer{}
 		cloner = &Cloner{}
 
 		var err error
@@ -55,9 +54,9 @@ var _ = Describe("type Cloner", func() {
 			// locally using the developer's SSH agent.
 			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-public.git"
 
-			err := cloner.Clone(ctx, tempDir, &logger)
+			err := cloner.Clone(ctx, tempDir, buffer.Log)
 			Expect(err).ShouldNot(HaveOccurred())
-			expectCloneWithURL(tempDir, cloner.SSHEndpoint, &logger)
+			expectCloneWithURL(tempDir, cloner.SSHEndpoint, buffer)
 		})
 
 		It("clones via SSH using an explicit private key", func() {
@@ -66,9 +65,9 @@ var _ = Describe("type Cloner", func() {
 			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-private.git"
 			cloner.SSHKeyFile = "./testdata/deploy-key-no-passphrase"
 
-			err := cloner.Clone(ctx, tempDir, &logger)
+			err := cloner.Clone(ctx, tempDir, buffer.Log)
 			Expect(err).ShouldNot(HaveOccurred())
-			expectCloneWithURL(tempDir, cloner.SSHEndpoint, &logger)
+			expectCloneWithURL(tempDir, cloner.SSHEndpoint, buffer)
 		})
 
 		It("clones via SSH using an explicit private key with a passphrase", func() {
@@ -78,9 +77,9 @@ var _ = Describe("type Cloner", func() {
 			cloner.SSHKeyFile = "./testdata/deploy-key-with-passphrase"
 			cloner.SSHKeyPassphrase = "passphrase"
 
-			err := cloner.Clone(ctx, tempDir, &logger)
+			err := cloner.Clone(ctx, tempDir, buffer.Log)
 			Expect(err).ShouldNot(HaveOccurred())
-			expectCloneWithURL(tempDir, cloner.SSHEndpoint, &logger)
+			expectCloneWithURL(tempDir, cloner.SSHEndpoint, buffer)
 		})
 
 		It("clones via HTTP without authentication", func() {
@@ -89,9 +88,9 @@ var _ = Describe("type Cloner", func() {
 			cloner.HTTPEndpoint = "https://github.com/grit-integration-tests/test-public.git"
 			cloner.PreferHTTP = true
 
-			err := cloner.Clone(ctx, tempDir, &logger)
+			err := cloner.Clone(ctx, tempDir, buffer.Log)
 			Expect(err).ShouldNot(HaveOccurred())
-			expectCloneWithURL(tempDir, cloner.HTTPEndpoint, &logger)
+			expectCloneWithURL(tempDir, cloner.HTTPEndpoint, buffer)
 		})
 
 		It("clones via HTTP with authentication", func() {
@@ -107,9 +106,9 @@ var _ = Describe("type Cloner", func() {
 			cloner.HTTPPassword = token
 			cloner.PreferHTTP = true
 
-			err := cloner.Clone(ctx, tempDir, &logger)
+			err := cloner.Clone(ctx, tempDir, buffer.Log)
 			Expect(err).ShouldNot(HaveOccurred())
-			expectCloneWithURL(tempDir, cloner.HTTPEndpoint, &logger)
+			expectCloneWithURL(tempDir, cloner.HTTPEndpoint, buffer)
 		})
 	})
 
@@ -320,7 +319,7 @@ var _ = Describe("type Cloner", func() {
 // with the origin remote using the given URL.
 //
 // The logger is inspected to verify it contains the output from Git itself.
-func expectCloneWithURL(dir, url string, logger *logging.BufferedLogger) {
+func expectCloneWithURL(dir, url string, buffer logs.Buffer) {
 	repo, err := git.PlainOpen(dir)
 	Expect(err).ShouldNot(HaveOccurred())
 
@@ -328,9 +327,8 @@ func expectCloneWithURL(dir, url string, logger *logging.BufferedLogger) {
 	Expect(err).ShouldNot(HaveOccurred())
 	Expect(rem.Config().URLs).To(ConsistOf(url))
 
-	messages := logger.Messages()
-	Expect(messages).NotTo(BeEmpty())
-	Expect(messages[len(messages)-1].Message).To(
+	Expect(buffer).NotTo(BeEmpty())
+	Expect(buffer[len(buffer)-1].Text).To(
 		MatchRegexp(`git: Total \d+ \(delta \d+\), reused \d+ \(delta \d+\), pack-reused \d+`),
 	)
 }

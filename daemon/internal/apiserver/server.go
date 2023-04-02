@@ -7,10 +7,12 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/logs"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 )
 
 // Server is the implementation of api.APIServer
@@ -18,7 +20,30 @@ type Server struct {
 	SourceList source.List
 	Cloner     *source.Cloner
 	Suggester  *source.Suggester
-	Logger     logging.Logger
+	Log        logs.Log
+}
+
+// newLogger returns a logs.Logger that sends messages over a gRPC stream.
+func (s *Server) newLogger(
+	stream grpc.ServerStream,
+	options *api.ClientOptions,
+	wrap func(*api.ClientOutput) proto.Message,
+) logs.Log {
+	return func(m logs.Message) {
+		if m.IsVerbose && !options.GetVerbose() {
+			return
+		}
+
+		msg := wrap(
+			&api.ClientOutput{
+				Message: m.Text,
+			},
+		)
+
+		if err := stream.SendMsg(msg); err != nil {
+			s.Log.Write("unable to write message to stream: %s", err)
+		}
+	}
 }
 
 // Listen starts a listener on the given unix socket.

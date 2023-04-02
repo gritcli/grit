@@ -6,11 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
 	"github.com/gritcli/grit/daemon/internal/source"
+	"github.com/gritcli/grit/logs"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )
@@ -34,14 +34,14 @@ func Run(version string) (err error) {
 			ctx context.Context,
 			r *config.DriverRegistry,
 			s source.List,
-			l logging.Logger,
+			log logs.Log,
 		) error {
-			logging.Log(l, "grit daemon v%s", version)
+			log.Write("grit daemon v%s", version)
 
-			logDrivers(l, r)
-			logSources(l, s)
+			logDrivers(r, log)
+			logSources(s, log)
 
-			return initSourceDrivers(ctx, l, s)
+			return initSourceDrivers(ctx, s, log)
 		},
 	); err != nil {
 		return err
@@ -55,16 +55,19 @@ func Run(version string) (err error) {
 }
 
 // logDrivers logs information about the drivers in the registry.
-func logDrivers(logger logging.Logger, r *config.DriverRegistry) {
+func logDrivers(
+	r *config.DriverRegistry,
+	log logs.Log,
+) {
 	for alias, reg := range r.SourceDrivers() {
 		if alias == reg.Name {
-			logger.Log(
+			log.Write(
 				"config: loaded '%s' source driver: %s",
 				reg.Name,
 				reg.Description,
 			)
 		} else {
-			logger.Log(
+			log.Write(
 				"config: loaded '%s' source driver as '%s': %s",
 				reg.Name,
 				reg.Description,
@@ -75,13 +78,13 @@ func logDrivers(logger logging.Logger, r *config.DriverRegistry) {
 
 	for alias, reg := range r.VCSDrivers() {
 		if alias == reg.Name {
-			logger.Log(
+			log.Write(
 				"config: loaded '%s' vcs driver: %s",
 				reg.Name,
 				reg.Description,
 			)
 		} else {
-			logger.Log(
+			log.Write(
 				"config: loaded '%s' vcs driver as '%s': %s",
 				reg.Name,
 				reg.Description,
@@ -92,9 +95,12 @@ func logDrivers(logger logging.Logger, r *config.DriverRegistry) {
 }
 
 // logSources logs information about the sources in the configuration.
-func logSources(logger logging.Logger, sources source.List) {
+func logSources(
+	sources source.List,
+	log logs.Log,
+) {
 	for _, s := range sources {
-		logger.Log(
+		log.Write(
 			"config: loaded '%s' source: %s",
 			s.Name,
 			s.Description,
@@ -103,7 +109,11 @@ func logSources(logger logging.Logger, sources source.List) {
 }
 
 // initSourceDrivers initializes each source's driver in parallel.
-func initSourceDrivers(ctx context.Context, logger logging.Logger, sources source.List) error {
+func initSourceDrivers(
+	ctx context.Context,
+	sources source.List,
+	log logs.Log,
+) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, src := range sources {
@@ -111,8 +121,7 @@ func initSourceDrivers(ctx context.Context, logger logging.Logger, sources sourc
 		g.Go(func() error {
 			return src.Driver.Init(
 				ctx,
-				logging.Prefix(
-					logger,
+				log.WithPrefix(
 					"source[%s]: ",
 					src.Name,
 				),
@@ -126,8 +135,8 @@ func initSourceDrivers(ctx context.Context, logger logging.Logger, sources sourc
 // runSourceDrivers runs each source's driver in parallel.
 func runSourceDrivers(
 	ctx context.Context,
-	logger logging.Logger,
 	sources source.List,
+	log logs.Log,
 ) error {
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -136,8 +145,7 @@ func runSourceDrivers(
 		g.Go(func() error {
 			return src.Driver.Run(
 				ctx,
-				logging.Prefix(
-					logger,
+				log.WithPrefix(
 					"source[%s]: ",
 					src.Name,
 				),
@@ -153,7 +161,7 @@ func runGRPCServer(
 	ctx context.Context,
 	cfg config.Config,
 	s *grpc.Server,
-	l logging.Logger,
+	log logs.Log,
 ) error {
 	lis, err := apiserver.Listen(cfg.Daemon.Socket)
 	if err != nil {
@@ -166,8 +174,8 @@ func runGRPCServer(
 		s.GracefulStop()
 	}()
 
-	logging.Log(l, "api: accepting requests on unix socket: %s", cfg.Daemon.Socket)
-	defer logging.Log(l, "api: server stopped")
+	log.Write("api: accepting requests on unix socket: %s", cfg.Daemon.Socket)
+	defer log.Write("api: server stopped")
 
 	return s.Serve(lis)
 }

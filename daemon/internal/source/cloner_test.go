@@ -7,10 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dogmatiq/dodeca/logging"
 	. "github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/internal/stubs"
+	"github.com/gritcli/grit/logs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -42,7 +42,7 @@ var _ = Describe("type Cloner", func() {
 			NewClonerFunc: func(
 				context.Context,
 				string,
-				logging.Logger,
+				logs.Log,
 			) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
 				return sourceCloner, repo, nil
 			},
@@ -56,7 +56,6 @@ var _ = Describe("type Cloner", func() {
 
 		cloner = &Cloner{
 			Sources: List{src},
-			Logger:  logging.SilentLogger,
 		}
 	})
 
@@ -72,7 +71,7 @@ var _ = Describe("type Cloner", func() {
 				context.Background(),
 				"<source>",
 				"<id>",
-				logging.SilentLogger,
+				logs.Discard,
 			)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(local).To(Equal(
@@ -93,7 +92,7 @@ var _ = Describe("type Cloner", func() {
 				context.Background(),
 				"<source>",
 				"<id>",
-				logging.SilentLogger,
+				logs.Discard,
 			)
 			Expect(err).To(MatchError(
 				fmt.Sprintf(
@@ -110,7 +109,7 @@ var _ = Describe("type Cloner", func() {
 				context.Background(),
 				"<source>",
 				"<id>",
-				logging.SilentLogger,
+				logs.Discard,
 			)
 			Expect(err).To(MatchError(
 				fmt.Sprintf(
@@ -125,7 +124,7 @@ var _ = Describe("type Cloner", func() {
 				context.Background(),
 				"<unknown>",
 				"<id>",
-				logging.SilentLogger,
+				logs.Discard,
 			)
 			Expect(err).To(MatchError("unable to clone: unrecognized source (<unknown>)"))
 		})
@@ -134,7 +133,7 @@ var _ = Describe("type Cloner", func() {
 			driver.NewClonerFunc = func(
 				context.Context,
 				string,
-				logging.Logger,
+				logs.Log,
 			) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error) {
 				return nil, sourcedriver.RemoteRepo{}, errors.New("<error>")
 			}
@@ -143,7 +142,7 @@ var _ = Describe("type Cloner", func() {
 				context.Background(),
 				"<source>",
 				"<id>",
-				logging.SilentLogger,
+				logs.Discard,
 			)
 			Expect(err).To(MatchError("unable to prepare for cloning: <error>"))
 		})
@@ -152,7 +151,7 @@ var _ = Describe("type Cloner", func() {
 			sourceCloner.CloneFunc = func(
 				context.Context,
 				string,
-				logging.Logger,
+				logs.Log,
 			) error {
 				return errors.New("<error>")
 			}
@@ -161,7 +160,7 @@ var _ = Describe("type Cloner", func() {
 				context.Background(),
 				"<source>",
 				"<id>",
-				logging.SilentLogger,
+				logs.Discard,
 			)
 			Expect(err).To(MatchError("unable to clone: <error>"))
 

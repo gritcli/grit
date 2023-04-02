@@ -3,9 +3,9 @@ package apiserver
 import (
 	"context"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/daemon/internal/source"
+	"github.com/gritcli/grit/logs"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"
 )
@@ -19,7 +19,7 @@ func (s *Server) ResolveRepo(
 	ctx := responses.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
-	logger := s.newStreamLogger(
+	logger := s.newLogger(
 		responses,
 		req.ClientOptions,
 		func(out *api.ClientOutput) proto.Message {
@@ -38,8 +38,6 @@ func (s *Server) ResolveRepo(
 			continue
 		}
 
-		logger := logging.Prefix(logger, "%s: ", src.Name)
-
 		if hasLocality(req.LocalityFilter, api.Locality_REMOTE) {
 			g.Go(func() error {
 				return s.resolveRemoteRepo(
@@ -47,7 +45,7 @@ func (s *Server) ResolveRepo(
 					src,
 					req.Query,
 					responses,
-					logger,
+					logger.WithPrefix("%s: ", src.Name),
 				)
 			})
 		}
@@ -63,9 +61,9 @@ func (s *Server) resolveRemoteRepo(
 	src source.Source,
 	query string,
 	responses api.API_ResolveRepoServer,
-	logger logging.Logger,
+	log logs.Log,
 ) error {
-	repos, err := src.Driver.Resolve(ctx, query, logger)
+	repos, err := src.Driver.Resolve(ctx, query, log)
 	if err != nil {
 		return err
 	}

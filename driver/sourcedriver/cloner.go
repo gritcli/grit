@@ -3,7 +3,7 @@ package sourcedriver
 import (
 	"context"
 
-	"github.com/dogmatiq/dodeca/logging"
+	"github.com/gritcli/grit/logs"
 )
 
 // Cloner is an interface for cloning a specific remote repository.
@@ -15,6 +15,6 @@ type Cloner interface {
 	Clone(
 		ctx context.Context,
 		dir string,
-		logger logging.Logger,
+		log logs.Log,
 	) error
 }

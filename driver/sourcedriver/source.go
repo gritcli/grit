@@ -3,7 +3,7 @@ package sourcedriver
 import (
 	"context"
 
-	"github.com/dogmatiq/dodeca/logging"
+	"github.com/gritcli/grit/logs"
 )
 
 // Source is an interface for a source provided by this driver.
@@ -12,7 +12,7 @@ type Source interface {
 	//
 	// It is called before the daemon starts serving API requests. If an error
 	// is returned, the daemon is stopped.
-	Init(ctx context.Context, logger logging.Logger) error
+	Init(ctx context.Context, log logs.Log) error
 
 	// Run performs any background processing required by the source.
 	//
@@ -21,7 +21,7 @@ type Source interface {
 	// context is canceled when the daemon shuts down.
 	//
 	// If it returns an error before ctx is canceled, the daemon is stopped.
-	Run(ctx context.Context, logger logging.Logger) error
+	Run(ctx context.Context, log logs.Log) error
 
 	// Status returns a brief description of the current state of the source.
 	//
@@ -44,7 +44,7 @@ type Source interface {
 	Resolve(
 		ctx context.Context,
 		query string,
-		logger logging.Logger,
+		log logs.Log,
 	) ([]RemoteRepo, error)
 
 	// NewCloner returns a cloner that clones the repository with the given ID,
@@ -54,7 +54,7 @@ type Source interface {
 	NewCloner(
 		ctx context.Context,
 		id string,
-		logger logging.Logger,
+		log logs.Log,
 	) (Cloner, RemoteRepo, error)
 
 	// Suggest returns a set of repositories that have names beginning with the

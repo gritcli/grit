@@ -3,13 +3,13 @@ package githubsource
 import (
 	"context"
 
-	"github.com/dogmatiq/dodeca/logging"
+	"github.com/gritcli/grit/logs"
 )
 
 // Run performs any background processing required by the source.
 func (s *source) Run(
 	ctx context.Context,
-	logger logging.Logger,
+	log logs.Log,
 ) error {
 	return nil
 }

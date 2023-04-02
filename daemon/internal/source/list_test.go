@@ -3,11 +3,11 @@ package source_test
 import (
 	"context"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/config"
 	. "github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/internal/stubs"
+	"github.com/gritcli/grit/logs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -21,13 +21,13 @@ var _ = Describe("type List", func() {
 			// differentiated from each other. The panic message is different so
 			// these functions can't get combined by the compiler.
 			srcA := &stubs.Source{
-				InitFunc: func(context.Context, logging.Logger) error {
+				InitFunc: func(context.Context, logs.Log) error {
 					panic("not implemented (a)")
 				},
 			}
 
 			srcB := &stubs.Source{
-				InitFunc: func(context.Context, logging.Logger) error {
+				InitFunc: func(context.Context, logs.Log) error {
 					panic("not implemented (b)")
 				},
 			}

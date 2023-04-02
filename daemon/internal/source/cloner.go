@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dogmatiq/dodeca/logging"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/logs"
 )
 
 // LocalRepo represents a local clone of a remote repository.
@@ -23,7 +23,7 @@ type LocalRepo struct {
 // A Cloner clones repositories.
 type Cloner struct {
 	Sources List
-	Logger  logging.Logger
+	Log     logs.Log
 }
 
 // Clone clones a repository identified by source name and ID and returns the
@@ -31,12 +31,11 @@ type Cloner struct {
 func (c *Cloner) Clone(
 	ctx context.Context,
 	source, repoID string,
-	clientLogger logging.Logger,
+	clientLog logs.Log,
 ) (_ LocalRepo, err error) {
-	logger := logging.Tee(
-		clientLogger,
-		logging.Prefix(
-			c.Logger,
+	log := logs.Tee(
+		clientLog,
+		c.Log.WithPrefix(
 			"source[%s]: clone %s: ",
 			source,
 			repoID,
@@ -45,7 +44,7 @@ func (c *Cloner) Clone(
 
 	defer func() {
 		if err != nil {
-			logger.LogString(err.Error())
+			log.Write("%s", err.Error())
 		}
 	}()
 
@@ -54,7 +53,7 @@ func (c *Cloner) Clone(
 		return LocalRepo{}, fmt.Errorf("unable to clone: unrecognized source (%s)", source)
 	}
 
-	cloner, repo, err := src.Driver.NewCloner(ctx, repoID, logger)
+	cloner, repo, err := src.Driver.NewCloner(ctx, repoID, log)
 	if err != nil {
 		return LocalRepo{}, fmt.Errorf("unable to prepare for cloning: %w", err)
 	}
@@ -70,7 +69,7 @@ func (c *Cloner) Clone(
 		}
 	}()
 
-	if err := cloner.Clone(ctx, dir, logger); err != nil {
+	if err := cloner.Clone(ctx, dir, log); err != nil {
 		return LocalRepo{}, fmt.Errorf("unable to clone: %w", err)
 	}
 
