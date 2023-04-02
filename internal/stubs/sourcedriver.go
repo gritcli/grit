@@ -81,10 +81,10 @@ func (s *SourceConfig) DescribeSourceConfig() string {
 type Source struct {
 	InitFunc      func(context.Context, logs.Log) error
 	RunFunc       func(context.Context, logs.Log) error
-	StatusFunc    func(context.Context) (string, error)
+	StatusFunc    func(context.Context, logs.Log) (string, error)
 	ResolveFunc   func(context.Context, string, logs.Log) ([]sourcedriver.RemoteRepo, error)
 	NewClonerFunc func(context.Context, string, logs.Log) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error)
-	SuggestFunc   func(string) []sourcedriver.RemoteRepo
+	SuggestFunc   func(string, logs.Log) []sourcedriver.RemoteRepo
 }
 
 // Init returns s.InitFunc() if it is non-nil; otherwise, it returns nil.
@@ -107,9 +107,9 @@ func (s *Source) Run(ctx context.Context, log logs.Log) error {
 
 // Status returns s.StatusFunc() if it is non-nil; otherwise, it returns a fixed
 // value.
-func (s *Source) Status(ctx context.Context) (string, error) {
+func (s *Source) Status(ctx context.Context, log logs.Log) (string, error) {
 	if s.StatusFunc != nil {
-		return s.StatusFunc(ctx)
+		return s.StatusFunc(ctx, log)
 	}
 
 	return "<status>", nil
@@ -144,9 +144,9 @@ func (s *Source) NewCloner(
 }
 
 // Suggest returns s.SuggestFunc() if it is non-nil; otherwise, it returns nil.
-func (s *Source) Suggest(word string) []sourcedriver.RemoteRepo {
+func (s *Source) Suggest(word string, log logs.Log) []sourcedriver.RemoteRepo {
 	if s.SuggestFunc != nil {
-		return s.SuggestFunc(word)
+		return s.SuggestFunc(word, log)
 	}
 
 	return nil

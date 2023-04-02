@@ -5,6 +5,7 @@ import (
 
 	. "github.com/gritcli/grit/builtins/githubsource"
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/logs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -29,7 +30,7 @@ var _ = Describe("func source.Status()", func() {
 		})
 
 		It("indicates that the user is unauthenticated", func() {
-			status, err := src.Status(ctx)
+			status, err := src.Status(ctx, logs.Discard)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(status).To(MatchRegexp(`unauthenticated, \d+ API requests remaining \(resets .+ from now\)`))
 		})
@@ -42,7 +43,7 @@ var _ = Describe("func source.Status()", func() {
 			})
 
 			It("indicates that the token is invalid", func() {
-				status, err := src.Status(ctx)
+				status, err := src.Status(ctx, logs.Discard)
 				Expect(err).ShouldNot(HaveOccurred())
 				Expect(status).To(Equal(`unauthenticated (invalid token)`))
 			})
@@ -57,7 +58,7 @@ var _ = Describe("func source.Status()", func() {
 		})
 
 		It("indicates that the user is authenticated", func() {
-			status, err := src.Status(ctx)
+			status, err := src.Status(ctx, logs.Discard)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(status).To(MatchRegexp(`@grit-integration-tests, \d+ API requests remaining \(resets .+ from now\)`))
 		})

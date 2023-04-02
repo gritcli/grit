@@ -4,6 +4,7 @@ import (
 	. "github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/internal/stubs"
+	"github.com/gritcli/grit/logs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -30,13 +31,13 @@ var _ = Describe("type Suggester", func() {
 		}
 
 		srcA = &stubs.Source{
-			SuggestFunc: func(w string) []sourcedriver.RemoteRepo {
+			SuggestFunc: func(w string, log logs.Log) []sourcedriver.RemoteRepo {
 				Expect(w).To(Equal("<word>"))
 				return []sourcedriver.RemoteRepo{repoA1, repoA2}
 			},
 		}
 		srcB = &stubs.Source{
-			SuggestFunc: func(w string) []sourcedriver.RemoteRepo {
+			SuggestFunc: func(w string, log logs.Log) []sourcedriver.RemoteRepo {
 				Expect(w).To(Equal("<word>"))
 				return []sourcedriver.RemoteRepo{repoB1, repoB2}
 			},

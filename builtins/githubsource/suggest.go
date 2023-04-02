@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/logs"
 )
 
 // Suggest returns a set of repositories that have names beginning with the
@@ -11,7 +12,10 @@ import (
 //
 // This implementation considers the name to start with the word if any of the
 // owner name, unqualified name, or fully qualified name begin with the word.
-func (s *source) Suggest(word string) []sourcedriver.RemoteRepo {
+func (s *source) Suggest(
+	word string,
+	log logs.Log,
+) []sourcedriver.RemoteRepo {
 	var matches []sourcedriver.RemoteRepo
 
 	for owner, repos := range s.reposByOwner {

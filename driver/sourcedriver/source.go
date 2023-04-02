@@ -27,7 +27,7 @@ type Source interface {
 	//
 	// This may include information about connectivity with a remote server,
 	// authenticated details, etc.
-	Status(ctx context.Context) (string, error)
+	Status(ctx context.Context, log logs.Log) (string, error)
 
 	// Resolve resolves a repository name, URL, or other identifier to a set of
 	// possible repositories.
@@ -41,23 +41,15 @@ type Source interface {
 	// The query string is typically captured directly from user input and has
 	// not been sanitized. The implementation must not return an error if the
 	// query is invalid; instead return an empty slice.
-	Resolve(
-		ctx context.Context,
-		query string,
-		log logs.Log,
-	) ([]RemoteRepo, error)
+	Resolve(ctx context.Context, query string, log logs.Log) ([]RemoteRepo, error)
 
 	// NewCloner returns a cloner that clones the repository with the given ID,
 	// and information about the repository being cloned.
 	//
 	// id is the repository ID, as discovered by a prior call to Resolve().
-	NewCloner(
-		ctx context.Context,
-		id string,
-		log logs.Log,
-	) (Cloner, RemoteRepo, error)
+	NewCloner(ctx context.Context, id string, log logs.Log) (Cloner, RemoteRepo, error)
 
 	// Suggest returns a set of repositories that have names beginning with the
 	// given word (which may be empty).
-	Suggest(word string) []RemoteRepo
+	Suggest(word string, log logs.Log) []RemoteRepo
 }

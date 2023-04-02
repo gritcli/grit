@@ -121,10 +121,7 @@ func initSourceDrivers(
 		g.Go(func() error {
 			return src.Driver.Init(
 				ctx,
-				log.WithPrefix(
-					"source[%s]: ",
-					src.Name,
-				),
+				src.Log(log),
 			)
 		})
 	}
@@ -145,10 +142,7 @@ func runSourceDrivers(
 		g.Go(func() error {
 			return src.Driver.Run(
 				ctx,
-				log.WithPrefix(
-					"source[%s]: ",
-					src.Name,
-				),
+				src.Log(log),
 			)
 		})
 	}

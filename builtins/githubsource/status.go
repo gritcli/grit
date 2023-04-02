@@ -9,10 +9,14 @@ import (
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/google/go-github/v50/github"
+	"github.com/gritcli/grit/logs"
 )
 
 // Status returns a brief description of the current state of the source.
-func (s *source) Status(ctx context.Context) (string, error) {
+func (s *source) Status(
+	ctx context.Context,
+	log logs.Log,
+) (string, error) {
 	invalidToken := false
 	limits, _, err := s.client.RateLimits(ctx)
 	if err != nil {

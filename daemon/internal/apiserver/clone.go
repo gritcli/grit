@@ -11,7 +11,7 @@ func (s *Server) CloneRepo(req *api.CloneRepoRequest, stream api.API_CloneRepoSe
 		stream.Context(),
 		req.Source,
 		req.RepoId,
-		s.newLogger(
+		s.newClientLog(
 			stream,
 			req.ClientOptions,
 			func(out *api.ClientOutput) proto.Message {

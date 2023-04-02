@@ -8,7 +8,7 @@ import (
 
 // Cloner is an interface for cloning a specific remote repository.
 //
-// Cloners are obtained via the NewCloner() method on a Driver.
+// Cloners are obtained via the NewCloner() method on a Source.
 type Cloner interface {
 	// Clone makes a local clone of the remote repository in the given
 	// directory.

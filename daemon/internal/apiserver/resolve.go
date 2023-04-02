@@ -19,7 +19,7 @@ func (s *Server) ResolveRepo(
 	ctx := responses.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
-	logger := s.newLogger(
+	logger := s.newClientLog(
 		responses,
 		req.ClientOptions,
 		func(out *api.ClientOutput) proto.Message {

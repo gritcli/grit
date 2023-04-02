@@ -23,8 +23,8 @@ type Server struct {
 	Log        logs.Log
 }
 
-// newLogger returns a logs.Logger that sends messages over a gRPC stream.
-func (s *Server) newLogger(
+// newClientLog returns a logs.Logger that sends messages to the gRPC client.
+func (s *Server) newClientLog(
 	stream grpc.ServerStream,
 	options *api.ClientOptions,
 	wrap func(*api.ClientOutput) proto.Message,
