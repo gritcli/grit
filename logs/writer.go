@@ -73,7 +73,11 @@ func (w *Writer) Close() error {
 // blank lines from the output.
 func (w *Writer) flush() {
 	if w.buf.Len() > 0 {
-		w.Target.Write(w.buf.String())
+		w.Target(
+			Message{
+				Text: w.buf.String(),
+			},
+		)
 		w.buf.Reset()
 	}
 }

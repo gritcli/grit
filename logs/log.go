@@ -13,13 +13,29 @@ type Message struct {
 // Log is a function that logs a message.
 type Log func(Message)
 
+// Terse is a log that prints non-verbose messages to STDOUT.
+var Terse Log = func(m Message) {
+	if !m.IsVerbose {
+		fmt.Println(m.Text)
+	}
+}
+
+// Verbose is a log that prints all messages to STDOUT.
+var Verbose Log = func(m Message) {
+	fmt.Println(m.Text)
+}
+
 // Discard is a log that discards all messages.
-func Discard(Message) {}
+var Discard Log
 
 // Write writes a log message.
 func (log Log) Write(format string, args ...any) {
 	if log != nil {
-		log(Message{fmt.Sprintf(format, args...), false})
+		log(
+			Message{
+				Text: fmt.Sprintf(format, args...),
+			},
+		)
 	}
 }
 
@@ -27,20 +43,30 @@ func (log Log) Write(format string, args ...any) {
 // enabled.
 func (log Log) WriteVerbose(format string, args ...any) {
 	if log != nil {
-		log(Message{fmt.Sprintf(format, args...), true})
+		log(
+			Message{
+				Text:      fmt.Sprintf(format, args...),
+				IsVerbose: true,
+			},
+		)
 	}
 }
 
-// WithPrefix returns a new log that prefixes all messages with a string.
+// WithPrefix returns a log that prefixes all messages with the given string.
 func (log Log) WithPrefix(format string, args ...any) Log {
-	prefix := fmt.Sprintf(format, args...)
-	if log == nil || prefix == "" {
-		return log
+	if log == nil {
+		return nil
 	}
 
+	prefix := fmt.Sprintf(format, args...)
+
 	return func(m Message) {
-		m.Text = prefix + m.Text
-		log(m)
+		log(
+			Message{
+				prefix + m.Text,
+				m.IsVerbose,
+			},
+		)
 	}
 }
 
@@ -59,6 +85,8 @@ func Tee(logs ...Log) Log {
 type Buffer []Message
 
 // Log is a Log implementation that appends the message to the buffer.
-func (b *Buffer) Log(m Message) {
-	*b = append(*b, m)
+func (b *Buffer) Log() Log {
+	return func(m Message) {
+		*b = append(*b, m)
+	}
 }

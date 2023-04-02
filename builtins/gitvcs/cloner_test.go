@@ -49,7 +49,7 @@ var _ = Describe("type Cloner", func() {
 			// locally using the developer's SSH agent.
 			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-public.git"
 
-			err := cloner.Clone(ctx, tempDir, buffer.Log)
+			err := cloner.Clone(ctx, tempDir, buffer.Log())
 			Expect(err).ShouldNot(HaveOccurred())
 			expectCloneWithURL(tempDir, cloner.SSHEndpoint, buffer)
 		})
@@ -60,7 +60,7 @@ var _ = Describe("type Cloner", func() {
 			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-private.git"
 			cloner.SSHKeyFile = "./testdata/deploy-key-no-passphrase"
 
-			err := cloner.Clone(ctx, tempDir, buffer.Log)
+			err := cloner.Clone(ctx, tempDir, buffer.Log())
 			Expect(err).ShouldNot(HaveOccurred())
 			expectCloneWithURL(tempDir, cloner.SSHEndpoint, buffer)
 		})
@@ -72,7 +72,7 @@ var _ = Describe("type Cloner", func() {
 			cloner.SSHKeyFile = "./testdata/deploy-key-with-passphrase"
 			cloner.SSHKeyPassphrase = "passphrase"
 
-			err := cloner.Clone(ctx, tempDir, buffer.Log)
+			err := cloner.Clone(ctx, tempDir, buffer.Log())
 			Expect(err).ShouldNot(HaveOccurred())
 			expectCloneWithURL(tempDir, cloner.SSHEndpoint, buffer)
 		})
@@ -83,7 +83,7 @@ var _ = Describe("type Cloner", func() {
 			cloner.HTTPEndpoint = "https://github.com/grit-integration-tests/test-public.git"
 			cloner.PreferHTTP = true
 
-			err := cloner.Clone(ctx, tempDir, buffer.Log)
+			err := cloner.Clone(ctx, tempDir, buffer.Log())
 			Expect(err).ShouldNot(HaveOccurred())
 			expectCloneWithURL(tempDir, cloner.HTTPEndpoint, buffer)
 		})
@@ -101,7 +101,7 @@ var _ = Describe("type Cloner", func() {
 			cloner.HTTPPassword = token
 			cloner.PreferHTTP = true
 
-			err := cloner.Clone(ctx, tempDir, buffer.Log)
+			err := cloner.Clone(ctx, tempDir, buffer.Log())
 			Expect(err).ShouldNot(HaveOccurred())
 			expectCloneWithURL(tempDir, cloner.HTTPEndpoint, buffer)
 		})
@@ -313,7 +313,7 @@ var _ = Describe("type Cloner", func() {
 // expectCloneWithURL expects a local Git clone to exist in the given directory,
 // with the origin remote using the given URL.
 //
-// The logger is inspected to verify it contains the output from Git itself.
+// The log buffer is inspected to verify it contains the output from Git itself.
 func expectCloneWithURL(dir, url string, buffer logs.Buffer) {
 	repo, err := git.PlainOpen(dir)
 	Expect(err).ShouldNot(HaveOccurred())

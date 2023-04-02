@@ -35,10 +35,8 @@ func (c *Cloner) Clone(
 ) (_ LocalRepo, err error) {
 	log := logs.Tee(
 		clientLog,
-		newLog(
-			source,
-			c.Log.WithPrefix("clone %s: ", repoID),
-		),
+		newLog(source, c.Log).
+			WithPrefix("clone %s: ", repoID),
 	)
 
 	defer func() {

@@ -19,7 +19,7 @@ func (s *Server) ResolveRepo(
 	ctx := responses.Context()
 	g, ctx := errgroup.WithContext(ctx)
 
-	logger := s.newClientLog(
+	log := s.newClientLog(
 		responses,
 		req.ClientOptions,
 		func(out *api.ClientOutput) proto.Message {
@@ -45,7 +45,7 @@ func (s *Server) ResolveRepo(
 					src,
 					req.Query,
 					responses,
-					logger.WithPrefix("%s: ", src.Name),
+					log,
 				)
 			})
 		}
@@ -63,7 +63,11 @@ func (s *Server) resolveRemoteRepo(
 	responses api.API_ResolveRepoServer,
 	log logs.Log,
 ) error {
-	repos, err := src.Driver.Resolve(ctx, query, log)
+	repos, err := src.Driver.Resolve(
+		ctx,
+		query,
+		src.Log(log),
+	)
 	if err != nil {
 		return err
 	}

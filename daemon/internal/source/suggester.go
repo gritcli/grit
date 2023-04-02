@@ -22,12 +22,11 @@ func (s *Suggester) Suggest(
 	var matches []sourcedriver.RemoteRepo
 
 	for _, src := range s.Sources {
-		log := newLog(
-			src.Name,
-			s.Log.WithPrefix("suggest %#v: ", word),
-		)
+		log := src.
+			Log(s.Log).
+			WithPrefix("suggest %#v: ", word)
 
-		repos := src.Driver.Suggest(word, s.Log)
+		repos := src.Driver.Suggest(word, log)
 
 		log.Write(
 			"suggested %d repo(s)",
