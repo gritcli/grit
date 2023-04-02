@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	humanize "github.com/dustin/go-humanize"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v50/github"
 )
 
 // Status returns a brief description of the current state of the source.

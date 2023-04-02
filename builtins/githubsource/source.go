@@ -3,7 +3,7 @@ package githubsource
 import (
 	"strings"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v50/github"
 )
 
 // source is an implementation of sourcedriver.Source that provides repositories

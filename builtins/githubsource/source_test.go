@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v50/github"
 	. "github.com/gritcli/grit/builtins/githubsource"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/gritcli/grit/logs"
