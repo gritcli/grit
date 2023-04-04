@@ -19,10 +19,19 @@ import (
 var catalog = imbue.NewCatalog()
 
 // Run executes the Grit daemon.
-func Run(version string) error {
+func Run(ver string) error {
+	imbue.With0Named[version](
+		catalog,
+		func(
+			ctx imbue.Context,
+		) (string, error) {
+			return ver, nil
+		},
+	)
+
 	reloads := 0
 	for {
-		reload, err := run(version, reloads)
+		reload, err := run(reloads)
 		if !reload || err != nil {
 			return err
 		}
@@ -32,7 +41,10 @@ func Run(version string) error {
 }
 
 // run executes the Grit daemon.
-func run(version string, reloads int) (reload bool, err error) {
+func run(reloads int) (reload bool, err error) {
+	con := imbue.New(imbue.WithCatalog(catalog))
+	defer con.Close()
+
 	ctx, cancel := signalx.NotifyContextWithCause(
 		context.Background(),
 		os.Interrupt,
@@ -47,20 +59,18 @@ func run(version string, reloads int) (reload bool, err error) {
 		cancel()
 	}()
 
-	con := imbue.New(imbue.WithCatalog(catalog))
-	defer con.Close()
-
-	if err := imbue.Invoke3(
+	if err := imbue.Invoke4(
 		ctx,
 		con,
 		func(
 			ctx context.Context,
 			r *config.DriverRegistry,
 			s source.List,
+			ver imbue.ByName[version, string],
 			log logs.Log,
 		) error {
 			if reloads == 0 {
-				log.Write("grit daemon v%s, pid %d", version, os.Getpid())
+				log.Write("grit daemon v%s, pid %d", ver.Value(), os.Getpid())
 			} else {
 				log.Write("reloading daemon configuration, pid %d", os.Getpid())
 			}
