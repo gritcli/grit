@@ -11,7 +11,7 @@ import (
 
 func init() {
 	imbue.With4(
-		container,
+		catalog,
 		func(
 			ctx imbue.Context,
 			sources source.List,
@@ -29,7 +29,7 @@ func init() {
 	)
 
 	imbue.With1(
-		container,
+		catalog,
 		func(
 			ctx imbue.Context,
 			s api.APIServer,

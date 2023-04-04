@@ -58,7 +58,7 @@ func (s *source) Resolve(
 
 	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
-		if res.StatusCode == http.StatusNotFound {
+		if res != nil || res.StatusCode == http.StatusNotFound {
 			log.WriteVerbose(
 				"no repository named '%s' found by querying the GitHub API",
 				query,

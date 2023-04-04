@@ -3,40 +3,67 @@ package daemon
 import (
 	"context"
 	"os"
-	"os/signal"
 	"syscall"
 
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
+	"github.com/gritcli/grit/daemon/internal/signalx"
 	"github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/logs"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )
 
-// container is the dependency injection container for the Grit daemon.
-var container = imbue.New()
+// catalog is the dependency injection catalog for the Grit daemon.
+var catalog = imbue.NewCatalog()
 
 // Run executes the Grit daemon.
-func Run(version string) (err error) {
-	ctx, cancel := signal.NotifyContext(
+func Run(version string) error {
+	reloads := 0
+	for {
+		reload, err := run(version, reloads)
+		if !reload || err != nil {
+			return err
+		}
+
+		reloads++
+	}
+}
+
+// run executes the Grit daemon.
+func run(version string, reloads int) (reload bool, err error) {
+	ctx, cancel := signalx.NotifyContextWithCause(
 		context.Background(),
 		os.Interrupt,
 		syscall.SIGTERM,
+		syscall.SIGHUP,
 	)
-	defer cancel()
+	defer func() {
+		if ctx.Err() == context.Canceled {
+			err = nil
+			reload = signalx.SignalCause(ctx) == syscall.SIGHUP
+		}
+		cancel()
+	}()
+
+	con := imbue.New(imbue.WithCatalog(catalog))
+	defer con.Close()
 
 	if err := imbue.Invoke3(
 		ctx,
-		container,
+		con,
 		func(
 			ctx context.Context,
 			r *config.DriverRegistry,
 			s source.List,
 			log logs.Log,
 		) error {
-			log.Write("grit daemon v%s", version)
+			if reloads == 0 {
+				log.Write("grit daemon v%s, pid %d", version, os.Getpid())
+			} else {
+				log.Write("reloading daemon configuration, pid %d", os.Getpid())
+			}
 
 			logDrivers(r, log)
 			logSources(s, log)
@@ -44,14 +71,14 @@ func Run(version string) (err error) {
 			return initSourceDrivers(ctx, s, log)
 		},
 	); err != nil {
-		return err
+		return false, err
 	}
 
-	g := container.WaitGroup(ctx)
+	g := con.WaitGroup(ctx)
 	imbue.Go2(g, runSourceDrivers)
 	imbue.Go3(g, runGRPCServer)
 
-	return g.Wait()
+	return false, g.Wait()
 }
 
 // logDrivers logs information about the drivers in the registry.
@@ -171,5 +198,9 @@ func runGRPCServer(
 	log.Write("api: accepting requests on unix socket: %s", cfg.Daemon.Socket)
 	defer log.Write("api: server stopped")
 
-	return s.Serve(lis)
+	if err := s.Serve(lis); err != nil {
+		return err
+	}
+
+	return ctx.Err()
 }

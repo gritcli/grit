@@ -7,7 +7,7 @@ import (
 
 func init() {
 	imbue.With0(
-		container,
+		catalog,
 		func(
 			ctx imbue.Context,
 		) (logs.Log, error) {

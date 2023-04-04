@@ -15,7 +15,7 @@ var configDir = ferrite.
 
 func init() {
 	imbue.With0(
-		container,
+		catalog,
 		func(
 			ctx imbue.Context,
 		) (*config.DriverRegistry, error) {
@@ -27,7 +27,7 @@ func init() {
 	)
 
 	imbue.With1(
-		container,
+		catalog,
 		func(
 			ctx imbue.Context,
 			r *config.DriverRegistry,

@@ -41,7 +41,7 @@ func (s *source) Init(
 
 	user, res, err := s.client.Users.Get(ctx, "")
 	if err != nil {
-		if res.StatusCode != http.StatusUnauthorized {
+		if res == nil || res.StatusCode != http.StatusUnauthorized {
 			return err
 		}
 
