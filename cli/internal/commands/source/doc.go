@@ -1,2 +1,2 @@
-// Package source contains the implementation of the "grit source" command.
+// Package source contains the implementation of the "source" command.
 package source

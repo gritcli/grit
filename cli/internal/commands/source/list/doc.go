@@ -1,2 +1,2 @@
-// Package list contains the implementation of the "grit source list" command.
+// Package list contains the implementation of the "source list" command.
 package list

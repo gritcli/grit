@@ -1,2 +1,2 @@
-// Package clone contains the implementation of the "grit clone" command.
+// Package clone contains the implementation of the "clone" command.
 package clone
