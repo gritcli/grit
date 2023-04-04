@@ -84,7 +84,7 @@ type Source struct {
 	StatusFunc    func(context.Context, logs.Log) (string, error)
 	ResolveFunc   func(context.Context, string, logs.Log) ([]sourcedriver.RemoteRepo, error)
 	NewClonerFunc func(context.Context, string, logs.Log) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error)
-	SuggestFunc   func(string, logs.Log) []sourcedriver.RemoteRepo
+	SuggestFunc   func(string, logs.Log) map[string][]sourcedriver.RemoteRepo
 }
 
 // Init returns s.InitFunc() if it is non-nil; otherwise, it returns nil.
@@ -144,7 +144,7 @@ func (s *Source) NewCloner(
 }
 
 // Suggest returns s.SuggestFunc() if it is non-nil; otherwise, it returns nil.
-func (s *Source) Suggest(word string, log logs.Log) []sourcedriver.RemoteRepo {
+func (s *Source) Suggest(word string, log logs.Log) map[string][]sourcedriver.RemoteRepo {
 	if s.SuggestFunc != nil {
 		return s.SuggestFunc(word, log)
 	}

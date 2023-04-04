@@ -31,15 +31,19 @@ var _ = Describe("type Suggester", func() {
 		}
 
 		srcA = &stubs.Source{
-			SuggestFunc: func(w string, log logs.Log) []sourcedriver.RemoteRepo {
+			SuggestFunc: func(w string, log logs.Log) map[string][]sourcedriver.RemoteRepo {
 				Expect(w).To(Equal("<word>"))
-				return []sourcedriver.RemoteRepo{repoA1, repoA2}
+				return map[string][]sourcedriver.RemoteRepo{
+					"<word>": {repoA1, repoA2},
+				}
 			},
 		}
 		srcB = &stubs.Source{
-			SuggestFunc: func(w string, log logs.Log) []sourcedriver.RemoteRepo {
+			SuggestFunc: func(w string, log logs.Log) map[string][]sourcedriver.RemoteRepo {
 				Expect(w).To(Equal("<word>"))
-				return []sourcedriver.RemoteRepo{repoB1, repoB2}
+				return map[string][]sourcedriver.RemoteRepo{
+					"<word>": {repoB1, repoB2},
+				}
 			},
 		}
 
@@ -60,11 +64,15 @@ var _ = Describe("type Suggester", func() {
 	Describe("func Suggest()", func() {
 		It("aggregates the suggestions from all sources", func() {
 			matches := suggester.Suggest("<word>", true, true)
-			Expect(matches).To(ConsistOf(
-				repoA1,
-				repoA2,
-				repoB1,
-				repoB2,
+			Expect(matches).To(Equal(
+				map[string][]sourcedriver.RemoteRepo{
+					"<word>": {
+						repoA1,
+						repoA2,
+						repoB1,
+						repoB2,
+					},
+				},
 			))
 		})
 	})

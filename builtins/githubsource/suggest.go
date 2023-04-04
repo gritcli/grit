@@ -15,23 +15,25 @@ import (
 func (s *source) Suggest(
 	word string,
 	log logs.Log,
-) []sourcedriver.RemoteRepo {
-	var matches []sourcedriver.RemoteRepo
+) map[string][]sourcedriver.RemoteRepo {
+	suggestions := map[string][]sourcedriver.RemoteRepo{}
 
-	for owner, repos := range s.reposByOwner {
-		if strings.HasPrefix(owner, word) {
-			for _, r := range repos {
-				matches = append(matches, toRemoteRepo(r))
-			}
-		} else {
-			for name, r := range repos {
-				if strings.HasPrefix(r.GetFullName(), word) ||
-					strings.HasPrefix(name, word) {
-					matches = append(matches, toRemoteRepo(r))
-				}
+	for _, r := range s.reposByID {
+		candidates := []string{
+			r.GetFullName(),
+			r.GetName(),
+		}
+
+		for _, c := range candidates {
+			if strings.HasPrefix(c, word) {
+				suggestions[c] = append(
+					suggestions[c],
+					toRemoteRepo(r),
+				)
+				break
 			}
 		}
 	}
 
-	return matches
+	return suggestions
 }

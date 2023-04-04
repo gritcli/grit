@@ -49,7 +49,7 @@ type Source interface {
 	// id is the repository ID, as discovered by a prior call to Resolve().
 	NewCloner(ctx context.Context, id string, log logs.Log) (Cloner, RemoteRepo, error)
 
-	// Suggest returns a set of repositories that have names beginning with the
+	// Suggest returns a set of repositories that have names related to the
 	// given word (which may be empty).
-	Suggest(word string, log logs.Log) []RemoteRepo
+	Suggest(word string, log logs.Log) map[string][]RemoteRepo
 }
