@@ -28,7 +28,7 @@ func init() {
 				// executed actually requested a shell.Executor.
 				if _, ok := flags.ShellExecutorOutputFile(cmd); !ok {
 					cmd.PrintErrf("Shell integration has not been configured. For more information run:\n\n")
-					cmd.PrintErrf("  %s help shell-integration\n\n", os.Args[0])
+					cmd.PrintErrf("  %s help setup-shell\n\n", os.Args[0])
 				}
 
 				// Return an executor that does nothing, so we can still operate

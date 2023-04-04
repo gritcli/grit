@@ -9,8 +9,9 @@ import (
 // Command returns the "source" command.
 func Command(c *imbue.Container) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "source",
-		Short: "Manage repository sources",
+		Use:                   "source",
+		DisableFlagsInUseLine: true,
+		Short:                 "Manage repository sources",
 	}
 
 	cmd.AddCommand(

@@ -5,6 +5,7 @@ import (
 
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/cli/internal/commands/clone"
+	"github.com/gritcli/grit/cli/internal/commands/setupshell"
 	"github.com/gritcli/grit/cli/internal/commands/source"
 	"github.com/gritcli/grit/cli/internal/flags"
 	"github.com/spf13/cobra"
@@ -13,9 +14,10 @@ import (
 // Root returns the root "grit" command.
 func Root(container *imbue.Container, version string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "grit2",
-		Version: version,
-		Short:   "Manage your local VCS clones",
+		Use:                   "grit",
+		DisableFlagsInUseLine: true,
+		Version:               version,
+		Short:                 "Manage your local VCS clones",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// Add the currently-executing Cobra CLI command the the DI
 			// container.
@@ -34,6 +36,9 @@ func Root(container *imbue.Container, version string) *cobra.Command {
 				},
 			)
 		},
+		CompletionOptions: cobra.CompletionOptions{
+			HiddenDefaultCmd: true,
+		},
 	}
 
 	cmd.SetIn(os.Stdin)
@@ -47,6 +52,7 @@ func Root(container *imbue.Container, version string) *cobra.Command {
 
 	cmd.AddCommand(
 		clone.Command(container),
+		setupshell.Command(container),
 		source.Command(container),
 	)
 

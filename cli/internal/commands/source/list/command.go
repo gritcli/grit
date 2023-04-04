@@ -16,11 +16,12 @@ var helpText string
 // Command returns the "source list" command.
 func Command(container *imbue.Container) *cobra.Command {
 	return &cobra.Command{
-		Use:     "list",
-		Args:    cobra.NoArgs,
-		Aliases: []string{"ls"},
-		Short:   "List the configured repository sources",
-		Long:    helpText,
+		Use:                   "list",
+		DisableFlagsInUseLine: true,
+		Args:                  cobra.NoArgs,
+		Aliases:               []string{"ls"},
+		Short:                 "List the configured repository sources",
+		Long:                  helpText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return imbue.Invoke1(
 				cmd.Context(),
