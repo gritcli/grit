@@ -16,7 +16,7 @@ import (
 )
 
 // Command returns the "setup-shell" command.
-func Command(container *imbue.Container) *cobra.Command {
+func Command(con *imbue.Container) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   "setup-shell",
 		DisableFlagsInUseLine: true,

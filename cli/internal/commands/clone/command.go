@@ -18,14 +18,14 @@ import (
 var helpText string
 
 // Command returns the "clone" command.
-func Command(container *imbue.Container) *cobra.Command {
+func Command(con *imbue.Container) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   "clone [--from-source <source> [--no-resolve]] <repo>",
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.ExactArgs(1),
 		Short:                 "Clone a remote repository",
 		Long:                  helpText,
-		ValidArgsFunction:     completion.RepoName(container, 0, api.Locality_REMOTE),
+		ValidArgsFunction:     completion.RepoName(con, 0, api.Locality_REMOTE),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			queryOrID := args[0]
 
@@ -42,7 +42,7 @@ func Command(container *imbue.Container) *cobra.Command {
 
 			return imbue.Invoke3(
 				cmd.Context(),
-				container,
+				con,
 				func(
 					ctx context.Context,
 					client api.APIClient,

@@ -7,7 +7,7 @@ import (
 )
 
 // Command returns the "source" command.
-func Command(c *imbue.Container) *cobra.Command {
+func Command(con *imbue.Container) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   "source",
 		DisableFlagsInUseLine: true,
@@ -15,7 +15,7 @@ func Command(c *imbue.Container) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		list.Command(c),
+		list.Command(con),
 	)
 
 	return cmd

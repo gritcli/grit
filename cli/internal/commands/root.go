@@ -7,16 +7,16 @@ import (
 	"github.com/gritcli/grit/cli/internal/commands/clone"
 	"github.com/gritcli/grit/cli/internal/commands/setupshell"
 	"github.com/gritcli/grit/cli/internal/commands/source"
+	"github.com/gritcli/grit/cli/internal/commands/version"
 	"github.com/gritcli/grit/cli/internal/flags"
 	"github.com/spf13/cobra"
 )
 
 // Root returns the root "grit" command.
-func Root(container *imbue.Container, version string) *cobra.Command {
+func Root(con *imbue.Container, ver string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   "grit",
 		DisableFlagsInUseLine: true,
-		Version:               version,
 		Short:                 "Manage your local VCS clones",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// Add the currently-executing Cobra CLI command the the DI
@@ -28,7 +28,7 @@ func Root(container *imbue.Container, version string) *cobra.Command {
 			// This allows other DI provider definitions to make use of the
 			// flags passed to the command.
 			imbue.With0(
-				container,
+				con,
 				func(
 					ctx imbue.Context,
 				) (*cobra.Command, error) {
@@ -51,9 +51,10 @@ func Root(container *imbue.Container, version string) *cobra.Command {
 	flags.SetupShellExecutorOutput(cmd)
 
 	cmd.AddCommand(
-		clone.Command(container),
-		setupshell.Command(container),
-		source.Command(container),
+		clone.Command(con),
+		setupshell.Command(con),
+		source.Command(con),
+		version.Command(con, ver),
 	)
 
 	return cmd

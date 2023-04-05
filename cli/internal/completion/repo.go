@@ -18,12 +18,12 @@ type ValidArgsFunc func(
 // RepoName returns a ValidArgsFunc that completes the argument at the given
 // position using the known repository names.
 func RepoName(
-	container *imbue.Container,
+	con *imbue.Container,
 	pos int,
 	loc ...api.Locality,
 ) ValidArgsFunc {
 	return callSuggestAPI(
-		container,
+		con,
 		pos,
 		func(
 			ctx context.Context,
@@ -51,7 +51,7 @@ type suggestFunc func(
 // callSuggestAPI returns a ValidArgsFunc that completes the argument at the
 // given position by calling fn().
 func callSuggestAPI(
-	container *imbue.Container,
+	con *imbue.Container,
 	pos int,
 	fn suggestFunc,
 ) ValidArgsFunc {
@@ -66,7 +66,7 @@ func callSuggestAPI(
 
 		if err := imbue.Invoke1(
 			cmd.Context(),
-			container,
+			con,
 			func(
 				ctx context.Context,
 				client api.APIClient,
