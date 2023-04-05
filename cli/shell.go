@@ -12,7 +12,7 @@ import (
 
 func init() {
 	imbue.With1(
-		container,
+		catalog,
 		func(
 			ctx imbue.Context,
 			cmd *cobra.Command,

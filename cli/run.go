@@ -10,11 +10,14 @@ import (
 	"github.com/gritcli/grit/cli/internal/commands"
 )
 
-// container is the dependency injection container for the Grit CLI.
-var container = imbue.New()
+// catalog is the dependency injection catalog for the Grit CLI.
+var catalog = imbue.NewCatalog()
 
 // Run starts the Grit CLI.
 func Run(version string) (err error) {
+	con := imbue.New(imbue.WithCatalog(catalog))
+	defer con.Close()
+
 	ctx, cancel := signal.NotifyContext(
 		context.Background(),
 		os.Interrupt,
@@ -23,6 +26,6 @@ func Run(version string) (err error) {
 	defer cancel()
 
 	return commands.
-		Root(container, version).
+		Root(con, version).
 		ExecuteContext(ctx)
 }
