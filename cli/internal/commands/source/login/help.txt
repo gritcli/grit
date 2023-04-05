@@ -1,0 +1,5 @@
+The "source login" command configures authentication for a repository source.
+
+The specific authentication mechanism used depends on which driver the source
+uses. For example, you may be prompted for credentials on the terminal, or via a
+web page.

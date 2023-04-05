@@ -25,7 +25,9 @@ func Command(con *imbue.Container) *cobra.Command {
 		Args:                  cobra.ExactArgs(1),
 		Short:                 "Clone a remote repository",
 		Long:                  helpText,
-		ValidArgsFunction:     completion.RepoName(con, 0, api.Locality_REMOTE),
+		ValidArgsFunction: completion.Positional(
+			completion.RepoName(con, api.Locality_REMOTE),
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			queryOrID := args[0]
 
@@ -89,7 +91,7 @@ func Command(con *imbue.Container) *cobra.Command {
 		},
 	}
 
-	flags.SetupFromSource(cmd)
+	flags.SetupFromSource(cmd, con)
 
 	return cmd
 }
