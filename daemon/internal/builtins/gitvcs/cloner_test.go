@@ -58,7 +58,7 @@ var _ = Describe("type Cloner", func() {
 			// Use the private test repo to ensure the private key was
 			// definitely used.
 			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-private.git"
-			cloner.SSHKeyFile = "./testdata/deploy-key-no-passphrase"
+			cloner.SSHKeyFile = "../../../../testdata/keys/deploy-key-no-passphrase"
 
 			err := cloner.Clone(ctx, tempDir, buffer.Log())
 			Expect(err).ShouldNot(HaveOccurred())
@@ -69,7 +69,7 @@ var _ = Describe("type Cloner", func() {
 			// Use the private test repo to ensure the private key was
 			// definitely used.
 			cloner.SSHEndpoint = "git@github.com:grit-integration-tests/test-private.git"
-			cloner.SSHKeyFile = "./testdata/deploy-key-with-passphrase"
+			cloner.SSHKeyFile = "../../../../testdata/keys/deploy-key-with-passphrase"
 			cloner.SSHKeyPassphrase = "passphrase"
 
 			err := cloner.Clone(ctx, tempDir, buffer.Log())
