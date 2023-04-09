@@ -1,8 +1,8 @@
 package githubsource_test
 
 import (
-	. "github.com/gritcli/grit/builtins/githubsource"
-	"github.com/gritcli/grit/builtins/gitvcs"
+	. "github.com/gritcli/grit/daemon/internal/builtins/githubsource"
+	"github.com/gritcli/grit/daemon/internal/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/configtest"
 	"github.com/gritcli/grit/driver/vcsdriver"
 	. "github.com/onsi/ginkgo/v2"

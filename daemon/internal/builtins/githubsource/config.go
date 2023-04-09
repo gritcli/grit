@@ -1,7 +1,7 @@
 package githubsource
 
 import (
-	"github.com/gritcli/grit/builtins/gitvcs"
+	"github.com/gritcli/grit/daemon/internal/builtins/gitvcs"
 	"github.com/gritcli/grit/driver/sourcedriver"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
