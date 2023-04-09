@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/dogmatiq/imbue"
-	"github.com/gritcli/grit/api/daemonapi"
+	"github.com/gritcli/grit/api"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +21,7 @@ func Command(con *imbue.Container, ver string) *cobra.Command {
 				con,
 				func(
 					ctx context.Context,
-					client daemonapi.APIClient,
+					client api.APIClient,
 				) error {
 					cmd.SilenceUsage = true
 
@@ -30,7 +30,7 @@ func Command(con *imbue.Container, ver string) *cobra.Command {
 						ver,
 					)
 
-					res, err := client.Info(ctx, &daemonapi.InfoRequest{})
+					res, err := client.DaemonInfo(ctx, &api.DaemonInfoRequest{})
 					if err != nil {
 						return err
 					}

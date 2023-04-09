@@ -3,7 +3,6 @@ package cli
 import (
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/api"
-	"github.com/gritcli/grit/api/daemonapi"
 	"github.com/gritcli/grit/cli/internal/flags"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -56,16 +55,6 @@ func init() {
 			conn grpc.ClientConnInterface,
 		) (api.APIClient, error) {
 			return api.NewAPIClient(conn), nil
-		},
-	)
-
-	imbue.With1(
-		catalog,
-		func(
-			ctx imbue.Context,
-			conn grpc.ClientConnInterface,
-		) (daemonapi.APIClient, error) {
-			return daemonapi.NewAPIClient(conn), nil
 		},
 	)
 }

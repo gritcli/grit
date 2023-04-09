@@ -17,6 +17,8 @@ import (
 
 // Server is the implementation of api.APIServer
 type Server struct {
+	Version    string
+	PID        int
 	SourceList source.List
 	Cloner     *source.Cloner
 	Suggester  *source.Suggester

@@ -5,9 +5,7 @@ import (
 
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/api"
-	"github.com/gritcli/grit/api/daemonapi"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
-	"github.com/gritcli/grit/daemon/internal/apiserver/daemonapiserver"
 	"github.com/gritcli/grit/daemon/internal/source"
 	"github.com/gritcli/grit/logs"
 	"google.golang.org/grpc"
@@ -25,11 +23,12 @@ func init() {
 		},
 	)
 
-	imbue.Decorate4(
+	imbue.Decorate5(
 		catalog,
 		func(
 			ctx imbue.Context,
 			svr *grpc.Server,
+			ver imbue.ByName[version, string],
 			sources source.List,
 			c *source.Cloner,
 			s *source.Suggester,
@@ -38,28 +37,12 @@ func init() {
 			api.RegisterAPIServer(
 				svr,
 				&apiserver.Server{
+					Version:    ver.Value(),
+					PID:        os.Getpid(),
 					SourceList: sources,
 					Cloner:     c,
 					Suggester:  s,
 					Log:        log.WithPrefix("api: "),
-				},
-			)
-			return svr, nil
-		},
-	)
-
-	imbue.Decorate1(
-		catalog,
-		func(
-			ctx imbue.Context,
-			svr *grpc.Server,
-			ver imbue.ByName[version, string],
-		) (*grpc.Server, error) {
-			daemonapi.RegisterAPIServer(
-				svr,
-				&daemonapiserver.Server{
-					Version: ver.Value(),
-					PID:     os.Getpid(),
 				},
 			)
 			return svr, nil

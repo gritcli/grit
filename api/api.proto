@@ -34,6 +34,9 @@ message ClientOptions { bool verbose = 1; }
 message ClientOutput { string message = 1; }
 
 service API {
+  // DaemonInfo returns information about the daemon.
+  rpc DaemonInfo(DaemonInfoRequest) returns (DaemonInfoResponse);
+
   // ListSources lists the configured repository sources.
   rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse);
 
@@ -47,6 +50,12 @@ service API {
   // SuggestRepos returns a list of repository names to be used as suggestions
   // for completing a partial repository name.
   rpc SuggestRepos(SuggestReposRequest) returns (SuggestResponse);
+}
+
+message DaemonInfoRequest {}
+message DaemonInfoResponse {
+  string version = 1;
+  uint64 pid = 2;
 }
 
 message ListSourcesRequest {}

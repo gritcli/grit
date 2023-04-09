@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	API_DaemonInfo_FullMethodName   = "/grit.v2.api.API/DaemonInfo"
 	API_ListSources_FullMethodName  = "/grit.v2.api.API/ListSources"
 	API_ResolveRepo_FullMethodName  = "/grit.v2.api.API/ResolveRepo"
 	API_CloneRepo_FullMethodName    = "/grit.v2.api.API/CloneRepo"
@@ -29,6 +30,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type APIClient interface {
+	// DaemonInfo returns information about the daemon.
+	DaemonInfo(ctx context.Context, in *DaemonInfoRequest, opts ...grpc.CallOption) (*DaemonInfoResponse, error)
 	// ListSources lists the configured repository sources.
 	ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error)
 	// ResolveRepo resolves a repository name, URL or other identifier to a list
@@ -47,6 +50,15 @@ type aPIClient struct {
 
 func NewAPIClient(cc grpc.ClientConnInterface) APIClient {
 	return &aPIClient{cc}
+}
+
+func (c *aPIClient) DaemonInfo(ctx context.Context, in *DaemonInfoRequest, opts ...grpc.CallOption) (*DaemonInfoResponse, error) {
+	out := new(DaemonInfoResponse)
+	err := c.cc.Invoke(ctx, API_DaemonInfo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *aPIClient) ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error) {
@@ -135,6 +147,8 @@ func (c *aPIClient) SuggestRepos(ctx context.Context, in *SuggestReposRequest, o
 // All implementations should embed UnimplementedAPIServer
 // for forward compatibility
 type APIServer interface {
+	// DaemonInfo returns information about the daemon.
+	DaemonInfo(context.Context, *DaemonInfoRequest) (*DaemonInfoResponse, error)
 	// ListSources lists the configured repository sources.
 	ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error)
 	// ResolveRepo resolves a repository name, URL or other identifier to a list
@@ -151,6 +165,9 @@ type APIServer interface {
 type UnimplementedAPIServer struct {
 }
 
+func (UnimplementedAPIServer) DaemonInfo(context.Context, *DaemonInfoRequest) (*DaemonInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DaemonInfo not implemented")
+}
 func (UnimplementedAPIServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListSources not implemented")
 }
@@ -173,6 +190,24 @@ type UnsafeAPIServer interface {
 
 func RegisterAPIServer(s grpc.ServiceRegistrar, srv APIServer) {
 	s.RegisterService(&API_ServiceDesc, srv)
+}
+
+func _API_DaemonInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DaemonInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(APIServer).DaemonInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: API_DaemonInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(APIServer).DaemonInfo(ctx, req.(*DaemonInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _API_ListSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -260,6 +295,10 @@ var API_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "grit.v2.api.API",
 	HandlerType: (*APIServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "DaemonInfo",
+			Handler:    _API_DaemonInfo_Handler,
+		},
 		{
 			MethodName: "ListSources",
 			Handler:    _API_ListSources_Handler,
