@@ -1,7 +1,7 @@
 daemon {
-    socket = "../../../artifacts/grit/daemon.sock"
+    socket = "../../artifacts/grit/daemon.sock"
 }
 
 clones {
-    dir = "../../../artifacts/grit/clones"
+    dir = "../../artifacts/grit/clones"
 }

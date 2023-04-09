@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/go-github/v50/github"
 	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 	"github.com/gritcli/grit/daemon/internal/logs"
 )
@@ -17,11 +18,35 @@ func (s *source) SignIn(
 		return nil, errors.New("already authenticated using a personal access token (PAT)")
 	}
 
-	return nil, errors.New("<not implemented>")
+	if isEnterpriseServer(s.config.Domain) {
+		return &tokenAuthenticator{}, nil
+	}
+
+	return &deviceAuthenticator{Client: s.client}, nil
 }
 
 // SignOut signs out of the source.
 func (s *source) SignOut(
+	ctx context.Context,
+	log logs.Log,
+) error {
+	return errors.New("<not implemented>")
+}
+
+type tokenAuthenticator struct{}
+
+func (a *tokenAuthenticator) Authenticate(
+	ctx context.Context,
+	log logs.Log,
+) error {
+	return errors.New("<not implemented>")
+}
+
+type deviceAuthenticator struct {
+	Client *github.Client
+}
+
+func (a *deviceAuthenticator) Authenticate(
 	ctx context.Context,
 	log logs.Log,
 ) error {
