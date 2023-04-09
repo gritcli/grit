@@ -3,7 +3,7 @@ package config
 import (
 	"sort"
 
-	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
 )
 
 // RegisterVCSDriver adds a VCS driver to the registry.

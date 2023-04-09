@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
 // LocalRepo represents a local clone of a remote repository.

@@ -3,7 +3,7 @@ package config_test
 import (
 	"strings"
 
-	. "github.com/gritcli/grit/config"
+	. "github.com/gritcli/grit/daemon/internal/config"
 	homedir "github.com/mitchellh/go-homedir"
 )
 

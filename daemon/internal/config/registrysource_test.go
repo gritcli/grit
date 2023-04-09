@@ -1,8 +1,8 @@
 package config_test
 
 import (
-	. "github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/driver/sourcedriver"
+	. "github.com/gritcli/grit/daemon/internal/config"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

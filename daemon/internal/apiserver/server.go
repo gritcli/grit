@@ -8,9 +8,9 @@ import (
 	"syscall"
 
 	"github.com/gritcli/grit/api"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/logs"
 	"github.com/gritcli/grit/daemon/internal/source"
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/logs"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )

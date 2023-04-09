@@ -1,8 +1,8 @@
 package source
 
 import (
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
 // Source is a repository source.

@@ -3,9 +3,9 @@ package daemon
 import (
 	"github.com/dogmatiq/ferrite"
 	"github.com/dogmatiq/imbue"
-	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/daemon/internal/builtins/githubsource"
 	"github.com/gritcli/grit/daemon/internal/builtins/gitvcs"
+	"github.com/gritcli/grit/daemon/internal/config"
 )
 
 var configDir = ferrite.

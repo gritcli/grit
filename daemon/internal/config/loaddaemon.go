@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+
+	"github.com/gritcli/grit/api"
 )
 
 // mergeDaemon merges s into the configuration.
@@ -32,7 +34,7 @@ func (l *loader) mergeDaemon(file string, s daemonSchema) error {
 // populateDaemonDefaults populates l.daemon with default values.
 func (l *loader) populateDaemonDefaults() error {
 	if l.daemon.Socket == "" {
-		l.daemon.Socket = DefaultDaemonSocket
+		l.daemon.Socket = api.DefaultSocket
 
 		if err := l.normalizePath(&l.daemon.Socket); err != nil {
 			return fmt.Errorf(

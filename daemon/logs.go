@@ -2,7 +2,7 @@ package daemon
 
 import (
 	"github.com/dogmatiq/imbue"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
 func init() {

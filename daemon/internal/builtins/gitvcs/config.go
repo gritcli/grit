@@ -3,7 +3,7 @@ package gitvcs
 import (
 	"path/filepath"
 
-	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 )

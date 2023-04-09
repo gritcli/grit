@@ -3,7 +3,7 @@ package githubsource_test
 import (
 	"path/filepath"
 
-	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 )
 
 var (

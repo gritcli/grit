@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	homedir "github.com/mitchellh/go-homedir"

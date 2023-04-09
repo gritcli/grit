@@ -6,7 +6,7 @@ import (
 	"time"
 
 	git "github.com/go-git/go-git/v5"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/logs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

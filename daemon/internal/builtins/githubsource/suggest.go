@@ -3,8 +3,8 @@ package githubsource
 import (
 	"strings"
 
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
 // Suggest returns a set of repositories that have names beginning with the

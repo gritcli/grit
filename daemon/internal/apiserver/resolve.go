@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/gritcli/grit/api"
+	"github.com/gritcli/grit/daemon/internal/logs"
 	"github.com/gritcli/grit/daemon/internal/source"
-	"github.com/gritcli/grit/logs"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"
 )

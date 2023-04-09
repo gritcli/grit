@@ -6,11 +6,11 @@ import (
 	"syscall"
 
 	"github.com/dogmatiq/imbue"
-	"github.com/gritcli/grit/config"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
+	"github.com/gritcli/grit/daemon/internal/config"
+	"github.com/gritcli/grit/daemon/internal/logs"
 	"github.com/gritcli/grit/daemon/internal/signalx"
 	"github.com/gritcli/grit/daemon/internal/source"
-	"github.com/gritcli/grit/logs"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )

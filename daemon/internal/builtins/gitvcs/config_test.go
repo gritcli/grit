@@ -2,7 +2,7 @@ package gitvcs_test
 
 import (
 	. "github.com/gritcli/grit/daemon/internal/builtins/gitvcs"
-	"github.com/gritcli/grit/driver/configtest"
+	"github.com/gritcli/grit/daemon/internal/driver/configtest"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

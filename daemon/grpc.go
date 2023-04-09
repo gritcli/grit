@@ -6,8 +6,9 @@ import (
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/api"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
+	"github.com/gritcli/grit/daemon/internal/logs"
 	"github.com/gritcli/grit/daemon/internal/source"
-	"github.com/gritcli/grit/logs"
+
 	"google.golang.org/grpc"
 )
 

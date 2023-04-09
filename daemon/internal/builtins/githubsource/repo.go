@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v50/github"
-	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 )
 
 // parseRepoID parses a repo ID from its string form (as used by the source

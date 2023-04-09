@@ -3,7 +3,8 @@ package config_test
 import (
 	"path/filepath"
 
-	. "github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/api"
+	. "github.com/gritcli/grit/daemon/internal/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -54,10 +55,10 @@ var _ = Describe("func Load() (daemon configuration)", func() {
 			// HACK: We really shouldn't manipulate (or even have) global
 			// variables like this, but it's the only cross-platform way to
 			// force the home directory resolution to fail.
-			original = DefaultDaemonSocket
-			DefaultDaemonSocket = "~someuser/path/to/socket"
+			original = api.DefaultSocket
+			api.DefaultSocket = "~someuser/path/to/socket"
 			DeferCleanup(func() {
-				DefaultDaemonSocket = original
+				api.DefaultSocket = original
 			})
 		})
 

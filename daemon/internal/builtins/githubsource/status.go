@@ -9,7 +9,7 @@ import (
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/google/go-github/v50/github"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
 // Status returns a brief description of the current state of the source.

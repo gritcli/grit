@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/gritcli/grit/daemon/internal/builtins/gitvcs"
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
 // NewCloner returns a cloner that clones the repository with the given ID, and

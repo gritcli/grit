@@ -3,11 +3,11 @@ package source_test
 import (
 	"context"
 
-	"github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/daemon/internal/config"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/logs"
 	. "github.com/gritcli/grit/daemon/internal/source"
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/internal/stubs"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/stubs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

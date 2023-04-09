@@ -1,8 +1,6 @@
 package githubsource
 
-import (
-	"github.com/gritcli/grit/driver/sourcedriver"
-)
+import "github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 
 // Registration contains information about the driver used to register it with
 // Grit's driver registry.

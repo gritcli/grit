@@ -3,8 +3,8 @@ package config
 import (
 	"sync"
 
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
 )
 
 // DriverRegistry is a collection of driver implementations that are available

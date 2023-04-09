@@ -3,7 +3,7 @@ package sourcedriver
 import (
 	"context"
 
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
 // Cloner is an interface for cloning a specific remote repository.

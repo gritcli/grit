@@ -3,7 +3,7 @@ package config
 import (
 	"sort"
 
-	"github.com/gritcli/grit/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 )
 
 // RegisterSourceDriver adds a source driver to the registry.

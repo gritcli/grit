@@ -1,6 +1,6 @@
 package gitvcs
 
-import "github.com/gritcli/grit/driver/vcsdriver"
+import "github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
 
 // Registration contains information about the driver used to register it with
 // Grit's driver registry.

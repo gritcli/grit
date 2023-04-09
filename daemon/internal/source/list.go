@@ -3,7 +3,7 @@ package source
 import (
 	"strings"
 
-	"github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/daemon/internal/config"
 )
 
 // List is a collection of sources.

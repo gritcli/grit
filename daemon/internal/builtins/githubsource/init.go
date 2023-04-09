@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/go-github/v50/github"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/logs"
 	"golang.org/x/oauth2"
 )
 

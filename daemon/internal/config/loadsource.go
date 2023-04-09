@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
 	"github.com/hashicorp/hcl/v2"
 )
 

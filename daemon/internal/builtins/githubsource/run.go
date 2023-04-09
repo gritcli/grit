@@ -3,7 +3,7 @@ package githubsource
 import (
 	"context"
 
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
 // Run performs any background processing required by the source.

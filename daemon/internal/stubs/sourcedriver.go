@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/driver/vcsdriver"
-	"github.com/gritcli/grit/logs"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
+	"github.com/gritcli/grit/daemon/internal/logs"
 	"github.com/hashicorp/hcl/v2"
 )
 

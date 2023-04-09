@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/gritcli/grit/config"
-	"github.com/gritcli/grit/driver/sourcedriver"
-	"github.com/gritcli/grit/driver/vcsdriver"
+	"github.com/gritcli/grit/daemon/internal/config"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"

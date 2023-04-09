@@ -1,7 +1,7 @@
 package flags
 
 import (
-	"github.com/gritcli/grit/config"
+	"github.com/gritcli/grit/api"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
@@ -10,7 +10,7 @@ import (
 func SetupSocket(cmd *cobra.Command) {
 	cmd.PersistentFlags().String(
 		"socket",
-		config.DefaultDaemonSocket,
+		api.DefaultSocket,
 		"set the Unix socket address of the Grit daemon",
 	)
 
