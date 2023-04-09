@@ -16,7 +16,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.9.2
 	github.com/onsi/gomega v1.27.6
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
 	golang.org/x/oauth2 v0.7.0
 	golang.org/x/sync v0.1.0
@@ -44,7 +44,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
