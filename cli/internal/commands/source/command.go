@@ -3,7 +3,8 @@ package source
 import (
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/cli/internal/commands/source/list"
-	"github.com/gritcli/grit/cli/internal/commands/source/login"
+	"github.com/gritcli/grit/cli/internal/commands/source/signin"
+	"github.com/gritcli/grit/cli/internal/commands/source/signout"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +18,8 @@ func Command(con *imbue.Container) *cobra.Command {
 
 	cmd.AddCommand(
 		list.Command(con),
-		login.Command(con),
+		signin.Command(con),
+		signout.Command(con),
 	)
 
 	return cmd

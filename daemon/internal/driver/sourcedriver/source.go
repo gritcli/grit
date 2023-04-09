@@ -29,6 +29,12 @@ type Source interface {
 	// authenticated details, etc.
 	Status(ctx context.Context, log logs.Log) (string, error)
 
+	// SignIn signs in to the source.
+	SignIn(ctx context.Context, log logs.Log) (Authenticator, error)
+
+	// SignOut signs out of the source.
+	SignOut(ctx context.Context, log logs.Log) error
+
 	// Resolve resolves a repository name, URL, or other identifier to a set of
 	// possible repositories.
 	//

@@ -6,7 +6,10 @@ import (
 )
 
 // CloneRepo makes a local clone of a repository from a source.
-func (s *Server) CloneRepo(req *api.CloneRepoRequest, stream api.API_CloneRepoServer) error {
+func (s *Server) CloneRepo(
+	req *api.CloneRepoRequest,
+	stream api.API_CloneRepoServer,
+) error {
 	repo, err := s.Cloner.Clone(
 		stream.Context(),
 		req.Source,

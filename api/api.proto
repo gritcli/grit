@@ -40,6 +40,12 @@ service API {
   // ListSources lists the configured repository sources.
   rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse);
 
+  // SignIn signs in to a repository source.
+  rpc SignIn(SignInRequest) returns (stream SignInResponse);
+
+  // SignOut signs out of a repository resource.
+  rpc SignOut(SignOutRequest) returns (SignOutResponse);
+
   // ResolveRepo resolves a repository name, URL or other identifier to a list
   // of repositories.
   rpc ResolveRepo(ResolveRepoRequest) returns (stream ResolveRepoResponse);
@@ -59,8 +65,15 @@ message DaemonInfoResponse {
 }
 
 message ListSourcesRequest {}
-
 message ListSourcesResponse { repeated Source sources = 1; }
+
+message SignInRequest { string source = 1; }
+message SignInResponse {
+  oneof response { ClientOutput output = 1; }
+}
+
+message SignOutRequest { string source = 1; }
+message SignOutResponse {}
 
 message ResolveRepoRequest {
   ClientOptions client_options = 1;
@@ -68,7 +81,6 @@ message ResolveRepoRequest {
   repeated string source_filter = 3;
   repeated Locality locality_filter = 4;
 }
-
 message ResolveRepoResponse {
   oneof response {
     ClientOutput output = 1;
@@ -82,7 +94,6 @@ message CloneRepoRequest {
   string source = 2;
   string repo_id = 3;
 }
-
 message CloneRepoResponse {
   oneof response {
     ClientOutput output = 1;
@@ -94,5 +105,4 @@ message SuggestReposRequest {
   string word = 1;
   repeated Locality locality_filter = 2;
 }
-
 message SuggestResponse { repeated string words = 1; }

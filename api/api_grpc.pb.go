@@ -21,6 +21,8 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	API_DaemonInfo_FullMethodName   = "/grit.v2.api.API/DaemonInfo"
 	API_ListSources_FullMethodName  = "/grit.v2.api.API/ListSources"
+	API_SignIn_FullMethodName       = "/grit.v2.api.API/SignIn"
+	API_SignOut_FullMethodName      = "/grit.v2.api.API/SignOut"
 	API_ResolveRepo_FullMethodName  = "/grit.v2.api.API/ResolveRepo"
 	API_CloneRepo_FullMethodName    = "/grit.v2.api.API/CloneRepo"
 	API_SuggestRepos_FullMethodName = "/grit.v2.api.API/SuggestRepos"
@@ -34,6 +36,10 @@ type APIClient interface {
 	DaemonInfo(ctx context.Context, in *DaemonInfoRequest, opts ...grpc.CallOption) (*DaemonInfoResponse, error)
 	// ListSources lists the configured repository sources.
 	ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error)
+	// SignIn signs in to a repository source.
+	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (API_SignInClient, error)
+	// SignOut signs out of a repository resource.
+	SignOut(ctx context.Context, in *SignOutRequest, opts ...grpc.CallOption) (*SignOutResponse, error)
 	// ResolveRepo resolves a repository name, URL or other identifier to a list
 	// of repositories.
 	ResolveRepo(ctx context.Context, in *ResolveRepoRequest, opts ...grpc.CallOption) (API_ResolveRepoClient, error)
@@ -70,8 +76,49 @@ func (c *aPIClient) ListSources(ctx context.Context, in *ListSourcesRequest, opt
 	return out, nil
 }
 
+func (c *aPIClient) SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (API_SignInClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], API_SignIn_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &aPISignInClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type API_SignInClient interface {
+	Recv() (*SignInResponse, error)
+	grpc.ClientStream
+}
+
+type aPISignInClient struct {
+	grpc.ClientStream
+}
+
+func (x *aPISignInClient) Recv() (*SignInResponse, error) {
+	m := new(SignInResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *aPIClient) SignOut(ctx context.Context, in *SignOutRequest, opts ...grpc.CallOption) (*SignOutResponse, error) {
+	out := new(SignOutResponse)
+	err := c.cc.Invoke(ctx, API_SignOut_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *aPIClient) ResolveRepo(ctx context.Context, in *ResolveRepoRequest, opts ...grpc.CallOption) (API_ResolveRepoClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], API_ResolveRepo_FullMethodName, opts...)
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[1], API_ResolveRepo_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +150,7 @@ func (x *aPIResolveRepoClient) Recv() (*ResolveRepoResponse, error) {
 }
 
 func (c *aPIClient) CloneRepo(ctx context.Context, in *CloneRepoRequest, opts ...grpc.CallOption) (API_CloneRepoClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[1], API_CloneRepo_FullMethodName, opts...)
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[2], API_CloneRepo_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -151,6 +198,10 @@ type APIServer interface {
 	DaemonInfo(context.Context, *DaemonInfoRequest) (*DaemonInfoResponse, error)
 	// ListSources lists the configured repository sources.
 	ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error)
+	// SignIn signs in to a repository source.
+	SignIn(*SignInRequest, API_SignInServer) error
+	// SignOut signs out of a repository resource.
+	SignOut(context.Context, *SignOutRequest) (*SignOutResponse, error)
 	// ResolveRepo resolves a repository name, URL or other identifier to a list
 	// of repositories.
 	ResolveRepo(*ResolveRepoRequest, API_ResolveRepoServer) error
@@ -170,6 +221,12 @@ func (UnimplementedAPIServer) DaemonInfo(context.Context, *DaemonInfoRequest) (*
 }
 func (UnimplementedAPIServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListSources not implemented")
+}
+func (UnimplementedAPIServer) SignIn(*SignInRequest, API_SignInServer) error {
+	return status.Errorf(codes.Unimplemented, "method SignIn not implemented")
+}
+func (UnimplementedAPIServer) SignOut(context.Context, *SignOutRequest) (*SignOutResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignOut not implemented")
 }
 func (UnimplementedAPIServer) ResolveRepo(*ResolveRepoRequest, API_ResolveRepoServer) error {
 	return status.Errorf(codes.Unimplemented, "method ResolveRepo not implemented")
@@ -224,6 +281,45 @@ func _API_ListSources_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(APIServer).ListSources(ctx, req.(*ListSourcesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _API_SignIn_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SignInRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(APIServer).SignIn(m, &aPISignInServer{stream})
+}
+
+type API_SignInServer interface {
+	Send(*SignInResponse) error
+	grpc.ServerStream
+}
+
+type aPISignInServer struct {
+	grpc.ServerStream
+}
+
+func (x *aPISignInServer) Send(m *SignInResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _API_SignOut_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignOutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(APIServer).SignOut(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: API_SignOut_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(APIServer).SignOut(ctx, req.(*SignOutRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -304,11 +400,20 @@ var API_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _API_ListSources_Handler,
 		},
 		{
+			MethodName: "SignOut",
+			Handler:    _API_SignOut_Handler,
+		},
+		{
 			MethodName: "SuggestRepos",
 			Handler:    _API_SuggestRepos_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SignIn",
+			Handler:       _API_SignIn_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "ResolveRepo",
 			Handler:       _API_ResolveRepo_Handler,

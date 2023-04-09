@@ -1,4 +1,4 @@
-package login_test
+package signin_test
 
 import (
 	"reflect"
