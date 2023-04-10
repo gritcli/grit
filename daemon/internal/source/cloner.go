@@ -50,7 +50,7 @@ func (c *Cloner) Clone(
 		return LocalRepo{}, fmt.Errorf("unable to clone: unrecognized source (%s)", source)
 	}
 
-	cloner, repo, err := src.Driver.NewCloner(ctx, repoID, log)
+	cloner, repo, err := src.Driver.Cloner(ctx, repoID, log)
 	if err != nil {
 		return LocalRepo{}, fmt.Errorf("unable to prepare for cloning: %w", err)
 	}

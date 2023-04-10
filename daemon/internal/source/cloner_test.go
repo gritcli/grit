@@ -42,7 +42,7 @@ var _ = Describe("type Cloner", func() {
 		sourceCloner = &stubs.SourceCloner{}
 
 		driver = &stubs.Source{
-			NewClonerFunc: func(
+			ClonerFunc: func(
 				context.Context,
 				string,
 				logs.Log,
@@ -127,7 +127,7 @@ var _ = Describe("type Cloner", func() {
 		})
 
 		It("returns an error if the driver returns an error", func() {
-			driver.NewClonerFunc = func(
+			driver.ClonerFunc = func(
 				context.Context,
 				string,
 				logs.Log,

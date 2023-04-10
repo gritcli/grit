@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("func source.NewCloner()", func() {
+var _ = Describe("func source.Cloner()", func() {
 	var (
 		ctx context.Context
 		src sourcedriver.Source
@@ -24,7 +24,7 @@ var _ = Describe("func source.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner", func() {
-			cloner, repo, err := src.NewCloner(ctx, publicUserRepo.ID, logs.Discard)
+			cloner, repo, err := src.Cloner(ctx, publicUserRepo.ID, logs.Discard)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{
@@ -46,7 +46,7 @@ var _ = Describe("func source.NewCloner()", func() {
 		})
 
 		It("returns a gitvcs.Cloner with the token as the HTTP password", func() {
-			cloner, repo, err := src.NewCloner(ctx, privateUserRepo.ID, logs.Discard)
+			cloner, repo, err := src.Cloner(ctx, privateUserRepo.ID, logs.Discard)
 			skipIfRateLimited(err)
 
 			Expect(cloner).To(Equal(&gitvcs.Cloner{

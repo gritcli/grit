@@ -8,9 +8,9 @@ import (
 	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
-// NewCloner returns a cloner that clones the repository with the given ID, and
+// Cloner returns a cloner that clones the repository with the given ID, and
 // information about the repository being cloned.
-func (s *source) NewCloner(
+func (s *source) Cloner(
 	ctx context.Context,
 	id string,
 	log logs.Log,

@@ -49,11 +49,11 @@ type Source interface {
 	// query is invalid; instead return an empty slice.
 	Resolve(ctx context.Context, query string, log logs.Log) ([]RemoteRepo, error)
 
-	// NewCloner returns a cloner that clones the repository with the given ID,
+	// Cloner returns a cloner that clones the repository with the given ID,
 	// and information about the repository being cloned.
 	//
 	// id is the repository ID, as discovered by a prior call to Resolve().
-	NewCloner(ctx context.Context, id string, log logs.Log) (Cloner, RemoteRepo, error)
+	Cloner(ctx context.Context, id string, log logs.Log) (Cloner, RemoteRepo, error)
 
 	// Suggest returns a set of repositories that have names related to the
 	// given word (which may be empty).
