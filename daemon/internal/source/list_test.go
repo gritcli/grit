@@ -2,6 +2,7 @@ package source_test
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/gritcli/grit/daemon/internal/config"
 	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
@@ -21,68 +22,90 @@ var _ = Describe("type List", func() {
 			// differentiated from each other. The panic message is different so
 			// these functions can't get combined by the compiler.
 			srcA := &stubs.Source{
-				InitFunc: func(context.Context, logs.Log) error {
+				InitFunc: func(context.Context, sourcedriver.InitParameters, logs.Log) error {
 					panic("not implemented (a)")
 				},
 			}
 
 			srcB := &stubs.Source{
-				InitFunc: func(context.Context, logs.Log) error {
+				InitFunc: func(context.Context, sourcedriver.InitParameters, logs.Log) error {
 					panic("not implemented (b)")
 				},
 			}
 
-			list = NewList([]config.Source{
-				{
-					Name:    "<source-a>",
-					Enabled: true,
-					Clones: config.Clones{
-						Dir: "/path/to/clones-a",
+			baseURL, err := url.Parse("http://localhost:8080")
+			Expect(err).ShouldNot(HaveOccurred())
+
+			list = NewList(
+				baseURL,
+				[]config.Source{
+					{
+						Name:    "<source-a>",
+						Enabled: true,
+						Clones: config.Clones{
+							Dir: "/path/to/clones-a",
+						},
+						Driver: &stubs.SourceConfig{
+							NewSourceFunc: func() sourcedriver.Source {
+								return srcA
+							},
+						},
 					},
-					Driver: &stubs.SourceConfig{
-						NewSourceFunc: func() sourcedriver.Source {
-							return srcA
+					{
+						Name:    "<source-b>",
+						Enabled: true,
+						Clones: config.Clones{
+							Dir: "/path/to/clones-b",
+						},
+						Driver: &stubs.SourceConfig{
+							NewSourceFunc: func() sourcedriver.Source {
+								return srcB
+							},
 						},
 					},
 				},
-				{
-					Name:    "<source-b>",
-					Enabled: true,
-					Clones: config.Clones{
-						Dir: "/path/to/clones-b",
-					},
-					Driver: &stubs.SourceConfig{
-						NewSourceFunc: func() sourcedriver.Source {
-							return srcB
-						},
-					},
-				},
-			})
+			)
 
 			Expect(list).To(ConsistOf(
 				Source{
 					Name:         "<source-a>",
 					Description:  "<description>",
 					BaseCloneDir: "/path/to/clones-a",
-					Driver:       srcA,
+					BaseURL: &url.URL{
+						Scheme: "http",
+						Host:   "localhost:8080",
+						Path:   "source/<source-a>",
+					},
+					Driver: srcA,
 				},
 				Source{
 					Name:         "<source-b>",
 					Description:  "<description>",
 					BaseCloneDir: "/path/to/clones-b",
-					Driver:       srcB,
+					BaseURL: &url.URL{
+						Scheme: "http",
+						Host:   "localhost:8080",
+						Path:   "source/<source-b>",
+					},
+					Driver: srcB,
 				},
 			))
 
 		})
 
 		It("excludes disabled sources", func() {
-			list = NewList([]config.Source{
-				{
-					Name:    "<source>",
-					Enabled: false,
+			baseURL, err := url.Parse("http://localhost:8080")
+			Expect(err).ShouldNot(HaveOccurred())
+
+			list = NewList(
+				baseURL,
+				[]config.Source{
+					{
+						Name:    "<source>",
+						Enabled: false,
+					},
 				},
-			})
+			)
 
 			Expect(list).To(BeEmpty())
 		})

@@ -80,11 +80,15 @@ func initSource(
 		fn(&c)
 	}
 
-	s := c.NewSource()
+	src := c.NewSource()
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	if err := s.Init(ctx, logs.Discard); err != nil {
+	if err := src.Init(
+		ctx,
+		sourcedriver.InitParameters{},
+		logs.Discard,
+	); err != nil {
 		cancel()
 		skipIfRateLimited(err)
 	}
@@ -95,7 +99,7 @@ func initSource(
 		defer GinkgoRecover()
 		defer close(done)
 
-		err := s.Run(ctx, logs.Discard)
+		err := src.Run(ctx, logs.Discard)
 		if err != context.Canceled {
 			Expect(err).ShouldNot(HaveOccurred())
 		}
@@ -108,7 +112,7 @@ func initSource(
 		case <-time.After(3 * time.Second):
 			Fail("timed out waiting for Run() goroutine to finish")
 		}
-	}, s
+	}, src
 }
 
 // skipIfRateLimited asserts that err is nil, or skips the test if err is a

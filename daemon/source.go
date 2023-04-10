@@ -1,6 +1,8 @@
 package daemon
 
 import (
+	"net/url"
+
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/daemon/internal/config"
 	"github.com/gritcli/grit/daemon/internal/logs"
@@ -8,13 +10,17 @@ import (
 )
 
 func init() {
-	imbue.With1(
+	imbue.With2(
 		catalog,
 		func(
 			ctx imbue.Context,
 			cfg config.Config,
+			baseURL imbue.ByName[httpBaseURL, *url.URL],
 		) (source.List, error) {
-			return source.NewList(cfg.Sources), nil
+			return source.NewList(
+				baseURL.Value(),
+				cfg.Sources,
+			), nil
 		},
 	)
 

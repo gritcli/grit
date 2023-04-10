@@ -3,6 +3,7 @@ package stubs
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 	"github.com/gritcli/grit/daemon/internal/driver/vcsdriver"
@@ -79,7 +80,7 @@ func (s *SourceConfig) DescribeSourceConfig() string {
 
 // Source is a test implementation of the sourcedriver.Source interface.
 type Source struct {
-	InitFunc      func(context.Context, logs.Log) error
+	InitFunc      func(context.Context, sourcedriver.InitParameters, logs.Log) error
 	RunFunc       func(context.Context, logs.Log) error
 	StatusFunc    func(context.Context, logs.Log) (string, error)
 	SignInFunc    func(context.Context, logs.Log) error
@@ -87,12 +88,13 @@ type Source struct {
 	ResolveFunc   func(context.Context, string, logs.Log) ([]sourcedriver.RemoteRepo, error)
 	ClonerFunc    func(context.Context, string, logs.Log) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error)
 	SuggestFunc   func(string, logs.Log) map[string][]sourcedriver.RemoteRepo
+	ServeHTTPFunc http.HandlerFunc
 }
 
 // Init returns s.InitFunc() if it is non-nil; otherwise, it returns nil.
-func (s *Source) Init(ctx context.Context, log logs.Log) error {
+func (s *Source) Init(ctx context.Context, p sourcedriver.InitParameters, log logs.Log) error {
 	if s.InitFunc != nil {
-		return s.InitFunc(ctx, log)
+		return s.InitFunc(ctx, p, log)
 	}
 
 	return nil
@@ -170,6 +172,13 @@ func (s *Source) Suggest(word string, log logs.Log) map[string][]sourcedriver.Re
 	}
 
 	return nil
+}
+
+// ServeHTTP calls s.ServeHTTPFunc() if it is non-nil.
+func (s *Source) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if s.ServeHTTPFunc != nil {
+		s.ServeHTTPFunc(w, r)
+	}
 }
 
 // SourceCloner is a test implementation of the sourcedriver.SourceCloner

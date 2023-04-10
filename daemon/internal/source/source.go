@@ -1,6 +1,8 @@
 package source
 
 import (
+	"net/url"
+
 	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 	"github.com/gritcli/grit/daemon/internal/logs"
 )
@@ -17,6 +19,10 @@ type Source struct {
 	// source.
 	BaseCloneDir string
 
+	// BaseURL is the base URL for that the daemon's HTTP server route's to the
+	// source's HTTP handler implementation.
+	BaseURL *url.URL
+
 	// Driver is the source implementation provided by the driver, used to
 	// perform repository operations for this source.
 	Driver sourcedriver.Source
@@ -28,5 +34,5 @@ func (s Source) Log(log logs.Log) logs.Log {
 }
 
 func newLog(name string, log logs.Log) logs.Log {
-	return log.WithPrefix("source.%s: ", name)
+	return log.WithPrefix("source/%s: ", name)
 }

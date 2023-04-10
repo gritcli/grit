@@ -2,17 +2,26 @@ package sourcedriver
 
 import (
 	"context"
+	"net/http"
+	"net/url"
 
 	"github.com/gritcli/grit/daemon/internal/logs"
 )
 
+// InitParameters are the parameters passed to the Init() method of a [Source].
+type InitParameters struct {
+	BaseURL *url.URL
+}
+
 // Source is an interface for a source provided by this driver.
 type Source interface {
+	http.Handler
+
 	// Init initializes the source.
 	//
 	// It is called before the daemon starts serving API requests. If an error
 	// is returned, the daemon is stopped.
-	Init(ctx context.Context, log logs.Log) error
+	Init(ctx context.Context, p InitParameters, log logs.Log) error
 
 	// Run performs any background processing required by the source.
 	//
