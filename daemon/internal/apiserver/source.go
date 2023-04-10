@@ -49,7 +49,7 @@ func (s *Server) SignIn(
 ) error {
 	src, ok := s.SourceList.ByName(req.GetSource())
 	if !ok {
-		return fmt.Errorf("unable to sign in: unrecognized source (%s)", req.GetSource())
+		return fmt.Errorf("unrecognized source (%s)", req.GetSource())
 	}
 
 	ctx := stream.Context()
@@ -65,7 +65,7 @@ func (s *Server) SignOut(
 ) (*api.SignOutResponse, error) {
 	src, ok := s.SourceList.ByName(req.GetSource())
 	if !ok {
-		return nil, fmt.Errorf("unable to sign out: unrecognized source (%s)", req.GetSource())
+		return nil, fmt.Errorf("unrecognized source (%s)", req.GetSource())
 	}
 
 	log := src.Log(s.Log)
