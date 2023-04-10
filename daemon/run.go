@@ -2,12 +2,16 @@ package daemon
 
 import (
 	"context"
+	"net"
+	"net/http"
 	"os"
 	"syscall"
+	"time"
 
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
 	"github.com/gritcli/grit/daemon/internal/config"
+	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 	"github.com/gritcli/grit/daemon/internal/logs"
 	"github.com/gritcli/grit/daemon/internal/signalx"
 	"github.com/gritcli/grit/daemon/internal/source"
@@ -59,14 +63,15 @@ func run(reloads int) (reload bool, err error) {
 		cancel()
 	}()
 
-	if err := imbue.Invoke4(
+	if err := imbue.Invoke5(
 		ctx,
 		con,
 		func(
 			ctx context.Context,
+			ver imbue.ByName[version, string],
 			r *config.DriverRegistry,
 			s source.List,
-			ver imbue.ByName[version, string],
+			lis imbue.ByName[httpListener, net.Listener],
 			log logs.Log,
 		) error {
 			if reloads == 0 {
@@ -78,7 +83,7 @@ func run(reloads int) (reload bool, err error) {
 			logDrivers(r, log)
 			logSources(s, log)
 
-			return initSourceDrivers(ctx, s, log)
+			return initSourceDrivers(ctx, s, lis.Value(), log)
 		},
 	); err != nil {
 		return false, err
@@ -87,6 +92,7 @@ func run(reloads int) (reload bool, err error) {
 	g := con.WaitGroup(ctx)
 	imbue.Go2(g, runSourceDrivers)
 	imbue.Go3(g, runGRPCServer)
+	imbue.Go3(g, runHTTPServer)
 
 	return false, g.Wait()
 }
@@ -149,15 +155,20 @@ func logSources(
 func initSourceDrivers(
 	ctx context.Context,
 	sources source.List,
+	lis net.Listener,
 	log logs.Log,
 ) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, src := range sources {
 		src := src // capture loop variable
+
 		g.Go(func() error {
 			return src.Driver.Init(
 				ctx,
+				sourcedriver.InitParameters{
+					BaseURL: src.BaseURL,
+				},
 				src.Log(log),
 			)
 		})
@@ -205,10 +216,49 @@ func runGRPCServer(
 		s.GracefulStop()
 	}()
 
-	log.Write("api: accepting requests on unix socket: %s", cfg.Daemon.Socket)
+	log.Write("api: accepting requests on %s", cfg.Daemon.Socket)
 	defer log.Write("api: server stopped")
 
 	if err := s.Serve(lis); err != nil {
+		return err
+	}
+
+	return ctx.Err()
+}
+
+// runHTTPServer runs the HTTP server.
+func runHTTPServer(
+	ctx context.Context,
+	lis imbue.ByName[httpListener, net.Listener],
+	sources source.List,
+	log logs.Log,
+) error {
+	mux := http.NewServeMux()
+
+	for _, s := range sources {
+		mux.Handle(s.BaseURL.Path, s.Driver)
+	}
+
+	s := &http.Server{
+		Handler:           mux,
+		ReadTimeout:       3 * time.Second,
+		ReadHeaderTimeout: 1 * time.Second,
+		WriteTimeout:      1 * time.Second,
+		BaseContext: func(net.Listener) context.Context {
+			return ctx
+		},
+	}
+
+	go func() {
+		<-ctx.Done()
+		s.Close()
+	}()
+
+	listener := lis.Value()
+	log.Write("http: accepting requests on %s", listener.Addr())
+	defer log.Write("http: server stopped")
+
+	if err := s.Serve(listener); err != nil {
 		return err
 	}
 
