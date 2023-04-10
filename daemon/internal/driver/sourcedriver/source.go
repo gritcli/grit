@@ -30,7 +30,7 @@ type Source interface {
 	Status(ctx context.Context, log logs.Log) (string, error)
 
 	// SignIn signs in to the source.
-	SignIn(ctx context.Context, log logs.Log) (Authenticator, error)
+	SignIn(ctx context.Context, log logs.Log) error
 
 	// SignOut signs out of the source.
 	SignOut(ctx context.Context, log logs.Log) error

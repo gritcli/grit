@@ -55,12 +55,7 @@ func (s *Server) SignIn(
 	ctx := stream.Context()
 	log := src.Log(s.Log)
 
-	a, err := src.Driver.SignIn(ctx, log)
-	if err != nil {
-		return err
-	}
-
-	return a.Authenticate(ctx, log)
+	return src.Driver.SignIn(ctx, log)
 }
 
 // SignOut signs out of a repository source.
@@ -74,10 +69,7 @@ func (s *Server) SignOut(
 	}
 
 	log := src.Log(s.Log)
+	err := src.Driver.SignOut(ctx, log)
 
-	if err := src.Driver.SignOut(ctx, log); err != nil {
-		return nil, err
-	}
-
-	return &api.SignOutResponse{}, nil
+	return &api.SignOutResponse{}, err
 }

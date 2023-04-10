@@ -82,7 +82,7 @@ type Source struct {
 	InitFunc      func(context.Context, logs.Log) error
 	RunFunc       func(context.Context, logs.Log) error
 	StatusFunc    func(context.Context, logs.Log) (string, error)
-	SignInFunc    func(context.Context, logs.Log) (sourcedriver.Authenticator, error)
+	SignInFunc    func(context.Context, logs.Log) error
 	SignOutFunc   func(context.Context, logs.Log) error
 	ResolveFunc   func(context.Context, string, logs.Log) ([]sourcedriver.RemoteRepo, error)
 	NewClonerFunc func(context.Context, string, logs.Log) (sourcedriver.Cloner, sourcedriver.RemoteRepo, error)
@@ -118,13 +118,13 @@ func (s *Source) Status(ctx context.Context, log logs.Log) (string, error) {
 }
 
 // SignIn returns s.SignInFunc() if it is non-nil; otherwise, it
-// returns an error.
-func (s *Source) SignIn(ctx context.Context, log logs.Log) (sourcedriver.Authenticator, error) {
+// returns nil.
+func (s *Source) SignIn(ctx context.Context, log logs.Log) error {
 	if s.SignInFunc != nil {
 		return s.SignInFunc(ctx, log)
 	}
 
-	return nil, errors.New("<not implemented>")
+	return nil
 }
 
 // SignOut returns s.SignOutFunc() if it is non-nil; otherwise, it returns nil.
