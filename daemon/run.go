@@ -12,6 +12,7 @@ import (
 	"github.com/gritcli/grit/daemon/internal/apiserver"
 	"github.com/gritcli/grit/daemon/internal/config"
 	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
+	"github.com/gritcli/grit/daemon/internal/httpserver"
 	"github.com/gritcli/grit/daemon/internal/logs"
 	"github.com/gritcli/grit/daemon/internal/signalx"
 	"github.com/gritcli/grit/daemon/internal/source"
@@ -234,6 +235,7 @@ func runHTTPServer(
 	log logs.Log,
 ) error {
 	mux := http.NewServeMux()
+	mux.Handle("/", &httpserver.IndexHandler{})
 
 	for _, s := range sources {
 		mux.Handle(s.BaseURL.Path, s.Driver)
@@ -255,7 +257,7 @@ func runHTTPServer(
 	}()
 
 	listener := lis.Value()
-	log.Write("http: accepting requests on %s", listener.Addr())
+	log.Write("http: accepting requests at http://%s", listener.Addr())
 	defer log.Write("http: server stopped")
 
 	if err := s.Serve(listener); err != nil {

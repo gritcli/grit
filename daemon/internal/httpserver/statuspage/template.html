@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ .Title }} &mdash; Grit</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css"
+      integrity="sha512-NmLkDIU1C/C88wi324HBc+S2kLhi08PN5GDeUVVVC/BVt/9Izdsc9SVeVfA1UZbY3sHUlDSyRXhCzHfr6hmPPw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --ink: #0f1133;
+        --background: #fff5b4;
+        --highlight: #ff8844;
+        --highlight-hover: #ff1100;
+      }
+
+      body {
+        color: var(--ink);
+        background: var(--background);
+        font-family: "Special Elite", sans-serif;
+        font-size: 2vmin;
+      }
+
+      .container {
+        height: 100vh;
+        width: 100vw;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 245, 200, 0.25) 20%,
+            rgba(255, 245, 180, 0.55) 50%,
+            rgba(255, 245, 200, 0.25) 100%
+          ),
+          url("data:image/svg+xml,%3Csvg viewBox='0 0 100%25 100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      section {
+        opacity: 60%;
+        mix-blend-mode: color-burn;
+
+        padding: 4vmin;
+        height: fit-content;
+        width: fit-content;
+        max-width: 50%;
+
+        border-left: 1vmin solid var(--ink);
+        border-radius: 2em 0 0 2em;
+
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+
+      h1 {
+        font-weight: bold;
+        font-size: 3.75em;
+      }
+
+      h2 {
+        font-weight: bold;
+        font-size: 1.5em;
+      }
+
+      p {
+        margin-top: 1em;
+      }
+
+      header {
+        white-space: no-wrap;
+        margin-bottom: 1.75em;
+      }
+
+      footer {
+        margin-top: 1.75em;
+      }
+
+      footer p {
+        font-size: 0.55em;
+      }
+
+      a {
+        color: var(--ink);
+        text-decoration: underline;
+        text-decoration-thickness: 0.1em;
+        text-underline-position: under;
+      }
+
+      code {
+        font-weight: bold;
+      }
+
+      a,
+      code {
+        position: relative;
+        z-index: 0;
+      }
+
+      a::before,
+      code::before {
+        opacity: 50%;
+        background-color: var(--highlight);
+        content: "";
+        position: absolute;
+        width: calc(100% + 0.2em);
+        height: 90%;
+        left: -0.1em;
+        bottom: 0;
+        z-index: -1;
+        transform: rotate(-2deg);
+      }
+
+      a:hover::before {
+        background-color: var(--highlight-hover);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section>
+        <header>
+          <h1>{{ .Heading }}</h1>
+          <h2>{{ .SubHeading }}</h2>
+        </header>
+
+        <main>
+          <!--{{ range .Paragraphs }}-->
+          <p>{{ . }}</p>
+          <!--{{ end }}-->
+        </main>
+
+        <footer>
+          <p>
+            This page was served by the
+            <a href="https://github.com/gritcli/grit">Grit</a>
+            installation on your machine. It is not exposed to the internet.
+          </p>
+        </footer>
+      </section>
+    </div>
+  </body>
+</html>

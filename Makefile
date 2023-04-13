@@ -1,5 +1,6 @@
 GO_EMBEDDED_FILES += $(shell PATH="$(PATH)" git-find cli/internal/commands -name 'help.txt')
 GO_EMBEDDED_FILES += $(shell PATH="$(PATH)" git-find cli/internal/commands/setupshell -name 'install.*')
+GO_EMBEDDED_FILES += $(shell PATH="$(PATH)" git-find daemon/internal/httpserver/statuspage -name 'template.*')
 GO_FERRITE_BINARY = gritd
 
 -include .makefiles/Makefile
@@ -11,7 +12,7 @@ run: $(GO_DEBUG_DIR)/grit artifacts/grit
 	$< --socket artifacts/grit/daemon.sock $(args)
 
 serve: $(GO_DEBUG_DIR)/gritd artifacts/grit
-	GRIT_CONFIG_DIR="testdata/etc" $< $(RUN_ARGS)
+	GRIT_CONFIG_DIR="testdata/etc" HTTP_PORT=8081 $< $(RUN_ARGS)
 
 .makefiles/%:
 	@curl -sfL https://makefiles.dev/v1 | bash /dev/stdin "$@"
