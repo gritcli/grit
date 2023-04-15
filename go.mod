@@ -6,7 +6,6 @@ require (
 	github.com/charmbracelet/bubbles v0.15.0
 	github.com/charmbracelet/bubbletea v0.23.2
 	github.com/charmbracelet/lipgloss v0.7.1
-	github.com/dogmatiq/dyad v0.2.2
 	github.com/dogmatiq/ferrite v1.0.2
 	github.com/dogmatiq/imbue v0.7.0
 	github.com/dustin/go-humanize v1.0.1

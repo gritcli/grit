@@ -4,7 +4,9 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"syscall"
 	"time"
 
@@ -64,7 +66,7 @@ func run(reloads int) (reload bool, err error) {
 		cancel()
 	}()
 
-	if err := imbue.Invoke5(
+	if err := imbue.Invoke6(
 		ctx,
 		con,
 		func(
@@ -72,7 +74,8 @@ func run(reloads int) (reload bool, err error) {
 			ver imbue.ByName[version, string],
 			r *config.DriverRegistry,
 			s source.List,
-			lis imbue.ByName[httpListener, net.Listener],
+			lis imbue.FromGroup[httpServer, net.Listener],
+			mux imbue.FromGroup[httpServer, *http.ServeMux],
 			log logs.Log,
 		) error {
 			if reloads == 0 {
@@ -84,7 +87,13 @@ func run(reloads int) (reload bool, err error) {
 			logDrivers(r, log)
 			logSources(s, log)
 
-			return initSourceDrivers(ctx, s, lis.Value(), log)
+			return initSourceDrivers(
+				ctx,
+				s,
+				lis.Value(),
+				mux.Value(),
+				log,
+			)
 		},
 	); err != nil {
 		return false, err
@@ -93,7 +102,7 @@ func run(reloads int) (reload bool, err error) {
 	g := con.WaitGroup(ctx)
 	imbue.Go2(g, runSourceDrivers)
 	imbue.Go3(g, runGRPCServer)
-	imbue.Go3(g, runHTTPServer)
+	imbue.Go4(g, runHTTPServer)
 
 	return false, g.Wait()
 }
@@ -157,6 +166,7 @@ func initSourceDrivers(
 	ctx context.Context,
 	sources source.List,
 	lis net.Listener,
+	mux *http.ServeMux,
 	log logs.Log,
 ) error {
 	g, ctx := errgroup.WithContext(ctx)
@@ -168,7 +178,12 @@ func initSourceDrivers(
 			return src.Driver.Init(
 				ctx,
 				sourcedriver.InitParameters{
-					BaseURL: src.BaseURL,
+					BaseURL: &url.URL{
+						Scheme: "http",
+						Host:   lis.Addr().String(),
+						Path:   path.Join("source", src.Name),
+					},
+					Mux: mux,
 				},
 				src.Log(log),
 			)
@@ -230,19 +245,15 @@ func runGRPCServer(
 // runHTTPServer runs the HTTP server.
 func runHTTPServer(
 	ctx context.Context,
-	lis imbue.ByName[httpListener, net.Listener],
+	lis imbue.FromGroup[httpServer, net.Listener],
+	mux imbue.FromGroup[httpServer, *http.ServeMux],
 	sources source.List,
 	log logs.Log,
 ) error {
-	mux := http.NewServeMux()
-	mux.Handle("/", &httpserver.IndexHandler{})
-
-	for _, s := range sources {
-		mux.Handle(s.BaseURL.Path, s.Driver)
-	}
+	mux.Value().Handle("/", &httpserver.IndexHandler{})
 
 	s := &http.Server{
-		Handler:           mux,
+		Handler:           mux.Value(),
 		ReadTimeout:       3 * time.Second,
 		ReadHeaderTimeout: 1 * time.Second,
 		WriteTimeout:      1 * time.Second,

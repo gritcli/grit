@@ -67,7 +67,10 @@ message DaemonInfoResponse {
 message ListSourcesRequest {}
 message ListSourcesResponse { repeated Source sources = 1; }
 
-message SignInRequest { string source = 1; }
+message SignInRequest {
+  ClientOptions client_options = 1;
+  string source = 2;
+}
 message SignInResponse {
   oneof response { ClientOutput output = 1; }
 }

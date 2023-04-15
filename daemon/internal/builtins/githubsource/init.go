@@ -13,7 +13,7 @@ import (
 // Init initializes the source.
 func (s *source) Init(
 	ctx context.Context,
-	in sourcedriver.InitParameters,
+	p sourcedriver.InitParameters,
 	log logs.Log,
 ) error {
 	httpClient := http.DefaultClient

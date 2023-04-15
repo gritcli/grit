@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"path"
 
 	"github.com/gritcli/grit/daemon/internal/logs"
 )
@@ -11,12 +12,18 @@ import (
 // InitParameters are the parameters passed to the Init() method of a [Source].
 type InitParameters struct {
 	BaseURL *url.URL
+	Mux     *http.ServeMux
+}
+
+// Handle registers a handler for the given pattern under the source's base URL.
+func (p InitParameters) Handle(pattern string, h http.Handler) {
+	if p.Mux != nil {
+		p.Mux.Handle("/"+path.Join(p.BaseURL.Path, pattern), h)
+	}
 }
 
 // Source is an interface for a source provided by this driver.
 type Source interface {
-	http.Handler
-
 	// Init initializes the source.
 	//
 	// It is called before the daemon starts serving API requests. If an error

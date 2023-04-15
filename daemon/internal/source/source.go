@@ -1,8 +1,6 @@
 package source
 
 import (
-	"net/url"
-
 	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 	"github.com/gritcli/grit/daemon/internal/logs"
 )
@@ -18,10 +16,6 @@ type Source struct {
 	// BaseCloneDir is the directory containing repositories cloned from this
 	// source.
 	BaseCloneDir string
-
-	// BaseURL is the base URL for that the daemon's HTTP server route's to the
-	// source's HTTP handler implementation.
-	BaseURL *url.URL
 
 	// Driver is the source implementation provided by the driver, used to
 	// perform repository operations for this source.

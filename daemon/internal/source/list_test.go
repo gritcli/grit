@@ -2,7 +2,6 @@ package source_test
 
 import (
 	"context"
-	"net/url"
 
 	"github.com/gritcli/grit/daemon/internal/config"
 	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
@@ -33,11 +32,7 @@ var _ = Describe("type List", func() {
 				},
 			}
 
-			baseURL, err := url.Parse("http://localhost:8080")
-			Expect(err).ShouldNot(HaveOccurred())
-
 			list = NewList(
-				baseURL,
 				[]config.Source{
 					{
 						Name:    "<source-a>",
@@ -71,34 +66,20 @@ var _ = Describe("type List", func() {
 					Name:         "<source-a>",
 					Description:  "<description>",
 					BaseCloneDir: "/path/to/clones-a",
-					BaseURL: &url.URL{
-						Scheme: "http",
-						Host:   "localhost:8080",
-						Path:   "source/<source-a>",
-					},
-					Driver: srcA,
+					Driver:       srcA,
 				},
 				Source{
 					Name:         "<source-b>",
 					Description:  "<description>",
 					BaseCloneDir: "/path/to/clones-b",
-					BaseURL: &url.URL{
-						Scheme: "http",
-						Host:   "localhost:8080",
-						Path:   "source/<source-b>",
-					},
-					Driver: srcB,
+					Driver:       srcB,
 				},
 			))
 
 		})
 
 		It("excludes disabled sources", func() {
-			baseURL, err := url.Parse("http://localhost:8080")
-			Expect(err).ShouldNot(HaveOccurred())
-
 			list = NewList(
-				baseURL,
 				[]config.Source{
 					{
 						Name:    "<source>",

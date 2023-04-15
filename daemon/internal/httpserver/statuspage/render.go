@@ -73,7 +73,7 @@ func RenderError(
 			Title:      fmt.Sprintf("%d %s", code, text),
 			Heading:    fmt.Sprintf("%d", code),
 			SubHeading: text,
-			Paragraphs: []any{explanation, "another paragraph."},
+			Paragraphs: []any{explanation},
 		},
 	)
 }

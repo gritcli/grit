@@ -1,11 +1,8 @@
 package source
 
 import (
-	"net/url"
-	"path"
 	"strings"
 
-	"github.com/dogmatiq/dyad"
 	"github.com/gritcli/grit/daemon/internal/config"
 )
 
@@ -13,7 +10,7 @@ import (
 type List []Source
 
 // NewList returns a new List from the given source configurations.
-func NewList(baseURL *url.URL, sources []config.Source) List {
+func NewList(sources []config.Source) List {
 	var list List
 
 	for _, cfg := range sources {
@@ -21,20 +18,12 @@ func NewList(baseURL *url.URL, sources []config.Source) List {
 			continue
 		}
 
-		u := dyad.Clone(baseURL)
-		u.Path = path.Join(
-			baseURL.Path,
-			"source",
-			cfg.Name,
-		)
-
 		list = append(
 			list,
 			Source{
 				Name:         cfg.Name,
 				Description:  cfg.Driver.DescribeSourceConfig(),
 				BaseCloneDir: cfg.Clones.Dir,
-				BaseURL:      u,
 				Driver:       cfg.Driver.NewSource(),
 			},
 		)

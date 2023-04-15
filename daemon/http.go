@@ -2,23 +2,20 @@ package daemon
 
 import (
 	"net"
-	"net/url"
+	"net/http"
 
 	"github.com/dogmatiq/imbue"
 )
 
-type (
-	httpListener imbue.Name[net.Listener]
-	httpBaseURL  imbue.Name[*url.URL]
-)
+type httpServer imbue.Group
 
 func init() {
-	imbue.With0Named[httpListener](
+	imbue.With0Grouped[httpServer](
 		catalog,
 		func(
 			ctx imbue.Context,
 		) (net.Listener, error) {
-			lis, err := net.Listen("tcp", "localhost:0")
+			lis, err := net.Listen("tcp", "127.0.0.1:0")
 			if err != nil {
 				return nil, err
 			}
@@ -28,16 +25,12 @@ func init() {
 		},
 	)
 
-	imbue.With1Named[httpBaseURL](
+	imbue.With0Grouped[httpServer](
 		catalog,
 		func(
 			ctx imbue.Context,
-			lis imbue.ByName[httpListener, net.Listener],
-		) (*url.URL, error) {
-			return &url.URL{
-				Scheme: "http",
-				Host:   lis.Value().Addr().String(),
-			}, nil
+		) (*http.ServeMux, error) {
+			return http.NewServeMux(), nil
 		},
 	)
 }

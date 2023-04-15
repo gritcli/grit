@@ -6,6 +6,7 @@ import (
 
 	"github.com/gritcli/grit/api"
 	"golang.org/x/exp/slices"
+	"google.golang.org/protobuf/proto"
 )
 
 // ListSources lists the configured repository sources.
@@ -53,7 +54,20 @@ func (s *Server) SignIn(
 	}
 
 	ctx := stream.Context()
-	log := src.Log(s.Log)
+
+	log := src.Log(
+		s.newClientLog(
+			stream,
+			req.ClientOptions,
+			func(out *api.ClientOutput) proto.Message {
+				return &api.SignInResponse{
+					Response: &api.SignInResponse_Output{
+						Output: out,
+					},
+				}
+			},
+		),
+	)
 
 	return src.Driver.SignIn(ctx, log)
 }
