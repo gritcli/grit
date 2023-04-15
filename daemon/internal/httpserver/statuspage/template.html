@@ -100,6 +100,7 @@
       }
 
       code {
+        cursor: copy;
         font-weight: bold;
       }
 
@@ -123,11 +124,30 @@
         transform: rotate(-2deg);
       }
 
-      a:hover::before {
+      a:hover::before,
+      code:hover::before {
         background-color: var(--highlight-hover);
       }
+
+      a:active::before,
+      code:active::before {
+        background-color: var(--ink);
+      }
     </style>
+
+    <script>
+      window.onload = function () {
+        let code = document.querySelectorAll("code");
+        for (let e of code) {
+          e.setAttribute("title", "Copy to clipboard");
+          e.addEventListener("click", function () {
+            navigator.clipboard.writeText(e.innerText);
+          });
+        }
+      };
+    </script>
   </head>
+
   <body>
     <div class="container">
       <section>

@@ -18,7 +18,7 @@ func (*IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Heading:    "Grit",
 			SubHeading: "Manage your local VCS clones",
 			Paragraphs: []any{
-				"This webserver handles interactive authentication requests. You do not need to visit this page manually.",
+				"This webserver handles interactive authentication requests.",
 				"To authenticate, run the `grit source login` command from your terminal.",
 			},
 		},
