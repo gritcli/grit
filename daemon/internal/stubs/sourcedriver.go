@@ -80,7 +80,7 @@ func (s *SourceConfig) DescribeSourceConfig() string {
 
 // Source is a test implementation of the sourcedriver.Source interface.
 type Source struct {
-	InitFunc      func(context.Context, sourcedriver.InitParameters, logs.Log) error
+	InitFunc      func(context.Context, logs.Log) error
 	RunFunc       func(context.Context, logs.Log) error
 	StatusFunc    func(context.Context, logs.Log) (string, error)
 	SignInFunc    func(context.Context, logs.Log) error
@@ -92,9 +92,9 @@ type Source struct {
 }
 
 // Init returns s.InitFunc() if it is non-nil; otherwise, it returns nil.
-func (s *Source) Init(ctx context.Context, p sourcedriver.InitParameters, log logs.Log) error {
+func (s *Source) Init(ctx context.Context, log logs.Log) error {
 	if s.InitFunc != nil {
-		return s.InitFunc(ctx, p, log)
+		return s.InitFunc(ctx, log)
 	}
 
 	return nil

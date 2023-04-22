@@ -11,11 +11,13 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-git/go-git/v5 v5.6.1
 	github.com/google/go-github/v50 v50.2.0
+	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/mattn/go-isatty v0.0.18
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.9.2
 	github.com/onsi/gomega v1.27.6
+	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/spf13/cobra v1.7.0
 	github.com/timewasted/go-accept-headers v0.0.0-20130320203746-c78f304b1b09
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e

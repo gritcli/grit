@@ -84,11 +84,7 @@ func initSource(
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	if err := src.Init(
-		ctx,
-		sourcedriver.InitParameters{},
-		logs.Discard,
-	); err != nil {
+	if err := src.Init(ctx, logs.Discard); err != nil {
 		cancel()
 		skipIfRateLimited(err)
 	}

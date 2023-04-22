@@ -2,19 +2,12 @@ package daemon
 
 import (
 	"context"
-	"net"
-	"net/http"
-	"net/url"
 	"os"
-	"path"
 	"syscall"
-	"time"
 
 	"github.com/dogmatiq/imbue"
 	"github.com/gritcli/grit/daemon/internal/apiserver"
 	"github.com/gritcli/grit/daemon/internal/config"
-	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
-	"github.com/gritcli/grit/daemon/internal/httpserver"
 	"github.com/gritcli/grit/daemon/internal/logs"
 	"github.com/gritcli/grit/daemon/internal/signalx"
 	"github.com/gritcli/grit/daemon/internal/source"
@@ -66,7 +59,7 @@ func run(reloads int) (reload bool, err error) {
 		cancel()
 	}()
 
-	if err := imbue.Invoke6(
+	if err := imbue.Invoke4(
 		ctx,
 		con,
 		func(
@@ -74,8 +67,6 @@ func run(reloads int) (reload bool, err error) {
 			ver imbue.ByName[version, string],
 			r *config.DriverRegistry,
 			s source.List,
-			lis imbue.FromGroup[httpServer, net.Listener],
-			mux imbue.FromGroup[httpServer, *http.ServeMux],
 			log logs.Log,
 		) error {
 			if reloads == 0 {
@@ -90,8 +81,6 @@ func run(reloads int) (reload bool, err error) {
 			return initSourceDrivers(
 				ctx,
 				s,
-				lis.Value(),
-				mux.Value(),
 				log,
 			)
 		},
@@ -102,7 +91,6 @@ func run(reloads int) (reload bool, err error) {
 	g := con.WaitGroup(ctx)
 	imbue.Go2(g, runSourceDrivers)
 	imbue.Go3(g, runGRPCServer)
-	imbue.Go4(g, runHTTPServer)
 
 	return false, g.Wait()
 }
@@ -165,8 +153,6 @@ func logSources(
 func initSourceDrivers(
 	ctx context.Context,
 	sources source.List,
-	lis net.Listener,
-	mux *http.ServeMux,
 	log logs.Log,
 ) error {
 	g, ctx := errgroup.WithContext(ctx)
@@ -177,14 +163,6 @@ func initSourceDrivers(
 		g.Go(func() error {
 			return src.Driver.Init(
 				ctx,
-				sourcedriver.InitParameters{
-					BaseURL: &url.URL{
-						Scheme: "http",
-						Host:   lis.Addr().String(),
-						Path:   path.Join("source", src.Name),
-					},
-					Mux: mux,
-				},
 				src.Log(log),
 			)
 		})
@@ -236,42 +214,6 @@ func runGRPCServer(
 	defer log.Write("api: server stopped")
 
 	if err := s.Serve(lis); err != nil {
-		return err
-	}
-
-	return ctx.Err()
-}
-
-// runHTTPServer runs the HTTP server.
-func runHTTPServer(
-	ctx context.Context,
-	lis imbue.FromGroup[httpServer, net.Listener],
-	mux imbue.FromGroup[httpServer, *http.ServeMux],
-	sources source.List,
-	log logs.Log,
-) error {
-	mux.Value().Handle("/", &httpserver.IndexHandler{})
-
-	s := &http.Server{
-		Handler:           mux.Value(),
-		ReadTimeout:       3 * time.Second,
-		ReadHeaderTimeout: 1 * time.Second,
-		WriteTimeout:      1 * time.Second,
-		BaseContext: func(net.Listener) context.Context {
-			return ctx
-		},
-	}
-
-	go func() {
-		<-ctx.Done()
-		s.Close()
-	}()
-
-	listener := lis.Value()
-	log.Write("http: accepting requests at http://%s", listener.Addr())
-	defer log.Write("http: server stopped")
-
-	if err := s.Serve(listener); err != nil {
 		return err
 	}
 

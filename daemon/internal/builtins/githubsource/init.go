@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/google/go-github/v50/github"
-	"github.com/gritcli/grit/daemon/internal/driver/sourcedriver"
 	"github.com/gritcli/grit/daemon/internal/logs"
 	"golang.org/x/oauth2"
 )
@@ -13,7 +12,6 @@ import (
 // Init initializes the source.
 func (s *source) Init(
 	ctx context.Context,
-	p sourcedriver.InitParameters,
 	log logs.Log,
 ) error {
 	httpClient := http.DefaultClient

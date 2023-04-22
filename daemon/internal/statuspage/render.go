@@ -56,8 +56,9 @@ func Render(
 	template.Execute(w, values)
 }
 
-// RenderError writes a status page to w.
-func RenderError(
+// RenderDefault writes a defualt status page to w for the given HTTP status
+// code.
+func RenderDefault(
 	w http.ResponseWriter,
 	r *http.Request,
 	code int,
