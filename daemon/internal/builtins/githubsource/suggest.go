@@ -16,9 +16,10 @@ func (s *source) Suggest(
 	word string,
 	log logs.Log,
 ) map[string][]sourcedriver.RemoteRepo {
+	state := s.state.Load()
 	suggestions := map[string][]sourcedriver.RemoteRepo{}
 
-	for _, r := range s.reposByID {
+	for _, r := range state.ReposByID {
 		candidates := []string{
 			r.GetFullName(),
 			r.GetName(),

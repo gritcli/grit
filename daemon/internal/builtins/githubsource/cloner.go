@@ -20,10 +20,11 @@ func (s *source) Cloner(
 		return nil, sourcedriver.RemoteRepo{}, err
 	}
 
-	r, ok := s.reposByID[intID]
+	state := s.state.Load()
+	r, ok := state.ReposByID[intID]
 	if !ok {
 		var err error
-		r, _, err = s.client.Repositories.GetByID(ctx, intID)
+		r, _, err = state.Client.Repositories.GetByID(ctx, intID)
 		if err != nil {
 			return nil, sourcedriver.RemoteRepo{}, err
 		}

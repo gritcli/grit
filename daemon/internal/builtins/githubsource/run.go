@@ -11,5 +11,14 @@ func (s *source) Run(
 	ctx context.Context,
 	log logs.Log,
 ) error {
-	return nil
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-s.reinit:
+			if err := s.init(ctx); err != nil {
+				return err
+			}
+		}
+	}
 }

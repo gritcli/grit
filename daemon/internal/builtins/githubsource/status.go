@@ -17,8 +17,10 @@ func (s *source) Status(
 	ctx context.Context,
 	log logs.Log,
 ) (string, error) {
+	state := s.state.Load()
+
 	invalidToken := false
-	limits, _, err := s.client.RateLimits(ctx)
+	limits, _, err := state.Client.RateLimits(ctx)
 	if err != nil {
 		var e *github.ErrorResponse
 
@@ -41,8 +43,8 @@ func (s *source) Status(
 	if invalidToken {
 		info = append(info, "unauthenticated (invalid token)")
 	} else {
-		if u := s.user; u != nil {
-			info = append(info, "@"+u.GetLogin())
+		if state.User != nil {
+			info = append(info, "@"+state.User.GetLogin())
 		} else {
 			info = append(info, "unauthenticated")
 		}

@@ -20,10 +20,12 @@ func (s *source) Resolve(
 		return nil, nil
 	}
 
+	state := s.state.Load()
+
 	if ownerName == "" {
 		var matches []sourcedriver.RemoteRepo
 
-		for _, reposByName := range s.reposByOwner {
+		for _, reposByName := range state.ReposByOwner {
 			if r, ok := reposByName[repoName]; ok {
 				matches = append(matches, toRemoteRepo(r))
 			}
@@ -33,7 +35,7 @@ func (s *source) Resolve(
 			"found %d match(es) for '%s' in the repository list for @%s",
 			len(matches),
 			query,
-			s.user.GetLogin(),
+			state.User.GetLogin(),
 		)
 
 		if len(matches) == 0 {
@@ -46,17 +48,17 @@ func (s *source) Resolve(
 		return matches, nil
 	}
 
-	if r, ok := s.reposByOwner[ownerName][repoName]; ok {
+	if r, ok := state.ReposByOwner[ownerName][repoName]; ok {
 		log.WriteVerbose(
 			"found an exact match for '%s' in the repository list for @%s",
 			query,
-			s.user.GetLogin(),
+			state.User.GetLogin(),
 		)
 
 		return toRemoteRepos(r), nil
 	}
 
-	r, res, err := s.client.Repositories.Get(ctx, ownerName, repoName)
+	r, res, err := state.Client.Repositories.Get(ctx, ownerName, repoName)
 	if err != nil {
 		if res != nil || res.StatusCode == http.StatusNotFound {
 			log.WriteVerbose(
