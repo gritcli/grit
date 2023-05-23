@@ -13,7 +13,7 @@ require (
 	github.com/go-git/go-git/v5 v5.6.1
 	github.com/google/go-github/v50 v50.2.0
 	github.com/hashicorp/hcl/v2 v2.16.2
-	github.com/mattn/go-isatty v0.0.18
+	github.com/mattn/go-isatty v0.0.19
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.9.5
 	github.com/onsi/gomega v1.27.7
