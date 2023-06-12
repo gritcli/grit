@@ -34,8 +34,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dogmatiq/dyad v0.2.2 h1:gKBvCbJD11r5sHtsU0U2FuCwqxWQOZ37Q6cXO5Srbn4=
 github.com/dogmatiq/dyad v0.2.2/go.mod h1:d646/q0Ufks+xfJm3jGXpobX/VMdjTHP1bSIhy4jDp4=
-github.com/dogmatiq/ferrite v1.1.0 h1:7G6LtOq6VvaZ253gxr9PaM2jnKr7nFxsW63hyWwHxH4=
-github.com/dogmatiq/ferrite v1.1.0/go.mod h1:9hB0y+UW93nMMSkTTquq+7PERfqpGwZpQS0Y+jWFpNA=
+github.com/dogmatiq/ferrite v1.2.0 h1:JJt94m85bArcr1JoInbp9t7K7Jnc+i8SkaQNCUwaiEc=
+github.com/dogmatiq/ferrite v1.2.0/go.mod h1:a62SEP9Us4DMzSe3Q1CkucreQwi0o+70eZythxmI9cI=
 github.com/dogmatiq/iago v0.4.0 h1:57nZqVT34IZxtCZEW/RFif7DNUEjMXgevfr/Mmd0N8I=
 github.com/dogmatiq/iago v0.4.0/go.mod h1:fishMWBtzYcjgis6d873VTv9kFm/wHYLOzOyO9ECBDc=
 github.com/dogmatiq/imbue v0.7.0 h1:x41ihAU9twjqvop0VN3A2tbhrXclhO7hE0f90m4V9j0=
