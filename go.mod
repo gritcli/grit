@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/mattn/go-isatty v0.0.19
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onsi/ginkgo/v2 v2.10.0
+	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.8
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
@@ -68,7 +68,7 @@ require (
 	github.com/zclconf/go-cty v1.13.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
