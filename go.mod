@@ -10,7 +10,7 @@ require (
 	github.com/dogmatiq/ferrite v1.2.0
 	github.com/dogmatiq/imbue v0.7.0
 	github.com/dustin/go-humanize v1.0.1
-	github.com/go-git/go-git/v5 v5.7.0
+	github.com/go-git/go-git/v5 v5.8.0
 	github.com/google/go-github/v50 v50.2.0
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/mattn/go-isatty v0.0.19
