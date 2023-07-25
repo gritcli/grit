@@ -16,7 +16,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.11.0
-	github.com/onsi/gomega v1.27.8
+	github.com/onsi/gomega v1.27.10
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
 	golang.org/x/oauth2 v0.10.0
