@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.7.1
 	github.com/dogmatiq/dyad v0.2.2
 	github.com/dogmatiq/ferrite v1.2.0
-	github.com/dogmatiq/imbue v0.7.0
+	github.com/dogmatiq/imbue v0.7.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-git/go-git/v5 v5.7.0
 	github.com/google/go-github/v50 v50.2.0
@@ -16,7 +16,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.11.0
-	github.com/onsi/gomega v1.27.8
+	github.com/onsi/gomega v1.27.10
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
 	golang.org/x/oauth2 v0.10.0
